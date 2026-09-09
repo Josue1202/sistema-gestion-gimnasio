@@ -1,0 +1,93 @@
+<h1>Inicio</h1>
+
+<div class="kpis">
+  <div class="kpi"><div class="label">Socios activos</div><div class="value"><%= kpis.socios_activos || 0 %></div></div>
+  <div class="kpi"><div class="label">Vencidos</div><div class="value"><%= kpis.socios_vencidos || 0 %></div></div>
+  <div class="kpi"><div class="label">Vencen en 7 dias</div><div class="value"><%= kpis.vencen_7d || 0 %></div></div>
+  <div class="kpi"><div class="label">Ingresos hoy</div><div class="value"><%= u.soles(kpis.ingresos_hoy) %></div></div>
+  <div class="kpi"><div class="label">Ingresos del mes</div><div class="value"><%= u.soles(kpis.ingresos_mes) %></div></div>
+  <div class="kpi"><div class="label">Asistencias hoy</div><div class="value"><%= kpis.asistencias_hoy || 0 %></div></div>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <div class="toolbar">
+    <strong>Caja</strong>
+    <% if (caja) { %>
+      <a class="btn sm" href="/caja">Abierta desde <%= u.fechaHora(caja.fecha_apertura) %> · esperado en efectivo <%= u.soles(caja.efectivo_esperado) %></a>
+    <% } else { %>
+      <a class="btn sm primary" href="/caja">Abrir caja</a>
+    <% } %>
+  </div>
+</div>
+
+<h2>Vencen en los proximos 7 dias</h2>
+<div class="card">
+  <% if (!porVencer.length) { %><p class="muted mb0">Nadie por vencer.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Socio</th><th>Plan</th><th>Vence</th><th class="num">Dias</th><th>Accion</th></tr></thead>
+    <tbody>
+    <% porVencer.forEach(function(r){ var link = linkPara(r.dias_restantes === 0 ? 'recordatorio_hoy' : 'recordatorio_3d', r); %>
+      <tr>
+        <td><a href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a></td>
+        <td><%= r.plan_nombre %></td>
+        <td><%= u.fecha(r.fecha_fin) %></td>
+        <td class="num"><span class="badge <%= r.dias_restantes <= 1 ? 'danger' : 'warn' %>"><%= r.dias_restantes %></span></td>
+        <td><% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">WhatsApp</a><% } else { %><span class="muted">sin telefono</span><% } %></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>
+
+<div class="row">
+  <div>
+    <h2>Vencidos</h2>
+    <div class="card">
+      <% if (!vencidos.length) { %><p class="muted mb0">Ninguno.</p><% } else { %>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Socio</th><th class="num">Dias</th><th></th></tr></thead>
+        <tbody>
+        <% vencidos.forEach(function(r){ var link = linkPara('vencido', r); %>
+          <tr>
+            <td><a href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a></td>
+            <td class="num"><%= r.dias_vencido %></td>
+            <td><% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">WhatsApp</a><% } %></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table></div>
+      <% } %>
+    </div>
+  </div>
+  <div>
+    <h2>Sin venir hace 14+ dias</h2>
+    <div class="card">
+      <% if (!riesgo.length) { %><p class="muted mb0">Ninguno.</p><% } else { %>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Socio</th><th class="num">Dias</th><th></th></tr></thead>
+        <tbody>
+        <% riesgo.forEach(function(r){ var link = linkPara('te_extranamos', r); %>
+          <tr>
+            <td><a href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a></td>
+            <td class="num"><%= r.dias_sin_venir == null ? '—' : r.dias_sin_venir %></td>
+            <td><% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">WhatsApp</a><% } %></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table></div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<% if (cumples.length) { %>
+<h2>Cumpleanos hoy 🎂</h2>
+<div class="card">
+  <div class="pill-list">
+  <% cumples.forEach(function(r){ %>
+    <a class="btn sm" href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a>
+  <% }); %>
+  </div>
+</div>
+<% } %>

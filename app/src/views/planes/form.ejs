@@ -1,0 +1,15 @@
+<h1><%= modo === 'nuevo' ? 'Nuevo plan' : 'Editar plan' %></h1>
+<div class="card">
+  <form method="post" action="<%= modo === 'nuevo' ? '/planes' : '/planes/' + plan.id %>" class="stack">
+    <div><label>Nombre *</label><input name="nombre" value="<%= plan.nombre || '' %>" required autofocus></div>
+    <div><label>Descripcion</label><input name="descripcion" value="<%= plan.descripcion || '' %>"></div>
+    <div class="grid2">
+      <div><label>Precio (S/) *</label><input type="number" step="0.01" min="0" name="precio" value="<%= plan.precio != null ? plan.precio : '' %>" required></div>
+      <div><label>Duracion (dias) *</label><input type="number" min="1" name="duracion_dias" value="<%= plan.duracion_dias || '' %>" required></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" type="submit">Guardar</button>
+      <a class="btn" href="/planes">Cancelar</a>
+    </div>
+  </form>
+</div>

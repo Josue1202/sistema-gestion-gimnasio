@@ -1,0 +1,27 @@
+<div class="toolbar">
+  <h1 class="mb0">Planes y precios</h1>
+  <a class="btn primary" href="/planes/nuevo">+ Nuevo plan</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap"><table>
+    <thead><tr><th>Nombre</th><th>Descripcion</th><th class="num">Precio</th><th class="num">Dias</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    <% planes.forEach(function(p){ %>
+      <tr<%= p.activo ? '' : ' class="muted"' %>>
+        <td><strong><%= p.nombre %></strong></td>
+        <td><%= p.descripcion || '' %></td>
+        <td class="num"><%= u.soles(p.precio) %></td>
+        <td class="num"><%= p.duracion_dias %></td>
+        <td><span class="badge <%= p.activo ? 'ok' : 'muted' %>"><%= p.activo ? 'Activo' : 'Inactivo' %></span></td>
+        <td class="actions">
+          <a class="btn sm" href="/planes/<%= p.id %>/editar">Editar</a>
+          <form method="post" action="/planes/<%= p.id %>/toggle" style="margin:0;">
+            <button class="btn sm" type="submit"><%= p.activo ? 'Desactivar' : 'Activar' %></button>
+          </form>
+        </td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+</div>

@@ -1,0 +1,32 @@
+<h1><%= modo === 'nuevo' ? 'Nueva plantilla' : 'Editar plantilla' %></h1>
+<div class="card">
+  <form method="post" action="<%= modo === 'nuevo' ? '/plantillas' : '/plantillas/' + p.id %>" class="stack">
+    <% if (modo === 'nuevo') { %>
+      <div><label>Clave (sin espacios) *</label><input name="clave" value="<%= p.clave || '' %>" required placeholder="recordatorio_3d"></div>
+    <% } else { %>
+      <p><strong>Clave:</strong> <code><%= p.clave %></code></p>
+    <% } %>
+    <div><label>Descripcion</label><input name="descripcion" value="<%= p.descripcion || '' %>"></div>
+    <div class="grid2">
+      <div>
+        <label>Canal</label>
+        <select name="canal">
+          <option value="whatsapp" <%= p.canal==='whatsapp'?'selected':'' %>>WhatsApp</option>
+          <option value="email" <%= p.canal==='email'?'selected':'' %>>Email</option>
+          <option value="sms" <%= p.canal==='sms'?'selected':'' %>>SMS</option>
+        </select>
+      </div>
+      <div><label>Asunto (solo email)</label><input name="asunto" value="<%= p.asunto || '' %>"></div>
+    </div>
+    <div><label>Cuerpo *</label><textarea name="cuerpo" rows="5" required><%= p.cuerpo || '' %></textarea></div>
+    <% if (modo === 'editar') { %>
+      <label style="display:flex;gap:8px;align-items:center;">
+        <input type="checkbox" name="activo" style="width:auto;" <%= p.activo ? 'checked' : '' %>> Activa
+      </label>
+    <% } %>
+    <div class="actions">
+      <button class="btn primary" type="submit">Guardar</button>
+      <a class="btn" href="/plantillas">Cancelar</a>
+    </div>
+  </form>
+</div>

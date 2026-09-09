@@ -1,0 +1,33 @@
+<div class="toolbar">
+  <h1 class="mb0">Historial de caja</h1>
+  <a class="btn" href="/caja">Volver</a>
+</div>
+
+<div class="card">
+  <% if (!cajas.length) { %><p class="muted mb0">Sin cajas cerradas.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr>
+      <th>Apertura</th><th>Cierre</th><th class="num">Apertura S/</th>
+      <th class="num">Ing. efectivo</th><th class="num">Egresos</th>
+      <th class="num">Esperado</th><th class="num">Contado</th><th class="num">Diferencia</th>
+    </tr></thead>
+    <tbody>
+    <% cajas.forEach(function(c){ var dif = Number(c.diferencia || 0); %>
+      <tr>
+        <td><%= u.fechaHora(c.fecha_apertura) %></td>
+        <td><%= u.fechaHora(c.fecha_cierre) %></td>
+        <td class="num"><%= u.soles(c.monto_apertura) %></td>
+        <td class="num"><%= u.soles(c.ingresos_efectivo) %></td>
+        <td class="num"><%= u.soles(c.egresos_total) %></td>
+        <td class="num"><%= u.soles(c.efectivo_esperado) %></td>
+        <td class="num"><%= u.soles(c.monto_cierre_real) %></td>
+        <td class="num">
+          <% if (dif === 0) { %><span class="badge ok">0.00</span>
+          <% } else { %><span class="badge <%= dif > 0 ? 'warn' : 'danger' %>"><%= u.soles(dif) %></span><% } %>
+        </td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>

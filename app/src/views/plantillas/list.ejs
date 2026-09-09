@@ -1,0 +1,23 @@
+<div class="toolbar">
+  <h1 class="mb0">Plantillas de mensaje</h1>
+  <a class="btn primary" href="/plantillas/nueva">+ Nueva</a>
+</div>
+
+<p class="muted">Marcadores disponibles: <code>{{nombres}}</code> <code>{{apellidos}}</code> <code>{{plan}}</code> <code>{{fecha_fin}}</code> <code>{{dias_restantes}}</code> <code>{{monto}}</code></p>
+
+<div class="card">
+  <div class="table-wrap"><table>
+    <thead><tr><th>Clave</th><th>Descripcion</th><th>Texto</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    <% plantillas.forEach(function(p){ %>
+      <tr<%= p.activo ? '' : ' class="muted"' %>>
+        <td><code><%= p.clave %></code></td>
+        <td><%= p.descripcion || '' %></td>
+        <td style="max-width:380px;"><span class="muted" style="font-size:13px;"><%= p.cuerpo %></span></td>
+        <td><span class="badge <%= p.activo ? 'ok' : 'muted' %>"><%= p.activo ? 'Activa' : 'Inactiva' %></span></td>
+        <td><a class="btn sm" href="/plantillas/<%= p.id %>/editar">Editar</a></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+</div>

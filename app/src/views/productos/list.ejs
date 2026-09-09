@@ -1,0 +1,60 @@
+<div class="toolbar">
+  <h1 class="mb0">Productos</h1>
+  <a class="btn primary" href="/productos/nuevo">+ Nuevo producto</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap"><table>
+    <thead><tr><th>Producto</th><th class="num">Precio</th><th class="num">Stock</th><th>Vender</th><th></th></tr></thead>
+    <tbody>
+    <% productos.forEach(function(p){ %>
+      <tr<%= p.activo ? '' : ' class="muted"' %>>
+        <td><strong><%= p.nombre %></strong></td>
+        <td class="num"><%= u.soles(p.precio) %></td>
+        <td class="num"><%= p.stock %></td>
+        <td>
+          <% if (p.activo) { %>
+          <form method="post" action="/productos/<%= p.id %>/vender" class="search" style="margin:0;">
+            <input type="number" name="cantidad" value="1" min="1" style="width:64px;">
+            <select name="metodo_pago" style="width:auto;">
+              <option value="efectivo">Efectivo</option>
+              <option value="yape">Yape</option>
+              <option value="plin">Plin</option>
+              <option value="tarjeta">Tarjeta</option>
+            </select>
+            <button class="btn sm primary" type="submit">Vender</button>
+          </form>
+          <% } %>
+        </td>
+        <td class="actions">
+          <a class="btn sm" href="/productos/<%= p.id %>/editar">Editar</a>
+          <form method="post" action="/productos/<%= p.id %>/toggle" style="margin:0;">
+            <button class="btn sm" type="submit"><%= p.activo ? 'Desactivar' : 'Activar' %></button>
+          </form>
+        </td>
+      </tr>
+    <% }); %>
+    <% if (!productos.length) { %><tr><td colspan="5" class="muted">Sin productos.</td></tr><% } %>
+    </tbody>
+  </table></div>
+</div>
+
+<h2>Ultimas ventas</h2>
+<div class="card">
+  <% if (!ventas.length) { %><p class="muted mb0">Sin ventas.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Fecha</th><th>Producto</th><th class="num">Cant.</th><th class="num">Subtotal</th><th>Metodo</th></tr></thead>
+    <tbody>
+    <% ventas.forEach(function(v){ %>
+      <tr>
+        <td><%= u.fechaHora(v.creado_en) %></td>
+        <td><%= v.nombre %></td>
+        <td class="num"><%= v.cantidad %></td>
+        <td class="num"><%= u.soles(v.subtotal) %></td>
+        <td><%= v.metodo_pago %></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>

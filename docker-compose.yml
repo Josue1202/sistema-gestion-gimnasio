@@ -104,23 +104,24 @@ services:
       postgres:
         condition: service_healthy
 
-  # ----------------------------------------------------------------
-  #  App web (Next.js). Descomenta cuando exista el codigo en ./app
-  # ----------------------------------------------------------------
-  # app:
-  #   build: ./app
-  #   restart: unless-stopped
-  #   environment:
-  #     DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-  #     N8N_WEBHOOK_URL: http://n8n:5678/webhook
-  #     EVOLUTION_API_URL: http://evolution-api:8080
-  #     EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
-  #     TZ: ${TZ:-America/Lima}
-  #   ports:
-  #     - "${APP_PORT:-3000}:3000"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  app:
+    build: ./app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: ${TZ:-America/Lima}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      SESSION_SECRET: ${SESSION_SECRET}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook
+      EVOLUTION_API_URL: http://evolution-api:8080
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pg_data:

@@ -1,0 +1,41 @@
+<h1><%= modo === 'nuevo' ? 'Nuevo socio' : 'Editar socio' %></h1>
+
+<div class="card">
+  <form method="post" action="<%= modo === 'nuevo' ? '/socios' : '/socios/' + socio.id %>" class="stack">
+    <div class="grid2">
+      <div><label>Nombres *</label><input name="nombres" value="<%= socio.nombres || '' %>" required autofocus></div>
+      <div><label>Apellidos *</label><input name="apellidos" value="<%= socio.apellidos || '' %>" required></div>
+    </div>
+    <div class="grid3">
+      <div><label>DNI</label><input name="dni" value="<%= socio.dni || '' %>"></div>
+      <div><label>Telefono (WhatsApp)</label><input name="telefono" value="<%= socio.telefono || '' %>" placeholder="51987654321"></div>
+      <div><label>Fecha de nacimiento</label><input type="date" name="fecha_nacimiento" value="<%= socio.fecha_nacimiento || '' %>"></div>
+    </div>
+    <div class="grid3">
+      <div><label>Correo</label><input type="email" name="email" value="<%= socio.email || '' %>"></div>
+      <div>
+        <label>Genero</label>
+        <select name="genero">
+          <option value="">—</option>
+          <option value="M" <%= socio.genero==='M'?'selected':'' %>>Masculino</option>
+          <option value="F" <%= socio.genero==='F'?'selected':'' %>>Femenino</option>
+          <option value="otro" <%= socio.genero==='otro'?'selected':'' %>>Otro</option>
+        </select>
+      </div>
+      <div><label>Direccion</label><input name="direccion" value="<%= socio.direccion || '' %>"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Contacto de emergencia</label><input name="contacto_emergencia_nombre" value="<%= socio.contacto_emergencia_nombre || '' %>"></div>
+      <div><label>Telefono de emergencia</label><input name="contacto_emergencia_telefono" value="<%= socio.contacto_emergencia_telefono || '' %>"></div>
+    </div>
+    <div><label>Notas</label><textarea name="notas" rows="2"><%= socio.notas || '' %></textarea></div>
+    <label style="display:flex;gap:8px;align-items:center;">
+      <input type="checkbox" name="acepta_marketing" style="width:auto;" <%= socio.acepta_marketing ? 'checked' : '' %>>
+      Acepta mensajes promocionales
+    </label>
+    <div class="actions">
+      <button class="btn primary" type="submit">Guardar</button>
+      <a class="btn" href="<%= modo === 'nuevo' ? '/socios' : '/socios/' + socio.id %>">Cancelar</a>
+    </div>
+  </form>
+</div>

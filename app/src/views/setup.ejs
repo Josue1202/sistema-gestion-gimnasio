@@ -1,0 +1,19 @@
+<div class="card">
+  <h1 class="mt0">Configuracion inicial</h1>
+  <p class="muted">Crea la contrasena del administrador para empezar a usar el sistema.</p>
+  <form method="post" action="/setup" class="stack">
+    <div>
+      <label for="email">Correo del administrador</label>
+      <input id="email" name="email" type="email" value="<%= email %>" required>
+    </div>
+    <div>
+      <label for="password">Contrasena (min. 6)</label>
+      <input id="password" name="password" type="password" minlength="6" required autofocus>
+    </div>
+    <div>
+      <label for="password2">Repetir contrasena</label>
+      <input id="password2" name="password2" type="password" minlength="6" required>
+    </div>
+    <button class="btn primary" type="submit">Crear y continuar</button>
+  </form>
+</div>

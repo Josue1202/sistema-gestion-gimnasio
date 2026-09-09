@@ -1,0 +1,89 @@
+<div class="toolbar">
+  <h1 class="mb0">Caja</h1>
+  <a class="btn" href="/caja/historial">Ver historial</a>
+</div>
+
+<% if (!caja) { %>
+  <div class="card">
+    <h2 class="mt0">Abrir caja</h2>
+    <form method="post" action="/caja/abrir" class="stack" style="max-width:320px;">
+      <div><label>Monto de apertura (efectivo en caja)</label><input type="number" step="0.01" min="0" name="monto_apertura" value="0" required autofocus></div>
+      <button class="btn primary" type="submit">Abrir</button>
+    </form>
+  </div>
+<% } else { %>
+  <div class="kpis">
+    <div class="kpi"><div class="label">Apertura</div><div class="value"><%= u.soles(caja.monto_apertura) %></div></div>
+    <div class="kpi"><div class="label">Ingresos efectivo</div><div class="value"><%= u.soles(caja.ingresos_efectivo) %></div></div>
+    <div class="kpi"><div class="label">Ingresos otros</div><div class="value"><%= u.soles(caja.ingresos_otros) %></div></div>
+    <div class="kpi"><div class="label">Egresos</div><div class="value"><%= u.soles(caja.egresos_total) %></div></div>
+    <div class="kpi"><div class="label">Efectivo esperado</div><div class="value"><%= u.soles(caja.efectivo_esperado) %></div></div>
+  </div>
+  <p class="muted">Abierta <%= u.fechaHora(caja.fecha_apertura) %><%= caja.abierta_por ? ' por ' + caja.abierta_por : '' %>.</p>
+
+  <div class="row">
+    <div>
+      <div class="card">
+        <h2 class="mt0">Registrar egreso</h2>
+        <form method="post" action="/caja/egreso" class="stack">
+          <div><label>Concepto</label><input name="concepto" required placeholder="Compra de agua, limpieza…"></div>
+          <div class="grid2">
+            <div><label>Monto</label><input type="number" step="0.01" min="0" name="monto" required></div>
+            <div>
+              <label>Metodo</label>
+              <select name="metodo_pago">
+                <option value="efectivo">Efectivo</option>
+                <option value="yape">Yape</option>
+                <option value="plin">Plin</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" type="submit">Agregar egreso</button>
+        </form>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2 class="mt0">Cerrar caja</h2>
+        <form method="post" action="/caja/cerrar" class="stack" onsubmit="return confirm('Cerrar la caja?');">
+          <div><label>Efectivo contado</label><input type="number" step="0.01" min="0" name="monto_cierre_real" required></div>
+          <div><label>Notas (opcional)</label><input name="notas"></div>
+          <button class="btn primary" type="submit">Cerrar caja</button>
+          <p class="muted mb0" style="font-size:13px;">Se comparara con el efectivo esperado (<%= u.soles(caja.efectivo_esperado) %>).</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <h2>Movimientos</h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Hora</th><th>Tipo</th><th>Detalle</th><th>Metodo</th><th class="num">Monto</th></tr></thead>
+      <tbody>
+      <% pagos.forEach(function(p){ %>
+        <tr>
+          <td><%= u.fechaHora(p.creado_en) %></td>
+          <td><span class="badge ok">Ingreso</span></td>
+          <td><%= p.concepto %><%= p.nombres ? ' · ' + p.apellidos + ', ' + p.nombres : '' %></td>
+          <td><%= p.metodo_pago %></td>
+          <td class="num"><%= u.soles(p.monto) %></td>
+        </tr>
+      <% }); %>
+      <% egresos.forEach(function(x){ %>
+        <tr>
+          <td><%= u.fechaHora(x.creado_en) %></td>
+          <td><span class="badge danger">Egreso</span></td>
+          <td><%= x.concepto %></td>
+          <td><%= x.metodo_pago %></td>
+          <td class="num">- <%= u.soles(x.monto) %></td>
+        </tr>
+      <% }); %>
+      <% if (!pagos.length && !egresos.length) { %>
+        <tr><td colspan="5" class="muted">Sin movimientos todavia.</td></tr>
+      <% } %>
+      </tbody>
+    </table></div>
+  </div>
+<% } %>

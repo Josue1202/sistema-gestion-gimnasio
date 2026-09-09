@@ -1,0 +1,58 @@
+<div class="toolbar">
+  <h1 class="mb0">Socios <span class="muted" style="font-size:14px;">(<%= total %>)</span></h1>
+  <a class="btn primary" href="/socios/nuevo">+ Nuevo socio</a>
+</div>
+
+<form method="get" action="/socios" class="toolbar">
+  <div class="search">
+    <input type="text" name="q" value="<%= q %>" placeholder="Nombre, DNI o telefono" autofocus>
+    <select name="estado">
+      <option value="">Todos los estados</option>
+      <option value="activo"        <%= estado==='activo'?'selected':'' %>>Activos</option>
+      <option value="por_vencer"    <%= estado==='por_vencer'?'selected':'' %>>Por vencer (7 dias)</option>
+      <option value="vencido"       <%= estado==='vencido'?'selected':'' %>>Vencidos</option>
+      <option value="congelado"     <%= estado==='congelado'?'selected':'' %>>Congelados</option>
+      <option value="sin_suscripcion" <%= estado==='sin_suscripcion'?'selected':'' %>>Sin suscripcion</option>
+    </select>
+    <button class="btn" type="submit">Buscar</button>
+    <% if (q || estado) { %><a class="btn" href="/socios">Limpiar</a><% } %>
+  </div>
+</form>
+
+<div class="card">
+  <% if (!socios.length) { %>
+    <p class="muted mb0">Sin resultados.</p>
+  <% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Socio</th><th>DNI</th><th>Telefono</th><th>Plan</th><th>Vence</th><th>Estado</th></tr></thead>
+    <tbody>
+    <% socios.forEach(function(s){
+       var est = s.estado_membresia;
+       if (est === 'activo' && s.dias_restantes != null && s.dias_restantes <= 7) est = 'por_vencer';
+    %>
+      <tr>
+        <td><a href="/socios/<%= s.id %>"><strong><%= s.apellidos %></strong>, <%= s.nombres %></a></td>
+        <td><%= s.dni || '' %></td>
+        <td><%= s.telefono || '' %></td>
+        <td><%= s.plan_nombre || '—' %></td>
+        <td><%= s.fecha_fin ? u.fecha(s.fecha_fin) : '—' %></td>
+        <td>
+          <% if (est==='activo') { %><span class="badge ok">Activo</span>
+          <% } else if (est==='por_vencer') { %><span class="badge warn">Vence en <%= s.dias_restantes %>d</span>
+          <% } else if (est==='vencido') { %><span class="badge danger">Vencido</span>
+          <% } else if (est==='congelado') { %><span class="badge muted">Congelado</span>
+          <% } else { %><span class="badge muted">Sin plan</span><% } %>
+        </td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>
+
+<% if (page > 1 || hayMas) { %>
+<div class="actions">
+  <% if (page > 1) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page-1 %>">« Anterior</a><% } %>
+  <% if (hayMas) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page+1 %>">Siguiente »</a><% } %>
+</div>
+<% } %>

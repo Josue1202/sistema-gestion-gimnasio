@@ -1,0 +1,139 @@
+<h1>Reportes</h1>
+
+<% function maxOf(arr, key) { var m = 0; arr.forEach(function(r){ var v = Number(r[key]||0); if (v > m) m = v; }); return m || 1; } %>
+
+<div class="row">
+  <div>
+    <h2>Ingresos por mes</h2>
+    <div class="card">
+      <% if (!ingresosMes.length) { %><p class="muted mb0">Sin datos.</p><% } else { var mm = maxOf(ingresosMes,'total'); %>
+      <table>
+        <thead><tr><th>Mes</th><th class="num">Total</th><th style="width:40%;"></th></tr></thead>
+        <tbody>
+        <% ingresosMes.forEach(function(r){ %>
+          <tr>
+            <td><%= u.fecha(r.mes).slice(3) %></td>
+            <td class="num"><%= u.soles(r.total) %></td>
+            <td><div class="bar-track"><div class="bar" style="width:<%= (Number(r.total)/mm*100).toFixed(1) %>%"></div></div></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+  <div>
+    <h2>Por metodo de pago</h2>
+    <div class="card">
+      <% if (!porMetodo.length) { %><p class="muted mb0">Sin datos.</p><% } else { var mp = maxOf(porMetodo,'total'); %>
+      <table>
+        <thead><tr><th>Metodo</th><th class="num">Total</th><th class="num">Pagos</th><th style="width:30%;"></th></tr></thead>
+        <tbody>
+        <% porMetodo.forEach(function(r){ %>
+          <tr>
+            <td><%= r.metodo_pago %></td>
+            <td class="num"><%= u.soles(r.total) %></td>
+            <td class="num"><%= r.num_pagos %></td>
+            <td><div class="bar-track"><div class="bar" style="width:<%= (Number(r.total)/mp*100).toFixed(1) %>%"></div></div></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<h2>Ingresos ultimos 30 dias</h2>
+<div class="card">
+  <% if (!ingresosDia.length) { %><p class="muted mb0">Sin pagos en el periodo.</p><% } else { var md = maxOf(ingresosDia,'total'); %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Dia</th><th class="num">Total</th><th class="num">Pagos</th><th style="width:50%;"></th></tr></thead>
+    <tbody>
+    <% ingresosDia.forEach(function(r){ %>
+      <tr>
+        <td><%= u.fecha(r.dia) %></td>
+        <td class="num"><%= u.soles(r.total) %></td>
+        <td class="num"><%= r.n %></td>
+        <td><div class="bar-track"><div class="bar" style="width:<%= (Number(r.total)/md*100).toFixed(1) %>%"></div></div></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>
+
+<div class="row">
+  <div>
+    <h2>Ingresos por plan</h2>
+    <div class="card">
+      <% if (!porPlan.length) { %><p class="muted mb0">Sin datos.</p><% } else { %>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mes</th><th>Plan</th><th class="num">Ventas</th><th class="num">Total</th></tr></thead>
+        <tbody>
+        <% porPlan.forEach(function(r){ %>
+          <tr><td><%= u.fecha(r.mes).slice(3) %></td><td><%= r.plan_nombre %></td><td class="num"><%= r.num_ventas %></td><td class="num"><%= u.soles(r.total) %></td></tr>
+        <% }); %>
+        </tbody>
+      </table></div>
+      <% } %>
+    </div>
+  </div>
+  <div>
+    <h2>Renovacion mensual</h2>
+    <div class="card">
+      <% if (!renovacion.length) { %><p class="muted mb0">Sin datos.</p><% } else { %>
+      <table>
+        <thead><tr><th>Mes</th><th class="num">Vencieron</th><th class="num">Renovaron</th><th class="num">Tasa</th></tr></thead>
+        <tbody>
+        <% renovacion.forEach(function(r){ %>
+          <tr>
+            <td><%= u.fecha(r.mes_vencimiento).slice(3) %></td>
+            <td class="num"><%= r.vencieron %></td>
+            <td class="num"><%= r.renovaron %></td>
+            <td class="num"><span class="badge <%= Number(r.tasa_renovacion_pct) >= 60 ? 'ok' : (Number(r.tasa_renovacion_pct) >= 40 ? 'warn' : 'danger') %>"><%= r.tasa_renovacion_pct != null ? r.tasa_renovacion_pct + '%' : '—' %></span></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div>
+    <h2>Asistencias por dia</h2>
+    <div class="card">
+      <% if (!asistDia.length) { %><p class="muted mb0">Sin datos.</p><% } else { var ma = maxOf(asistDia,'asistencias'); %>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Dia</th><th class="num">Asist.</th><th style="width:50%;"></th></tr></thead>
+        <tbody>
+        <% asistDia.forEach(function(r){ %>
+          <tr><td><%= u.fecha(r.dia) %></td><td class="num"><%= r.asistencias %></td>
+          <td><div class="bar-track"><div class="bar" style="width:<%= (Number(r.asistencias)/ma*100).toFixed(1) %>%"></div></div></td></tr>
+        <% }); %>
+        </tbody>
+      </table></div>
+      <% } %>
+    </div>
+  </div>
+  <div>
+    <h2>Horas pico</h2>
+    <div class="card">
+      <% if (!asistHora.length) { %><p class="muted mb0">Sin datos.</p><% } else { var mh = maxOf(asistHora,'asistencias'); %>
+      <table>
+        <tbody>
+        <% asistHora.forEach(function(r){ %>
+          <tr>
+            <td style="width:60px;"><%= String(r.hora).padStart(2,'0') %>:00</td>
+            <td class="num" style="width:50px;"><%= r.asistencias %></td>
+            <td><div class="bar-track"><div class="bar" style="width:<%= (Number(r.asistencias)/mh*100).toFixed(1) %>%"></div></div></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>

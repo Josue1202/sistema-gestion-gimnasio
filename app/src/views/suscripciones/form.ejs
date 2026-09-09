@@ -1,0 +1,84 @@
+<div class="toolbar">
+  <h1 class="mb0">Renovar / registrar pago</h1>
+  <a class="btn" href="/socios/<%= socio.id %>">Volver al socio</a>
+</div>
+
+<div class="card">
+  <p><strong><%= socio.apellidos %>, <%= socio.nombres %></strong>
+    <% if (actual) { %><span class="muted">· plan actual <%= actual.plan_nombre %>, vence <%= u.fecha(actual.fecha_fin) %></span><% } %>
+  </p>
+
+  <form method="post" action="/suscripciones" class="stack">
+    <input type="hidden" name="socio_id" value="<%= socio.id %>">
+    <div class="grid3">
+      <div>
+        <label>Plan</label>
+        <select name="plan_id" id="plan" required>
+          <option value="">Elegir…</option>
+          <% planes.forEach(function(p){ %>
+            <option value="<%= p.id %>" data-precio="<%= p.precio %>" data-dias="<%= p.duracion_dias %>">
+              <%= p.nombre %> — <%= u.soles(p.precio) %> / <%= p.duracion_dias %>d
+            </option>
+          <% }); %>
+        </select>
+      </div>
+      <div><label>Inicio</label><input type="date" name="fecha_inicio" id="inicio" value="<%= inicio %>" required></div>
+      <div><label>Fin</label><input type="date" name="fecha_fin" id="fin" required></div>
+    </div>
+    <div class="grid3">
+      <div><label>Monto cobrado (S/)</label><input type="number" step="0.01" min="0" name="precio_pagado" id="precio" placeholder="segun plan"></div>
+      <div>
+        <label>Metodo de pago</label>
+        <select name="metodo_pago">
+          <option value="efectivo">Efectivo</option>
+          <option value="yape">Yape</option>
+          <option value="plin">Plin</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div><label>Referencia (op. Yape/Plin)</label><input name="referencia" placeholder="opcional"></div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center;">
+      <input type="checkbox" name="marcar_asistencia" style="width:auto;"> Registrar tambien la asistencia de hoy
+    </label>
+    <% if (!cajaAbierta) { %>
+      <div class="flash info" style="margin:0;">No hay caja abierta. El pago se registra igual, pero sin asignar a una caja. <a href="/caja">Abrir caja</a></div>
+    <% } %>
+    <div class="actions">
+      <button class="btn primary" type="submit">Guardar</button>
+      <a class="btn" href="/socios/<%= socio.id %>">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  (function () {
+    var planes = <%- planesJson %>;
+    var sel = document.getElementById('plan');
+    var inicio = document.getElementById('inicio');
+    var fin = document.getElementById('fin');
+    var precio = document.getElementById('precio');
+    function addDias(iso, d) {
+      var p = iso.split('-').map(Number);
+      var dt = new Date(Date.UTC(p[0], p[1] - 1, p[2]));
+      dt.setUTCDate(dt.getUTCDate() + d);
+      return dt.toISOString().slice(0, 10);
+    }
+    function recalcular() {
+      var opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) return;
+      var dias = parseInt(opt.getAttribute('data-dias'), 10) || 30;
+      if (inicio.value) fin.value = addDias(inicio.value, dias);
+      if (!precio.value) precio.placeholder = opt.getAttribute('data-precio');
+    }
+    sel.addEventListener('change', function () {
+      var opt = sel.options[sel.selectedIndex];
+      if (opt && opt.value && !precio.value) precio.value = opt.getAttribute('data-precio');
+      recalcular();
+    });
+    inicio.addEventListener('change', recalcular);
+    recalcular();
+  })();
+</script>

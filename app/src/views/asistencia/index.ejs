@@ -1,0 +1,61 @@
+<h1>Asistencia</h1>
+
+<div class="card">
+  <form method="get" action="/asistencia" class="search">
+    <input type="text" name="q" value="<%= q %>" placeholder="Nombre, DNI o telefono" autofocus>
+    <button class="btn primary" type="submit">Buscar</button>
+    <% if (q) { %><a class="btn" href="/asistencia">Limpiar</a><% } %>
+  </form>
+
+  <% if (q && !encontrados.length) { %>
+    <p class="muted" style="margin-top:12px;">Sin resultados para "<%= q %>".</p>
+  <% } %>
+
+  <% if (encontrados.length) { %>
+  <div class="table-wrap" style="margin-top:12px;"><table>
+    <thead><tr><th>Socio</th><th>Plan</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    <% encontrados.forEach(function(s){
+       var est = s.estado_membresia;
+       if (est === 'activo' && s.dias_restantes != null && s.dias_restantes <= 7) est = 'por_vencer';
+    %>
+      <tr>
+        <td><a href="/socios/<%= s.id %>"><strong><%= s.apellidos %></strong>, <%= s.nombres %></a><br><span class="muted"><%= s.dni || '' %></span></td>
+        <td><%= s.plan_nombre || '—' %><br><span class="muted"><%= s.fecha_fin ? 'vence ' + u.fecha(s.fecha_fin) : '' %></span></td>
+        <td>
+          <% if (est==='activo') { %><span class="badge ok">Activo</span>
+          <% } else if (est==='por_vencer') { %><span class="badge warn">Vence en <%= s.dias_restantes %>d</span>
+          <% } else if (est==='vencido') { %><span class="badge danger">Vencido</span>
+          <% } else { %><span class="badge muted">Sin plan</span><% } %>
+        </td>
+        <td>
+          <form method="post" action="/asistencia" style="margin:0;">
+            <input type="hidden" name="socio_id" value="<%= s.id %>">
+            <input type="hidden" name="q" value="<%= q %>">
+            <button class="btn primary" type="submit">Marcar</button>
+          </form>
+        </td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>
+
+<h2>Hoy (<%= hoy.length %>)</h2>
+<div class="card">
+  <% if (!hoy.length) { %><p class="muted mb0">Nadie ha marcado hoy.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Hora</th><th>Socio</th><th>Metodo</th></tr></thead>
+    <tbody>
+    <% hoy.forEach(function(a){ %>
+      <tr>
+        <td><%= u.fechaHora(a.fecha) %></td>
+        <td><a href="/socios/<%= a.socio_id %>"><%= a.apellidos %>, <%= a.nombres %></a></td>
+        <td><%= a.metodo || 'manual' %></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>

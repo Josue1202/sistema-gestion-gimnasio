@@ -1,0 +1,61 @@
+<h1>Mensajes</h1>
+<p class="muted">Abre el WhatsApp con el texto ya escrito, envialo y marca "enviado". La automatizacion total se hace luego con n8n.</p>
+
+<% if (sinPlantilla.length) { %>
+  <div class="flash info">Faltan plantillas: <%= sinPlantilla.join(', ') %>. Crealas en <a href="/plantillas">Plantillas</a>.</div>
+<% } %>
+
+<% grupos.forEach(function(g){ %>
+  <h2><%= g.titulo %> <span class="muted">(<%= g.items.length %>)</span></h2>
+  <div class="card">
+    <% if (!g.items.length) { %>
+      <p class="muted mb0">Nada pendiente.</p>
+    <% } else { %>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Socio</th><th>Detalle</th><th>Mensaje</th><th></th></tr></thead>
+      <tbody>
+      <% g.items.forEach(function(it){ %>
+        <tr>
+          <td><a href="/socios/<%= it.socio_id %>"><%= it.nombre %></a><br><span class="muted"><%= it.telefono || 'sin telefono' %></span></td>
+          <td class="muted"><%= it.info %></td>
+          <td style="max-width:340px;"><span class="muted" style="font-size:13px;"><%= it.contenido %></span></td>
+          <td class="actions">
+            <% if (it.link) { %>
+              <a class="btn sm wa" href="<%= it.link %>" target="_blank" rel="noopener">WhatsApp</a>
+              <form method="post" action="/mensajes/registrar" style="margin:0;">
+                <input type="hidden" name="socio_id" value="<%= it.socio_id %>">
+                <input type="hidden" name="telefono" value="<%= it.telefono || '' %>">
+                <input type="hidden" name="plantilla_clave" value="<%= it.clave %>">
+                <input type="hidden" name="contenido" value="<%= it.contenido %>">
+                <button class="btn sm" type="submit">Marcar enviado</button>
+              </form>
+            <% } else { %>
+              <span class="muted">sin telefono</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+      </tbody>
+    </table></div>
+    <% } %>
+  </div>
+<% }); %>
+
+<h2>Historial</h2>
+<div class="card">
+  <% if (!historial.length) { %><p class="muted mb0">Sin mensajes registrados.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Fecha</th><th>Socio</th><th>Plantilla</th><th>Estado</th></tr></thead>
+    <tbody>
+    <% historial.forEach(function(m){ %>
+      <tr>
+        <td><%= u.fechaHora(m.creado_en) %></td>
+        <td><%= m.apellidos ? m.apellidos + ', ' + m.nombres : (m.telefono || '—') %></td>
+        <td><%= m.plantilla_clave || '—' %></td>
+        <td><span class="badge <%= m.estado==='fallido'?'danger':(m.estado==='pendiente'?'muted':'ok') %>"><%= m.estado %></span></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>

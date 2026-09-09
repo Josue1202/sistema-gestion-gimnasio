@@ -8,7 +8,8 @@ gratis (salvo el servidor) en un solo host con Docker.
 
 | Ruta | Contenido |
 |------|-----------|
-| `docker-compose.yml` | Postgres + n8n + Evolution API (WhatsApp) + Adminer |
+| `docker-compose.yml` | App web + Postgres + n8n + Evolution API (WhatsApp) + Adminer |
+| `app/` | App web de recepcion (Node + Express + EJS). Ver `app/README.md` |
 | `.env.example` | Variables de entorno (copiar a `.env`) |
 | `db/init/` | Se ejecuta solo en el primer arranque de Postgres |
 | `db/init/00_init_databases.sql` | Crea las bases `n8n` y `evolution` |
@@ -18,12 +19,11 @@ gratis (salvo el servidor) en un solo host con Docker.
 | `db/seed_demo.sql` | Datos de prueba (se corre a mano) |
 | `db/demo_cleanup.sql` | Borra los datos de prueba |
 | `docs/flujos.md` | Como interactuan la app, n8n y Evolution API |
-| `app/` | Reservado para la app web (Next.js), aun sin codigo |
 
 ## Arquitectura
 
 ```
-Recepcion --HTTPS--> App web (Next.js)
+Recepcion --HTTP--> App web (Express + EJS)
                         |  SQL         webhook HTTP
                         v                 |
                    Postgres <---- SQL --- n8n --HTTP--> Evolution API --WhatsApp--> Socios
@@ -43,8 +43,8 @@ Recepcion --HTTPS--> App web (Next.js)
 
 ```bash
 cp .env.example .env
-# edita .env y cambia TODAS las claves
-docker compose up -d
+# edita .env y cambia TODAS las claves (incluida SESSION_SECRET)
+docker compose up -d --build
 docker compose ps
 ```
 
@@ -52,10 +52,17 @@ Servicios (local):
 
 | Servicio | URL | Notas |
 |----------|-----|-------|
+| App web | http://localhost:3000 | primer uso: ir a `/setup` y crear la clave de admin |
 | n8n | http://localhost:5678 | usuario/clave de `.env` (`N8N_BASIC_AUTH_*`) |
 | Evolution API | http://localhost:8080 | header `apikey: <EVOLUTION_API_KEY>` |
 | Adminer | http://localhost:8081 | sistema PostgreSQL, servidor `postgres`, base `gym` |
 | Postgres | localhost:5432 | usuario/clave/base de `.env` |
+
+### Primer uso de la app
+
+1. Abre http://localhost:3000 → te manda a `/setup`.
+2. Crea la contrasena para `admin@gimnasio.local` (el usuario lo sembro `03_seed.sql`).
+3. Inicia sesion. Carga tus planes reales en **Planes** y empieza a registrar socios.
 
 ### Conectar WhatsApp (Evolution API)
 

@@ -1,0 +1,123 @@
+<div class="toolbar">
+  <h1 class="mb0"><%= socio.apellidos %>, <%= socio.nombres %></h1>
+  <div class="actions">
+    <a class="btn" href="/socios/<%= socio.id %>/editar">Editar</a>
+    <a class="btn" href="/socios">Volver</a>
+  </div>
+</div>
+
+<div class="row">
+  <div>
+    <div class="card">
+      <h2 class="mt0">Datos</h2>
+      <table>
+        <tr><th>DNI</th><td><%= socio.dni || '—' %></td></tr>
+        <tr><th>Telefono</th><td><%= socio.telefono || '—' %></td></tr>
+        <tr><th>Correo</th><td><%= socio.email || '—' %></td></tr>
+        <tr><th>Nacimiento</th><td><%= socio.fecha_nacimiento ? u.fecha(socio.fecha_nacimiento) : '—' %></td></tr>
+        <tr><th>Emergencia</th><td><%= socio.contacto_emergencia_nombre || '—' %> <%= socio.contacto_emergencia_telefono ? '· ' + socio.contacto_emergencia_telefono : '' %></td></tr>
+        <tr><th>Registrado</th><td><%= u.fecha(socio.fecha_registro) %></td></tr>
+        <% if (socio.notas) { %><tr><th>Notas</th><td><%= socio.notas %></td></tr><% } %>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <h2 class="mt0">Membresia</h2>
+      <p style="font-size:16px;">
+        <% var est = estado.estado_membresia; %>
+        <% if (est==='activo' && estado.dias_restantes != null && estado.dias_restantes <= 7) { %>
+          <span class="badge warn">Vence en <%= estado.dias_restantes %> dias</span>
+        <% } else if (est==='activo') { %><span class="badge ok">Activo</span>
+        <% } else if (est==='vencido') { %><span class="badge danger">Vencido</span>
+        <% } else if (est==='congelado') { %><span class="badge muted">Congelado</span>
+        <% } else { %><span class="badge muted">Sin suscripcion</span><% } %>
+      </p>
+      <% if (estado.plan_nombre) { %>
+        <p class="muted mb0"><%= estado.plan_nombre %> · vence <%= u.fecha(estado.fecha_fin) %></p>
+      <% } %>
+      <div class="actions" style="margin-top:12px;">
+        <a class="btn primary" href="/suscripciones/nueva?socio=<%= socio.id %>">Registrar pago / renovar</a>
+        <form method="post" action="/socios/<%= socio.id %>/asistencia" style="margin:0;">
+          <button class="btn" type="submit">Marcar asistencia</button>
+        </form>
+      </div>
+      <% if (!cajaAbierta) { %><p class="muted" style="margin-top:8px;font-size:13px;">No hay caja abierta: los pagos no quedaran asignados a una caja.</p><% } %>
+    </div>
+
+    <div class="card">
+      <h2 class="mt0">Enviar WhatsApp</h2>
+      <% if (!socio.telefono) { %>
+        <p class="muted mb0">El socio no tiene telefono registrado.</p>
+      <% } else { %>
+        <div class="pill-list">
+          <% Object.keys(links).forEach(function(k){ %>
+            <a class="btn sm wa" href="<%= links[k] %>" target="_blank" rel="noopener"><%= k.replace(/_/g,' ') %></a>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<h2>Suscripciones</h2>
+<div class="card">
+  <% if (!subs.length) { %><p class="muted mb0">Sin suscripciones.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Plan</th><th>Desde</th><th>Hasta</th><th class="num">Pagado</th><th>Estado</th><th>Registro</th></tr></thead>
+    <tbody>
+    <% subs.forEach(function(x){ %>
+      <tr>
+        <td><%= x.plan_nombre %></td>
+        <td><%= u.fecha(x.fecha_inicio) %></td>
+        <td><%= u.fecha(x.fecha_fin) %></td>
+        <td class="num"><%= u.soles(x.precio_pagado) %></td>
+        <td><span class="badge <%= x.estado==='activa'?'ok':(x.estado==='vencida'?'danger':'muted') %>"><%= x.estado %></span></td>
+        <td class="muted"><%= u.fecha(x.creado_en) %><%= x.creado_por ? ' · ' + x.creado_por : '' %></td>
+      </tr>
+    <% }); %>
+    </tbody>
+  </table></div>
+  <% } %>
+</div>
+
+<div class="row">
+  <div>
+    <h2>Pagos</h2>
+    <div class="card">
+      <% if (!pagos.length) { %><p class="muted mb0">Sin pagos.</p><% } else { %>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Concepto</th><th>Metodo</th><th class="num">Monto</th></tr></thead>
+        <tbody>
+        <% pagos.forEach(function(p){ %>
+          <tr>
+            <td><%= u.fechaHora(p.creado_en) %></td>
+            <td><%= p.concepto %></td>
+            <td><%= p.metodo_pago %></td>
+            <td class="num"><%= u.soles(p.monto) %></td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table></div>
+      <% } %>
+    </div>
+  </div>
+  <div>
+    <h2>Ultimas asistencias</h2>
+    <div class="card">
+      <% if (!asistencias.length) { %><p class="muted mb0">Sin asistencias.</p><% } else { %>
+      <ul style="margin:0;padding-left:18px;">
+        <% asistencias.forEach(function(a){ %>
+          <li><%= u.fechaHora(a.fecha) %> <span class="muted">· <%= a.metodo || 'manual' %></span></li>
+        <% }); %>
+      </ul>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <form method="post" action="/socios/<%= socio.id %>/baja" onsubmit="return confirm('Dar de baja a este socio? No se borran sus datos, solo deja de aparecer en los listados.');" style="margin:0;">
+    <button class="btn danger" type="submit">Dar de baja</button>
+  </form>
+</div>
