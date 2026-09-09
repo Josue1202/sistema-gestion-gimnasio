@@ -1,0 +1,20 @@
+# Secretos
+.env
+*.env.local
+
+# Backups
+backups/
+*.sql.gz
+*.dump
+
+# Node / Next.js (cuando exista la app)
+node_modules/
+app/node_modules/
+app/.next/
+app/out/
+app/.turbo/
+
+# Logs y temporales
+*.log
+.DS_Store
+Thumbs.db

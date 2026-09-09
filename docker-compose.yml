@@ -1,0 +1,128 @@
+name: gym-system
+
+# ------------------------------------------------------------------
+#  Stack base:
+#    postgres        -> base de datos (gym) + bases separadas para n8n y evolution
+#    n8n             -> automatizaciones y mensajes programados
+#    evolution-api   -> canal de WhatsApp (WhatsApp Web)
+#    adminer         -> visor web de la base de datos (opcional, liviano)
+#    app             -> la aplicacion web (Next.js) -> se activa cuando exista ./app
+# ------------------------------------------------------------------
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ:-America/Lima}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678/}
+      GENERIC_TIMEZONE: ${TZ:-America/Lima}
+      TZ: ${TZ:-America/Lima}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  evolution-api:
+    # El proyecto se movio a "evoapicloud/evolution-api". Verifica el tag actual
+    # en https://hub.docker.com/r/atendai/evolution-api  o  /r/evoapicloud/evolution-api
+    image: atendai/evolution-api:v2.1.1
+    restart: unless-stopped
+    environment:
+      SERVER_URL: ${EVOLUTION_SERVER_URL:-http://localhost:8080}
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+      DEL_INSTANCE: "false"
+      LANGUAGE: es
+      TZ: ${TZ:-America/Lima}
+      # Base de datos
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/evolution
+      DATABASE_CONNECTION_CLIENT_NAME: evolution
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "true"
+      # Cache local (sin Redis, para mantener el stack simple)
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+      # Webhook global -> n8n (opcional; tambien se puede configurar por instancia)
+      WEBHOOK_GLOBAL_ENABLED: "false"
+    ports:
+      - "${EVOLUTION_PORT:-8080}:8080"
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  adminer:
+    image: adminer:4
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8081}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ----------------------------------------------------------------
+  #  App web (Next.js). Descomenta cuando exista el codigo en ./app
+  # ----------------------------------------------------------------
+  # app:
+  #   build: ./app
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  #     N8N_WEBHOOK_URL: http://n8n:5678/webhook
+  #     EVOLUTION_API_URL: http://evolution-api:8080
+  #     EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+  #     TZ: ${TZ:-America/Lima}
+  #   ports:
+  #     - "${APP_PORT:-3000}:3000"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
+volumes:
+  pg_data:
+  n8n_data:
+  evolution_instances:
