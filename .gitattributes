@@ -1,0 +1,5 @@
+# Forzar LF: estos archivos corren dentro de contenedores Linux
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.dump binary
