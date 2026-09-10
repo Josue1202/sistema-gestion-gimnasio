@@ -7,6 +7,11 @@ backups/
 *.sql.gz
 *.dump
 
+# Artefactos locales de n8n
+n8n/qr_whatsapp.png
+n8n/_cred.tmp.json
+n8n/_cred*.json
+
 # Node / Next.js (cuando exista la app)
 node_modules/
 app/node_modules/
