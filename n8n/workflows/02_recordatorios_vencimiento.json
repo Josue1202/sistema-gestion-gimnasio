@@ -1,0 +1,82 @@
+{
+  "name": "Gym · Recordatorios de vencimiento (diario 08:00)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Cada dia 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 8 * * *" } ] } }
+    },
+    {
+      "id": "n2",
+      "name": "Buscar por vencer",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 0],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT v.socio_id, v.suscripcion_id, v.nombres, v.apellidos, v.telefono, v.plan_nombre, v.fecha_fin, v.dias_restantes, p.t_3d, p.t_hoy\nFROM v_suscripciones_por_vencer v\nCROSS JOIN (\n  SELECT max(cuerpo) FILTER (WHERE clave = 'recordatorio_3d')  AS t_3d,\n         max(cuerpo) FILTER (WHERE clave = 'recordatorio_hoy') AS t_hoy\n  FROM plantillas_mensaje WHERE activo\n) p\nWHERE v.dias_restantes IN (0, 1, 3)\n  AND v.telefono IS NOT NULL\n  AND NOT EXISTS (\n    SELECT 1 FROM mensajes_enviados m\n    WHERE m.socio_id = v.socio_id\n      AND m.plantilla_clave IN ('recordatorio_3d','recordatorio_hoy')\n      AND m.estado <> 'fallido'\n      AND m.creado_en > now() - interval '5 days'\n  )",
+        "options": {}
+      },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    },
+    {
+      "id": "n3",
+      "name": "Render",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "parameters": {
+        "jsCode": "const fmt = (d) => { if (!d) return ''; const t = new Date(d); return isNaN(t) ? String(d) : t.toLocaleDateString('es-PE', { timeZone: 'America/Lima' }); };\nreturn $input.all().map(({ json }) => {\n  const esHoy = Number(json.dias_restantes) === 0;\n  const clave = esHoy ? 'recordatorio_hoy' : 'recordatorio_3d';\n  const cuerpo = (esHoy ? json.t_hoy : json.t_3d) || 'Hola {{nombres}}, tu plan vence el {{fecha_fin}} ({{dias_restantes}} dias). Renueva a tiempo.';\n  const vars = {\n    nombres: json.nombres || '', apellidos: json.apellidos || '',\n    plan: json.plan_nombre || '', fecha_fin: fmt(json.fecha_fin),\n    dias_restantes: json.dias_restantes ?? '', monto: ''\n  };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  const numero = String(json.telefono || '').replace(/\\D/g, '');\n  return { json: { socio_id: json.socio_id, suscripcion_id: json.suscripcion_id, clave, numero, texto } };\n}).filter((i) => i.json.numero);"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 0],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "apikey", "value": "={{ $env.EVOLUTION_API_KEY }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.numero, text: $json.texto }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "n5",
+      "name": "SQL log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "parameters": {
+        "jsCode": "const esc = (s) => String(s ?? '').replace(/'/g, \"''\");\nreturn $('Render').all().map(({ json: r }) => {\n  const sql = `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, enviado_en, referencia_tipo, referencia_id) VALUES ('${esc(r.socio_id)}', '${esc(r.numero)}', 'whatsapp', '${esc(r.clave)}', '${esc(r.texto)}', 'enviado', now(), 'suscripcion', ${r.suscripcion_id ? `'${esc(r.suscripcion_id)}'` : 'NULL'})`;\n  return { json: { sql } };\n});"
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Registrar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1100, 0],
+      "parameters": { "operation": "executeQuery", "query": "={{ $json.sql }}", "options": {} },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    }
+  ],
+  "connections": {
+    "Cada dia 08:00": { "main": [ [ { "node": "Buscar por vencer", "type": "main", "index": 0 } ] ] },
+    "Buscar por vencer": { "main": [ [ { "node": "Render", "type": "main", "index": 0 } ] ] },
+    "Render": { "main": [ [ { "node": "Enviar WhatsApp", "type": "main", "index": 0 } ] ] },
+    "Enviar WhatsApp": { "main": [ [ { "node": "SQL log", "type": "main", "index": 0 } ] ] },
+    "SQL log": { "main": [ [ { "node": "Registrar", "type": "main", "index": 0 } ] ] }
+  }
+}

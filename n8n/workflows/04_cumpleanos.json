@@ -1,0 +1,82 @@
+{
+  "name": "Gym · Saludo de cumpleanos (diario 09:00)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Cada dia 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 9 * * *" } ] } }
+    },
+    {
+      "id": "n2",
+      "name": "Cumpleaneros de hoy",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 0],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.socio_id, c.nombres, c.apellidos, c.telefono, p.cuerpo AS plantilla_cuerpo\nFROM v_cumpleanos_hoy c\nCROSS JOIN (SELECT cuerpo FROM plantillas_mensaje WHERE clave = 'cumpleanos' AND activo LIMIT 1) p\nWHERE c.telefono IS NOT NULL\n  AND NOT EXISTS (\n    SELECT 1 FROM mensajes_enviados m\n    WHERE m.socio_id = c.socio_id AND m.plantilla_clave = 'cumpleanos'\n      AND m.estado <> 'fallido' AND m.creado_en > now() - interval '300 days'\n  )",
+        "options": {}
+      },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    },
+    {
+      "id": "n3",
+      "name": "Render",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "parameters": {
+        "jsCode": "return $input.all().map(({ json }) => {\n  const cuerpo = json.plantilla_cuerpo || 'Feliz cumpleanos, {{nombres}}! Todo el equipo del gimnasio te desea un gran dia.';\n  const vars = { nombres: json.nombres || '', apellidos: json.apellidos || '', plan: '', fecha_fin: '', dias_restantes: '', monto: '' };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  const numero = String(json.telefono || '').replace(/\\D/g, '');\n  return { json: { socio_id: json.socio_id, clave: 'cumpleanos', numero, texto } };\n}).filter((i) => i.json.numero);"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 0],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "apikey", "value": "={{ $env.EVOLUTION_API_KEY }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.numero, text: $json.texto }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "n5",
+      "name": "SQL log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "parameters": {
+        "jsCode": "const esc = (s) => String(s ?? '').replace(/'/g, \"''\");\nreturn $('Render').all().map(({ json: r }) => {\n  const sql = `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, enviado_en, referencia_tipo, referencia_id, periodo) VALUES ('${esc(r.socio_id)}', '${esc(r.numero)}', 'whatsapp', 'cumpleanos', '${esc(r.texto)}', 'enviado', now(), 'cumpleanos', '${esc(r.socio_id)}', to_char(CURRENT_DATE, 'YYYY'))`;\n  return { json: { sql } };\n});"
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Registrar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1100, 0],
+      "parameters": { "operation": "executeQuery", "query": "={{ $json.sql }}", "options": {} },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    }
+  ],
+  "connections": {
+    "Cada dia 09:00": { "main": [ [ { "node": "Cumpleaneros de hoy", "type": "main", "index": 0 } ] ] },
+    "Cumpleaneros de hoy": { "main": [ [ { "node": "Render", "type": "main", "index": 0 } ] ] },
+    "Render": { "main": [ [ { "node": "Enviar WhatsApp", "type": "main", "index": 0 } ] ] },
+    "Enviar WhatsApp": { "main": [ [ { "node": "SQL log", "type": "main", "index": 0 } ] ] },
+    "SQL log": { "main": [ [ { "node": "Registrar", "type": "main", "index": 0 } ] ] }
+  }
+}

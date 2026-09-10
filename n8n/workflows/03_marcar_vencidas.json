@@ -1,0 +1,31 @@
+{
+  "name": "Gym · Marcar suscripciones vencidas (diario 00:15)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Cada dia 00:15",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "15 0 * * *" } ] } }
+    },
+    {
+      "id": "n2",
+      "name": "Marcar vencidas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 0],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE suscripciones SET estado = 'vencida' WHERE estado = 'activa' AND fecha_fin < CURRENT_DATE RETURNING id",
+        "options": {}
+      },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    }
+  ],
+  "connections": {
+    "Cada dia 00:15": { "main": [ [ { "node": "Marcar vencidas", "type": "main", "index": 0 } ] ] }
+  }
+}

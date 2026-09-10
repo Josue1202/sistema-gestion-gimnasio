@@ -1,0 +1,82 @@
+{
+  "name": "Gym · Te extranamos (diario 10:00, a los 14 dias sin venir)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Cada dia 10:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 10 * * *" } ] } }
+    },
+    {
+      "id": "n2",
+      "name": "Socios en riesgo",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 0],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT r.socio_id, r.nombres, r.apellidos, r.telefono, p.cuerpo AS plantilla_cuerpo\nFROM v_socios_en_riesgo r\nCROSS JOIN (SELECT cuerpo FROM plantillas_mensaje WHERE clave = 'te_extranamos' AND activo LIMIT 1) p\nWHERE r.telefono IS NOT NULL\n  AND r.dias_sin_venir = 14\n  AND NOT EXISTS (\n    SELECT 1 FROM mensajes_enviados m\n    WHERE m.socio_id = r.socio_id AND m.plantilla_clave = 'te_extranamos'\n      AND m.estado <> 'fallido' AND m.creado_en > now() - interval '30 days'\n  )",
+        "options": {}
+      },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    },
+    {
+      "id": "n3",
+      "name": "Render",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "parameters": {
+        "jsCode": "return $input.all().map(({ json }) => {\n  const cuerpo = json.plantilla_cuerpo || 'Hola {{nombres}}, te extranamos en el gym! Aqui te esperamos.';\n  const vars = { nombres: json.nombres || '', apellidos: json.apellidos || '', plan: '', fecha_fin: '', dias_restantes: '', monto: '' };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  const numero = String(json.telefono || '').replace(/\\D/g, '');\n  return { json: { socio_id: json.socio_id, clave: 'te_extranamos', numero, texto } };\n}).filter((i) => i.json.numero);"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 0],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "apikey", "value": "={{ $env.EVOLUTION_API_KEY }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.numero, text: $json.texto }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "n5",
+      "name": "SQL log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "parameters": {
+        "jsCode": "const esc = (s) => String(s ?? '').replace(/'/g, \"''\");\nreturn $('Render').all().map(({ json: r }) => {\n  const sql = `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, enviado_en, referencia_tipo) VALUES ('${esc(r.socio_id)}', '${esc(r.numero)}', 'whatsapp', 'te_extranamos', '${esc(r.texto)}', 'enviado', now(), 'asistencia')`;\n  return { json: { sql } };\n});"
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Registrar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1100, 0],
+      "parameters": { "operation": "executeQuery", "query": "={{ $json.sql }}", "options": {} },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    }
+  ],
+  "connections": {
+    "Cada dia 10:00": { "main": [ [ { "node": "Socios en riesgo", "type": "main", "index": 0 } ] ] },
+    "Socios en riesgo": { "main": [ [ { "node": "Render", "type": "main", "index": 0 } ] ] },
+    "Render": { "main": [ [ { "node": "Enviar WhatsApp", "type": "main", "index": 0 } ] ] },
+    "Enviar WhatsApp": { "main": [ [ { "node": "SQL log", "type": "main", "index": 0 } ] ] },
+    "SQL log": { "main": [ [ { "node": "Registrar", "type": "main", "index": 0 } ] ] }
+  }
+}

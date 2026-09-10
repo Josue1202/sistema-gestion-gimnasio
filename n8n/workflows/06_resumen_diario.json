@@ -1,0 +1,79 @@
+{
+  "name": "Gym · Resumen diario a la duena (21:00)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Cada dia 21:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 21 * * *" } ] } }
+    },
+    {
+      "id": "n2",
+      "name": "KPIs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 0],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT k.*,\n  (SELECT count(*) FROM cajas WHERE estado = 'abierta') AS cajas_abiertas,\n  (SELECT COALESCE(sum(monto),0) FROM pagos p JOIN cajas c ON c.id = p.caja_id\n     WHERE c.estado = 'abierta' AND p.metodo_pago = 'efectivo') AS efectivo_en_caja\nFROM v_kpis_hoy k",
+        "options": {}
+      },
+      "credentials": { "postgres": { "id": "GYM_PG", "name": "Gym Postgres (gym DB)" } }
+    },
+    {
+      "id": "n3",
+      "name": "Armar resumen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "parameters": {
+        "jsCode": "const k = $json;\nconst soles = (n) => 'S/ ' + Number(n || 0).toFixed(2);\nconst hoy = new Date().toLocaleDateString('es-PE', { timeZone: 'America/Lima' });\nconst texto = [\n  `Resumen del ${hoy}`,\n  `Ingresos hoy: ${soles(k.ingresos_hoy)}`,\n  `Ingresos del mes: ${soles(k.ingresos_mes)}`,\n  `Asistencias hoy: ${k.asistencias_hoy || 0}`,\n  `Socios activos: ${k.socios_activos || 0}`,\n  `Vencen en 7 dias: ${k.vencen_7d || 0}`,\n  `Vencidos: ${k.socios_vencidos || 0}`,\n  Number(k.cajas_abiertas) > 0 ? `Caja abierta - efectivo esperado: ${soles(k.efectivo_en_caja)}` : 'Caja cerrada'\n].join('\\n');\nconst numero = String($env.GYM_OWNER_PHONE || '').replace(/\\D/g, '');\nreturn [{ json: { numero, texto } }];"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Hay telefono?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose" },
+          "combinator": "and",
+          "conditions": [
+            { "leftValue": "={{ $json.numero }}", "rightValue": "", "operator": { "type": "string", "operation": "notEmpty" } }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, -40],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "apikey", "value": "={{ $env.EVOLUTION_API_KEY }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.numero, text: $json.texto }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Cada dia 21:00": { "main": [ [ { "node": "KPIs", "type": "main", "index": 0 } ] ] },
+    "KPIs": { "main": [ [ { "node": "Armar resumen", "type": "main", "index": 0 } ] ] },
+    "Armar resumen": { "main": [ [ { "node": "Hay telefono?", "type": "main", "index": 0 } ] ] },
+    "Hay telefono?": { "main": [ [ { "node": "Enviar WhatsApp", "type": "main", "index": 0 } ], [] ] }
+  }
+}
