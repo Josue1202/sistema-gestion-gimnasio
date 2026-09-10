@@ -2,20 +2,21 @@
 const express = require('express');
 const db = require('../db');
 const { plantillasMap, varsDe } = require('../mensajeria');
-const { renderPlantilla, waLink, hoyISO } = require('../util');
+const { renderPlantilla, waLink, hoyISO, normalizarTelefono } = require('../util');
 
 const router = express.Router();
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function limpiarSocio(b) {
   const s = (v) => (v == null || String(v).trim() === '') ? null : String(v).trim();
+  const tel = (v) => { const n = normalizarTelefono(v); return n ? n : null; };
   return {
     nombres: s(b.nombres), apellidos: s(b.apellidos), dni: s(b.dni),
-    telefono: s(b.telefono), email: s(b.email),
+    telefono: tel(b.telefono), email: s(b.email),
     fecha_nacimiento: s(b.fecha_nacimiento), genero: s(b.genero),
     direccion: s(b.direccion),
     contacto_emergencia_nombre: s(b.contacto_emergencia_nombre),
-    contacto_emergencia_telefono: s(b.contacto_emergencia_telefono),
+    contacto_emergencia_telefono: tel(b.contacto_emergencia_telefono),
     notas: s(b.notas),
     acepta_marketing: b.acepta_marketing === 'on' || b.acepta_marketing === 'true',
   };

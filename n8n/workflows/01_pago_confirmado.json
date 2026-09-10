@@ -38,7 +38,7 @@
       "typeVersion": 2,
       "position": [440, 0],
       "parameters": {
-        "jsCode": "const b = $('Webhook').first().json.body || {};\nconst cuerpo = ($json.cuerpo) || 'Hola {{nombres}}, recibimos tu pago de S/ {{monto}}. Tu plan {{plan}} vence el {{fecha_fin}}.';\nconst vars = {\n  nombres: b.nombres || '',\n  apellidos: b.apellidos || '',\n  plan: b.plan || '',\n  fecha_fin: b.fecha_fin_txt || b.fecha_fin || '',\n  dias_restantes: '',\n  monto: (b.monto != null ? Number(b.monto).toFixed(2) : '')\n};\nconst texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\nconst numero = String(b.telefono || '').replace(/\\D/g, '');\nreturn [{ json: { socio_id: b.socio_id || null, numero, texto, clave: 'pago_confirmado' } }];"
+        "jsCode": "const b = $('Webhook').first().json.body || {};\nconst cuerpo = ($json.cuerpo) || 'Hola {{nombres}}, recibimos tu pago de S/ {{monto}}. Tu plan {{plan}} vence el {{fecha_fin}}.';\nconst vars = {\n  nombres: b.nombres || '',\n  apellidos: b.apellidos || '',\n  plan: b.plan || '',\n  fecha_fin: b.fecha_fin_txt || b.fecha_fin || '',\n  dias_restantes: '',\n  monto: (b.monto != null ? Number(b.monto).toFixed(2) : '')\n};\nconst texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\nlet numero = String(b.telefono || '').replace(/\\D/g, '');\nif (numero.length === 9) numero = '51' + numero;\nreturn [{ json: { socio_id: b.socio_id || null, numero, texto, clave: 'pago_confirmado' } }];"
       }
     },
     {

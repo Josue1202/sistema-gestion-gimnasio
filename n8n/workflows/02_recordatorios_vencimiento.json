@@ -1,4 +1,5 @@
 {
+  "id": "ynzGdwHRGYFjco2e",
   "name": "Gym · Recordatorios de vencimiento (diario 08:00)",
   "active": false,
   "settings": { "executionOrder": "v1" },
@@ -31,7 +32,7 @@
       "typeVersion": 2,
       "position": [440, 0],
       "parameters": {
-        "jsCode": "const fmt = (d) => { if (!d) return ''; const t = new Date(d); return isNaN(t) ? String(d) : t.toLocaleDateString('es-PE', { timeZone: 'America/Lima' }); };\nreturn $input.all().map(({ json }) => {\n  const esHoy = Number(json.dias_restantes) === 0;\n  const clave = esHoy ? 'recordatorio_hoy' : 'recordatorio_3d';\n  const cuerpo = (esHoy ? json.t_hoy : json.t_3d) || 'Hola {{nombres}}, tu plan vence el {{fecha_fin}} ({{dias_restantes}} dias). Renueva a tiempo.';\n  const vars = {\n    nombres: json.nombres || '', apellidos: json.apellidos || '',\n    plan: json.plan_nombre || '', fecha_fin: fmt(json.fecha_fin),\n    dias_restantes: json.dias_restantes ?? '', monto: ''\n  };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  const numero = String(json.telefono || '').replace(/\\D/g, '');\n  return { json: { socio_id: json.socio_id, suscripcion_id: json.suscripcion_id, clave, numero, texto } };\n}).filter((i) => i.json.numero);"
+        "jsCode": "const fmt = (d) => { if (!d) return ''; const t = new Date(d); return isNaN(t) ? String(d) : t.toLocaleDateString('es-PE', { timeZone: 'America/Lima' }); };\nreturn $input.all().map(({ json }) => {\n  const esHoy = Number(json.dias_restantes) === 0;\n  const clave = esHoy ? 'recordatorio_hoy' : 'recordatorio_3d';\n  const cuerpo = (esHoy ? json.t_hoy : json.t_3d) || 'Hola {{nombres}}, tu plan vence el {{fecha_fin}} ({{dias_restantes}} dias). Renueva a tiempo.';\n  const vars = {\n    nombres: json.nombres || '', apellidos: json.apellidos || '',\n    plan: json.plan_nombre || '', fecha_fin: fmt(json.fecha_fin),\n    dias_restantes: json.dias_restantes ?? '', monto: ''\n  };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  let numero = String(json.telefono || '').replace(/\\D/g, '');\n  if (numero.length === 9) numero = '51' + numero;\n  return { json: { socio_id: json.socio_id, suscripcion_id: json.suscripcion_id, clave, numero, texto } };\n}).filter((i) => i.json.numero);"
       }
     },
     {

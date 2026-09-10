@@ -1,4 +1,5 @@
 {
+  "id": "27MJCMOyk0akLOkh",
   "name": "Gym · Saludo de cumpleanos (diario 09:00)",
   "active": false,
   "settings": { "executionOrder": "v1" },
@@ -31,7 +32,7 @@
       "typeVersion": 2,
       "position": [440, 0],
       "parameters": {
-        "jsCode": "return $input.all().map(({ json }) => {\n  const cuerpo = json.plantilla_cuerpo || 'Feliz cumpleanos, {{nombres}}! Todo el equipo del gimnasio te desea un gran dia.';\n  const vars = { nombres: json.nombres || '', apellidos: json.apellidos || '', plan: '', fecha_fin: '', dias_restantes: '', monto: '' };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  const numero = String(json.telefono || '').replace(/\\D/g, '');\n  return { json: { socio_id: json.socio_id, clave: 'cumpleanos', numero, texto } };\n}).filter((i) => i.json.numero);"
+        "jsCode": "return $input.all().map(({ json }) => {\n  const cuerpo = json.plantilla_cuerpo || 'Feliz cumpleanos, {{nombres}}! Todo el equipo del gimnasio te desea un gran dia.';\n  const vars = { nombres: json.nombres || '', apellidos: json.apellidos || '', plan: '', fecha_fin: '', dias_restantes: '', monto: '' };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  let numero = String(json.telefono || '').replace(/\\D/g, '');\n  if (numero.length === 9) numero = '51' + numero;\n  return { json: { socio_id: json.socio_id, clave: 'cumpleanos', numero, texto } };\n}).filter((i) => i.json.numero);"
       }
     },
     {

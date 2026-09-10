@@ -1,4 +1,5 @@
 {
+  "id": "fFEM3sCfJ9tMqjCF",
   "name": "Gym · Te extranamos (diario 10:00, a los 14 dias sin venir)",
   "active": false,
   "settings": { "executionOrder": "v1" },
@@ -31,7 +32,7 @@
       "typeVersion": 2,
       "position": [440, 0],
       "parameters": {
-        "jsCode": "return $input.all().map(({ json }) => {\n  const cuerpo = json.plantilla_cuerpo || 'Hola {{nombres}}, te extranamos en el gym! Aqui te esperamos.';\n  const vars = { nombres: json.nombres || '', apellidos: json.apellidos || '', plan: '', fecha_fin: '', dias_restantes: '', monto: '' };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  const numero = String(json.telefono || '').replace(/\\D/g, '');\n  return { json: { socio_id: json.socio_id, clave: 'te_extranamos', numero, texto } };\n}).filter((i) => i.json.numero);"
+        "jsCode": "return $input.all().map(({ json }) => {\n  const cuerpo = json.plantilla_cuerpo || 'Hola {{nombres}}, te extranamos en el gym! Aqui te esperamos.';\n  const vars = { nombres: json.nombres || '', apellidos: json.apellidos || '', plan: '', fecha_fin: '', dias_restantes: '', monto: '' };\n  const texto = String(cuerpo).replace(/\\{\\{\\s*(\\w+)\\s*\\}\\}/g, (_, k) => (vars[k] ?? ''));\n  let numero = String(json.telefono || '').replace(/\\D/g, '');\n  if (numero.length === 9) numero = '51' + numero;\n  return { json: { socio_id: json.socio_id, clave: 'te_extranamos', numero, texto } };\n}).filter((i) => i.json.numero);"
       }
     },
     {

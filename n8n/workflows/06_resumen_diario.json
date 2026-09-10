@@ -1,4 +1,5 @@
 {
+  "id": "EJG2GxAi2sxOPvms",
   "name": "Gym · Resumen diario a la duena (21:00)",
   "active": false,
   "settings": { "executionOrder": "v1" },
@@ -31,7 +32,7 @@
       "typeVersion": 2,
       "position": [440, 0],
       "parameters": {
-        "jsCode": "const k = $json;\nconst soles = (n) => 'S/ ' + Number(n || 0).toFixed(2);\nconst hoy = new Date().toLocaleDateString('es-PE', { timeZone: 'America/Lima' });\nconst texto = [\n  `Resumen del ${hoy}`,\n  `Ingresos hoy: ${soles(k.ingresos_hoy)}`,\n  `Ingresos del mes: ${soles(k.ingresos_mes)}`,\n  `Asistencias hoy: ${k.asistencias_hoy || 0}`,\n  `Socios activos: ${k.socios_activos || 0}`,\n  `Vencen en 7 dias: ${k.vencen_7d || 0}`,\n  `Vencidos: ${k.socios_vencidos || 0}`,\n  Number(k.cajas_abiertas) > 0 ? `Caja abierta - efectivo esperado: ${soles(k.efectivo_en_caja)}` : 'Caja cerrada'\n].join('\\n');\nconst numero = String($env.GYM_OWNER_PHONE || '').replace(/\\D/g, '');\nreturn [{ json: { numero, texto } }];"
+        "jsCode": "const k = $json;\nconst soles = (n) => 'S/ ' + Number(n || 0).toFixed(2);\nconst hoy = new Date().toLocaleDateString('es-PE', { timeZone: 'America/Lima' });\nconst texto = [\n  `Resumen del ${hoy}`,\n  `Ingresos hoy: ${soles(k.ingresos_hoy)}`,\n  `Ingresos del mes: ${soles(k.ingresos_mes)}`,\n  `Asistencias hoy: ${k.asistencias_hoy || 0}`,\n  `Socios activos: ${k.socios_activos || 0}`,\n  `Vencen en 7 dias: ${k.vencen_7d || 0}`,\n  `Vencidos: ${k.socios_vencidos || 0}`,\n  Number(k.cajas_abiertas) > 0 ? `Caja abierta - efectivo esperado: ${soles(k.efectivo_en_caja)}` : 'Caja cerrada'\n].join('\\n');\nlet numero = String($env.GYM_OWNER_PHONE || '').replace(/\\D/g, '');\nif (numero.length === 9) numero = '51' + numero;\nreturn [{ json: { numero, texto } }];"
       }
     },
     {
