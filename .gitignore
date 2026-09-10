@@ -3,8 +3,9 @@
 .env.production
 *.env.local
 
-# Backups
+# Backups y logs locales
 backups/
+logs/
 *.sql.gz
 *.dump
 

@@ -114,14 +114,18 @@ docker compose exec -T postgres pg_dump -U gym -Fc gym > backup_gym_$(date +%F).
 docker compose exec -T postgres pg_restore -U gym -d gym --clean < backup_gym_2026-01-01.dump
 ```
 
-## Despliegue con Coolify
+## Puesta en produccion
 
-1. Instala Coolify en el servidor (Hetzner, Oracle, etc.).
-2. Nuevo recurso -> **Docker Compose** -> apunta a este repo.
-3. Carga las variables del `.env` en la pestana de entorno de Coolify.
-4. Publica dominios para la app y para n8n; deja Postgres y Evolution API
-   **sin exponer** (solo red interna).
-5. Activa backups programados de Postgres en Coolify.
+Dos caminos, segun presupuesto:
+
+| Modo | Costo | Guia |
+|------|-------|------|
+| **En esta PC** (arranque automatico + backups) | S/ 0 | [`docs/OPERACION.md`](docs/OPERACION.md) |
+| **Servidor + Coolify** (Hetzner / Oracle, HTTPS y dominio) | ~S/ 0-25/mes | [`docs/DEPLOY.md`](docs/DEPLOY.md) + `docker-compose.prod.yml` |
+
+Modo "en esta PC" (ya configurado): al iniciar sesion en Windows se levanta todo
+solo (accesos directos en la carpeta Inicio + `scripts/autostart.ps1`), con
+backup automatico a `backups/`. Archivos `.cmd` en la raiz para uso diario.
 
 ## Esquema (resumen)
 

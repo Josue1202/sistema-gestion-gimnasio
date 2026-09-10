@@ -1,0 +1,6 @@
+@echo off
+cd /d "%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\backup.ps1"
+echo.
+echo Los backups quedan en la carpeta  backups\
+pause
