@@ -59,9 +59,9 @@ services:
         condition: service_healthy
 
   evolution-api:
-    # El proyecto se movio a "evoapicloud/evolution-api". Verifica el tag actual
-    # en https://hub.docker.com/r/atendai/evolution-api  o  /r/evoapicloud/evolution-api
-    image: atendai/evolution-api:v2.1.1
+    # Imagen oficial actual del proyecto Evolution API.
+    # Tags: https://hub.docker.com/r/evoapicloud/evolution-api/tags
+    image: evoapicloud/evolution-api:latest
     restart: unless-stopped
     environment:
       SERVER_URL: ${EVOLUTION_SERVER_URL:-http://localhost:8080}
