@@ -3,13 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= title %> · Gimnasio</title>
+  <title><%= title %> · <%= gymName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
 </head>
 <body>
   <div class="auth-wrap">
     <div class="auth-card">
+      <div style="text-align:center; margin-bottom:20px;">
+        <span style="font-size:42px;">🏋️</span>
+        <h2 style="margin:6px 0 0; font-size:22px; font-weight:800; color:var(--text-bright); letter-spacing:-0.02em;"><%= gymName %></h2>
+        <span class="muted" style="font-size:13px;">Sistema de Gestión Fitness</span>
+      </div>
       <% flash.forEach(function(f){ %>
         <div class="flash <%= f.type %>"><%= f.msg %></div>
       <% }); %>

@@ -35,12 +35,14 @@ services:
       NODE_ENV: production
       PORT: 3000
       TZ: ${TZ:-America/Lima}
+      GYM_NAME: ${GYM_NAME:-Zona Fitness}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       SESSION_SECRET: ${SESSION_SECRET}
       COOKIE_SECURE: "true"
       N8N_WEBHOOK_URL: http://n8n:5678/webhook
       EVOLUTION_API_URL: http://evolution-api:8080
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+
     expose:
       - "3000"
     depends_on:

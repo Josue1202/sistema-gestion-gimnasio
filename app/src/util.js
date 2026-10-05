@@ -89,6 +89,76 @@ async function postWebhook(path, body) {
   }
 }
 
+/** Convierte Date o string a "yyyy-mm-dd" respetando la zona horaria local */
+function dateToISO(d) {
+  if (!d) return '';
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.slice(0, 10))) {
+    return d.slice(0, 10);
+  }
+  const date = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(date)) return '';
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(date);
+}
+
+/** Envio directo via Evolution API como respaldo si n8n no responde */
+async function sendEvolutionWhatsApp(numero, texto) {
+  const base = (process.env.EVOLUTION_API_URL || 'http://evolution-api:8080').replace(/\/$/, '');
+  const key = process.env.EVOLUTION_API_KEY;
+  const instance = process.env.EVOLUTION_INSTANCE || 'gym';
+  if (!base || !key) return { ok: false, error: 'Falta configurar Evolution API' };
+  const tel = normalizarTelefono(numero);
+  if (!tel) return { ok: false, error: 'Número de teléfono inválido' };
+
+  try {
+    // Verificación rápida del estado de conexión de la instancia (fail-fast en 1.5s)
+    try {
+      const stateRes = await fetch(`${base}/instance/connectionState/${instance}`, {
+        headers: { 'apikey': key },
+        signal: AbortSignal.timeout(1500),
+      });
+      if (stateRes.ok) {
+        const stateData = await stateRes.json();
+        const st = stateData?.instance?.state || stateData?.state;
+        if (st && st !== 'open') {
+          return {
+            ok: false,
+            error: 'WhatsApp no está vinculado o está desconectado. Ve a la pestaña "WhatsApp" y escanea el código QR.',
+          };
+        }
+      }
+    } catch (_) {
+      // Si la verificacion ligera falla, continuar al intento de envio
+    }
+
+    const res = await fetch(`${base}/message/sendText/${instance}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+      },
+      body: JSON.stringify({ number: tel, text: texto }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const rawMsg = data?.response?.message || data?.message || data?.error || 'Error en servidor de WhatsApp';
+      const friendly = (rawMsg === 'Connection Closed' || rawMsg === 'Unauthorized' || res.status === 401 || res.status === 500)
+        ? 'WhatsApp no está vinculado o está desconectado. Escanea el código QR en la pestaña "WhatsApp" para activar el envío automático.'
+        : rawMsg;
+      return { ok: false, status: res.status, error: friendly, data };
+    }
+    return { ok: true, status: res.status, data };
+  } catch (err) {
+    console.warn('[evolution-api] envio directo fallo:', err.message);
+    const msg = (err.name === 'TimeoutError' || String(err.message).toLowerCase().includes('timeout') || String(err.message).toLowerCase().includes('abort'))
+      ? 'WhatsApp no está vinculado o no responde a tiempo. Por favor verifica en la pestaña "WhatsApp" que el código QR esté escaneado.'
+      : 'No se pudo contactar al servidor de WhatsApp: ' + err.message;
+    return { ok: false, error: msg };
+  }
+}
+
 /** Badge segun estado de membresia */
 function badgeEstado(estado) {
   const map = {
@@ -99,7 +169,8 @@ function badgeEstado(estado) {
 }
 
 module.exports = {
-  TZ, soles, fecha, fechaHora, hoyISO, addDias,
+  TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
-  postWebhook, badgeEstado,
+  postWebhook, sendEvolutionWhatsApp, badgeEstado,
 };
+

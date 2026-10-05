@@ -3,39 +3,105 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= title %> · Gimnasio</title>
+  <title><%= title %> · <%= gymName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
 </head>
 <body>
   <% const nav = [
-    ['/dashboard','Inicio'],
-    ['/socios','Socios'],
-    ['/asistencia','Asistencia'],
-    ['/caja','Caja'],
-    ['/productos','Productos'],
-    ['/reportes','Reportes'],
-    ['/mensajes','Mensajes'],
-    ['/planes','Planes'],
-    ['/plantillas','Plantillas'],
+    ['/dashboard', 'Inicio', '📊'],
+    ['/asistencia', 'Terminal POS', '⚡'],
+    ['/socios', 'Socios', '👥'],
+    ['/caja', 'Caja', '💰'],
+    ['/productos', 'Productos', '🥤'],
+    ['/mensajes', 'Mensajes', '💬'],
+    ['/reportes', 'Reportes', '📈'],
+    ['/planes', 'Planes', '🏷️'],
+    ['/plantillas', 'Plantillas', '📝'],
+    ['/whatsapp', 'WhatsApp', '📲'],
   ]; %>
-  <nav class="nav">
-    <span class="brand">🏋️ Gimnasio</span>
-    <% nav.forEach(function(it){ %>
-      <a class="item <%= currentPath.indexOf(it[0]) === 0 ? 'active' : '' %>" href="<%= it[0] %>"><%= it[1] %></a>
-    <% }); %>
-    <span class="spacer"></span>
-    <span class="who"><%= user ? user.nombre : '' %></span>
-    <form method="post" action="/logout" style="margin:0 0 0 10px;">
-      <button class="btn sm" type="submit">Salir</button>
-    </form>
-  </nav>
+  
+  <header class="navbar-wrapper">
+    <nav class="nav">
+      <a href="/dashboard" class="brand">
+        <span class="brand-icon">🏋️</span>
+        <span class="brand-name"><%= gymName %></span>
+      </a>
+
+      <!-- Botón móvil para menú -->
+      <button class="mobile-toggle" id="mobile-menu-btn" aria-label="Abrir menú" onclick="document.querySelector('.nav-items').classList.toggle('open');">
+        ☰
+      </button>
+
+      <div class="nav-items">
+        <% nav.forEach(function(it){ %>
+          <a class="item <%= currentPath.indexOf(it[0]) === 0 ? 'active' : '' %>" href="<%= it[0] %>">
+            <span class="nav-ico"><%= it[2] %></span>
+            <span><%= it[1] %></span>
+          </a>
+        <% }); %>
+      </div>
+
+      <span class="spacer"></span>
+
+      <!-- Estado de WhatsApp en vivo -->
+      <a href="/whatsapp" id="nav-wa-pill" class="wa-status-pill loading" title="Ver estado de conexión de WhatsApp">
+        <span class="wa-dot"></span>
+        <span class="wa-txt">WhatsApp</span>
+      </a>
+
+      <div class="user-profile">
+        <span class="user-badge"><%= user ? user.nombre.slice(0, 2).toUpperCase() : 'AD' %></span>
+        <span class="who"><%= user ? user.nombre : '' %></span>
+        <form method="post" action="/logout" style="margin:0 0 0 8px;">
+          <button class="btn sm danger" type="submit" title="Cerrar sesión">Salir</button>
+        </form>
+      </div>
+    </nav>
+  </header>
 
   <main class="wrap">
     <% flash.forEach(function(f){ %>
-      <div class="flash <%= f.type %>"><%= f.msg %></div>
+      <div class="flash <%= f.type %>">
+        <span class="flash-icon">
+          <% if (f.type === 'ok') { %>✓<% } else if (f.type === 'error') { %>✕<% } else { %>ℹ<% } %>
+        </span>
+        <span><%= f.msg %></span>
+      </div>
     <% }); %>
     <%- body %>
   </main>
+
+  <script>
+    // Monitor en segundo plano para el pill de WhatsApp en el navbar
+    (function() {
+      var pill = document.getElementById('nav-wa-pill');
+      if (!pill) return;
+      function checkWa() {
+        fetch('/whatsapp/estado')
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            pill.classList.remove('loading', 'open', 'close', 'offline');
+            if (d.ok && d.estado === 'open') {
+              pill.classList.add('open');
+              pill.querySelector('.wa-txt').textContent = 'WhatsApp Conectado';
+            } else {
+              pill.classList.add('close');
+              pill.querySelector('.wa-txt').textContent = 'Vincular WhatsApp';
+            }
+          })
+          .catch(function() {
+            pill.classList.remove('loading');
+            pill.classList.add('offline');
+            pill.querySelector('.wa-txt').textContent = 'WhatsApp Off';
+          });
+      }
+      checkWa();
+      setInterval(checkWa, 15000);
+    })();
+  </script>
 </body>
 </html>

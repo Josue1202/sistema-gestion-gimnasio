@@ -47,6 +47,40 @@ router.post('/setup', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Rate limiting en memoria para prevenir fuerza bruta
+const loginAttempts = new Map();
+const MAX_ATTEMPTS = 5;
+const BLOCK_TIME_MS = 5 * 60 * 1000;
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry) return { blocked: false };
+  if (entry.blockedUntil && entry.blockedUntil > now) {
+    const mins = Math.ceil((entry.blockedUntil - now) / 60000);
+    return { blocked: true, mins };
+  }
+  if (entry.firstAttempt && (now - entry.firstAttempt > BLOCK_TIME_MS)) {
+    loginAttempts.delete(ip);
+    return { blocked: false };
+  }
+  return { blocked: false };
+}
+
+function registerFailedAttempt(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip) || { count: 0, firstAttempt: now };
+  entry.count += 1;
+  if (entry.count >= MAX_ATTEMPTS) {
+    entry.blockedUntil = now + BLOCK_TIME_MS;
+  }
+  loginAttempts.set(ip, entry);
+}
+
+function clearAttempts(ip) {
+  loginAttempts.delete(ip);
+}
+
 // ---------- Login ----------
 router.get('/login', async (req, res, next) => {
   try {
@@ -58,12 +92,22 @@ router.get('/login', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const rate = checkRateLimit(ip);
+    if (rate.blocked) {
+      req.flash('error', `Demasiados intentos fallidos. Por seguridad, espera ${rate.mins} minuto(s).`);
+      return res.redirect('/login');
+    }
+
     const { email, password } = req.body;
     const user = await db.one('SELECT * FROM usuarios WHERE lower(email) = lower($1) AND activo = true', [String(email || '').trim()]);
     if (!user || !user.password_hash || !(await bcrypt.compare(String(password || ''), user.password_hash))) {
+      registerFailedAttempt(ip);
       req.flash('error', 'Correo o contrasena incorrectos.');
       return res.redirect('/login');
     }
+
+    clearAttempts(ip);
     req.session.user = { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol };
     res.redirect('/dashboard');
   } catch (e) { next(e); }
@@ -72,5 +116,6 @@ router.post('/login', async (req, res, next) => {
 router.post('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
+
 
 module.exports = { router, requireAuth, requireAdmin, needsSetup };

@@ -1,0 +1,127 @@
+<div class="no-print toolbar" style="margin-bottom:20px;">
+  <div>
+    <h1 class="mb0">Comprobante de Pago</h1>
+    <p class="muted" style="margin-top:4px;">Recibo interno del gimnasio para control del socio y caja.</p>
+  </div>
+  <div class="actions">
+    <button class="btn primary" onclick="window.print();" style="font-size:15px; padding:9px 16px;">
+      🖨️ Imprimir Ticket
+    </button>
+    <% if (sub.telefono) { %>
+      <form method="post" action="/suscripciones/<%= sub.id %>/enviar-ticket" style="display:inline-block; margin:0;">
+        <button class="btn wa" type="submit">📲 Enviar a WhatsApp</button>
+      </form>
+      <% if (waHref) { %>
+        <a class="btn wa" href="<%= waHref %>" target="_blank" rel="noopener" title="Abrir WhatsApp Web directamente">
+          Abrir Web WhatsApp
+        </a>
+      <% } %>
+    <% } %>
+    <a class="btn" href="/socios/<%= sub.socio_id %>">Volver al socio</a>
+    <a class="btn" href="/asistencia">Ir a Check-in</a>
+  </div>
+</div>
+
+<% if (esNuevo) { %>
+<div class="no-print flash ok" style="margin-bottom:20px;">
+  ✓ <strong>¡Pago registrado exitosamente!</strong> Puedes imprimir el ticket o enviarlo al WhatsApp del socio.
+</div>
+<% } %>
+
+<!-- Contenedor del Ticket (Optimizado para impresion termica 58mm/80mm y pantalla) -->
+<div class="ticket-wrapper" style="display:flex; justify-content:center; padding:10px 0;">
+  <div class="ticket-card" style="width:340px; background:#fff; color:#111; padding:24px 20px; border-radius:12px; box-shadow:0 4px 25px rgba(0,0,0,0.1); border:1px solid #e2e8f0; font-family:'Courier New', Courier, monospace; font-size:13px; line-height:1.4;">
+    
+    <!-- Cabecera -->
+    <div style="text-align:center; border-bottom:1px dashed #718096; padding-bottom:12px; margin-bottom:12px;">
+      <div style="font-size:24px; font-weight:800; font-family:sans-serif; letter-spacing:1px; margin-bottom:2px;">
+        🏋️ <%= gymName.toUpperCase() %>
+      </div>
+      <div style="font-size:11px; color:#4a5568;">SISTEMA DE GESTION FITNESS</div>
+      <div style="font-size:11px; color:#4a5568;"><%= u.fechaHora(pago ? pago.creado_en : sub.creado_en) %></div>
+    </div>
+
+    <!-- Datos del Socio -->
+    <div style="border-bottom:1px dashed #718096; padding-bottom:10px; margin-bottom:10px;">
+      <div style="font-weight:700; font-size:14px;"><%= sub.apellidos %>, <%= sub.nombres %></div>
+      <% if (sub.dni) { %><div>DNI / Doc: <%= sub.dni %></div><% } %>
+      <% if (sub.telefono) { %><div>Teléfono: <%= sub.telefono %></div><% } %>
+    </div>
+
+    <!-- Detalle de Membresía -->
+    <div style="border-bottom:1px dashed #718096; padding-bottom:10px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; font-weight:700;">
+        <span>CONCEPTO</span>
+        <span>IMPORTE</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <span>Plan <%= sub.plan_nombre %></span>
+        <span><%= u.soles(sub.precio_pagado) %></span>
+      </div>
+      <div style="font-size:11px; color:#4a5568; margin-top:4px;">
+        Vigencia: <%= u.fecha(sub.fecha_inicio) %> al <%= u.fecha(sub.fecha_fin) %>
+      </div>
+      <div style="font-size:11px; color:#4a5568;">
+        Duración: <%= sub.duracion_dias %> días
+      </div>
+    </div>
+
+    <!-- Total y Método de Pago -->
+    <div style="border-bottom:1px dashed #718096; padding-bottom:10px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:800; font-family:sans-serif;">
+        <span>TOTAL:</span>
+        <span><%= u.soles(sub.precio_pagado) %></span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:4px;">
+        <span>Método de pago:</span>
+        <span style="font-weight:700; text-transform:uppercase;"><%= pago ? pago.metodo_pago : 'Efectivo' %></span>
+      </div>
+      <% if (pago && pago.referencia) { %>
+        <div style="font-size:11px; color:#4a5568;">Ref / Op: <%= pago.referencia %></div>
+      <% } %>
+      <div style="font-size:11px; color:#4a5568; margin-top:2px;">
+        Atendido por: <%= sub.creado_por || 'Recepción' %>
+      </div>
+    </div>
+
+    <!-- Pie de página -->
+    <div style="text-align:center; font-size:11px; color:#4a5568; padding-top:4px;">
+      ¡Gracias por tu preferencia!<br>
+      Conservar este comprobante para cualquier consulta.
+    </div>
+  </div>
+</div>
+
+<style>
+  @media print {
+    body {
+      background: #fff !important;
+      color: #000 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .nav, .no-print, .flash, .toolbar {
+      display: none !important;
+    }
+    .wrap {
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .ticket-wrapper {
+      padding: 0 !important;
+      margin: 0 !important;
+      display: block !important;
+    }
+    .ticket-card {
+      width: 100% !important;
+      max-width: 78mm !important; /* Ajuste para impresora termica 80mm y 58mm */
+      margin: 0 auto !important;
+      padding: 10px 4px !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      font-size: 12px !important;
+    }
+  }
+</style>

@@ -1,5 +1,7 @@
-<h1>Mensajes</h1>
-<p class="muted">Abre el WhatsApp con el texto ya escrito, envialo y marca "enviado". La automatizacion total se hace luego con n8n.</p>
+<h1>Mensajes y Recordatorios</h1>
+<p class="muted">
+  Envío directo desde el servidor por WhatsApp. Haz clic en <strong>🚀 Enviar Directo</strong> para mandar el mensaje al socio en 1 segundo sin abrir pestañas ni WhatsApp Web. Puedes verificar el estado de conexión en <a href="/whatsapp" style="font-weight:600;">Estado de WhatsApp</a>.
+</p>
 
 <% if (sinPlantilla.length) { %>
   <div class="flash info">Faltan plantillas: <%= sinPlantilla.join(', ') %>. Crealas en <a href="/plantillas">Plantillas</a>.</div>
@@ -12,25 +14,27 @@
       <p class="muted mb0">Nada pendiente.</p>
     <% } else { %>
     <div class="table-wrap"><table>
-      <thead><tr><th>Socio</th><th>Detalle</th><th>Mensaje</th><th></th></tr></thead>
+      <thead><tr><th>Socio</th><th>Detalle</th><th>Mensaje</th><th class="right">Acción</th></tr></thead>
       <tbody>
       <% g.items.forEach(function(it){ %>
         <tr>
-          <td><a href="/socios/<%= it.socio_id %>"><%= it.nombre %></a><br><span class="muted"><%= it.telefono || 'sin telefono' %></span></td>
+          <td><a href="/socios/<%= it.socio_id %>" style="font-weight:600;"><%= it.nombre %></a><br><span class="muted"><%= it.telefono || 'sin telefono' %></span></td>
           <td class="muted"><%= it.info %></td>
           <td style="max-width:340px;"><span class="muted" style="font-size:13px;"><%= it.contenido %></span></td>
-          <td class="actions">
+          <td class="actions right">
             <% if (it.link) { %>
-              <a class="btn sm wa" href="<%= it.link %>" target="_blank" rel="noopener">WhatsApp</a>
-              <form method="post" action="/mensajes/registrar" style="margin:0;">
-                <input type="hidden" name="socio_id" value="<%= it.socio_id %>">
-                <input type="hidden" name="telefono" value="<%= it.telefono || '' %>">
-                <input type="hidden" name="plantilla_clave" value="<%= it.clave %>">
-                <input type="hidden" name="contenido" value="<%= it.contenido %>">
-                <button class="btn sm" type="submit">Marcar enviado</button>
-              </form>
+              <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
+                <form method="post" action="/mensajes/enviar-directo" style="margin:0;">
+                  <input type="hidden" name="socio_id" value="<%= it.socio_id %>">
+                  <input type="hidden" name="telefono" value="<%= it.telefono || '' %>">
+                  <input type="hidden" name="plantilla_clave" value="<%= it.clave %>">
+                  <input type="hidden" name="contenido" value="<%= it.contenido %>">
+                  <button class="btn sm wa" type="submit" style="font-weight:600;">🚀 Enviar Directo</button>
+                </form>
+                <a class="muted" href="<%= it.link %>" target="_blank" rel="noopener" style="font-size:11px; text-decoration:underline;" title="Abrir en WhatsApp Web en una pestaña si el servidor no está vinculado">web</a>
+              </div>
             <% } else { %>
-              <span class="muted">sin telefono</span>
+              <span class="muted">sin teléfono</span>
             <% } %>
           </td>
         </tr>

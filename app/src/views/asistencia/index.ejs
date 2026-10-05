@@ -1,61 +1,876 @@
-<h1>Asistencia</h1>
+<div class="terminal-container">
+  <!-- Cabecera Superior del Terminal -->
+  <div class="toolbar" style="margin-bottom:16px;">
+    <div>
+      <h1 class="mb0" style="display:flex; align-items:center; gap:10px; font-size:24px;">
+        <span>⚡</span> Terminal de Recepción & Mostrador POS
+      </h1>
+      <p class="muted" style="margin-top:4px; font-size:13.5px;">
+        Control de acceso inmediato, venta rápida de productos y atención continua sin cambiar de pantalla.
+      </p>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="/socios/nuevo" target="_blank">+ Nuevo Socio</a>
+      <a class="btn" href="/caja">💰 Caja del Día</a>
+      <a class="btn" href="/productos">📦 Inventario</a>
+    </div>
+  </div>
 
-<div class="card">
-  <form method="get" action="/asistencia" class="search">
-    <input type="text" name="q" value="<%= q %>" placeholder="Nombre, DNI o telefono" autofocus>
-    <button class="btn primary" type="submit">Buscar</button>
-    <% if (q) { %><a class="btn" href="/asistencia">Limpiar</a><% } %>
-  </form>
+  <!-- Contenedor Grid 3-en-1 -->
+  <div class="terminal-grid">
 
-  <% if (q && !encontrados.length) { %>
-    <p class="muted" style="margin-top:12px;">Sin resultados para "<%= q %>".</p>
-  <% } %>
+    <!-- ========================================================
+         DIVISIÓN 1: CONTROL DE ACCESO & CHECK-IN
+         ======================================================== -->
+    <div class="terminal-card terminal-col-checkin" style="border-top: 4px solid var(--primary);">
+      <div class="terminal-header">
+        <h2 class="terminal-title">
+          <span>⚡</span> Check-in de Asistencia
+        </h2>
+        <span class="badge ok" style="font-size:11px;">Lector Activo</span>
+      </div>
 
-  <% if (encontrados.length) { %>
-  <div class="table-wrap" style="margin-top:12px;"><table>
-    <thead><tr><th>Socio</th><th>Plan</th><th>Estado</th><th></th></tr></thead>
-    <tbody>
-    <% encontrados.forEach(function(s){
-       var est = s.estado_membresia;
-       if (est === 'activo' && s.dias_restantes != null && s.dias_restantes <= 7) est = 'por_vencer';
-    %>
-      <tr>
-        <td><a href="/socios/<%= s.id %>"><strong><%= s.apellidos %></strong>, <%= s.nombres %></a><br><span class="muted"><%= s.dni || '' %></span></td>
-        <td><%= s.plan_nombre || '—' %><br><span class="muted"><%= s.fecha_fin ? 'vence ' + u.fecha(s.fecha_fin) : '' %></span></td>
-        <td>
-          <% if (est==='activo') { %><span class="badge ok">Activo</span>
-          <% } else if (est==='por_vencer') { %><span class="badge warn">Vence en <%= s.dias_restantes %>d</span>
-          <% } else if (est==='vencido') { %><span class="badge danger">Vencido</span>
-          <% } else { %><span class="badge muted">Sin plan</span><% } %>
-        </td>
-        <td>
-          <form method="post" action="/asistencia" style="margin:0;">
-            <input type="hidden" name="socio_id" value="<%= s.id %>">
-            <input type="hidden" name="q" value="<%= q %>">
-            <button class="btn primary" type="submit">Marcar</button>
-          </form>
-        </td>
-      </tr>
-    <% }); %>
-    </tbody>
-  </table></div>
-  <% } %>
+      <!-- Input de marcado rápido -->
+      <form id="checkin-form" method="post" action="/asistencia/marcar" onsubmit="return handleCheckinSubmit(event);">
+        <div class="checkin-input-wrap">
+          <label for="dni-input" style="display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">
+            Escanear código de barras o digitar DNI / Nombre:
+          </label>
+          <input type="text" id="dni-input" name="dni" placeholder="Ej: 45678901..." autofocus autocomplete="off">
+        </div>
+        <button class="btn primary" type="submit" style="width:100%; font-size:14.5px; font-weight:700; padding:11px;">
+          ✓ Marcar Acceso (Enter)
+        </button>
+      </form>
+
+      <!-- Banner de Resultado del Check-in -->
+      <div id="checkin-result" style="<%= ultimoCheckin ? '' : 'display:none;' %> margin-top:14px;">
+        <% if (ultimoCheckin) {
+             var uc = ultimoCheckin;
+             var isOk = uc.estado === 'activo';
+             var isWarn = uc.estado === 'por_vencer';
+             var isDanger = uc.estado === 'vencido';
+             var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
+             var statusColor = isOk ? '#25d366' : (isWarn ? '#fbbf24' : '#f15c6d');
+        %>
+          <div class="active-member-banner <%= bannerClass %>" id="banner-box">
+            <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:<%= statusColor %>;" id="banner-status">
+              <%= isOk ? '🟢 ACCESO CONCEDIDO' : (isWarn ? '🟡 ACCESO CONCEDIDO (POR VENCER)' : '🔴 MEMBRESÍA VENCIDA') %>
+            </div>
+            <div style="font-size:19px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;" id="banner-name">
+              <%= uc.nombre %>
+            </div>
+            <div class="muted" style="font-size:13px;" id="banner-detail">
+              DNI: <strong id="banner-dni"><%= uc.dni %></strong> · Plan: <strong id="banner-plan"><%= uc.plan %></strong>
+              <% if (uc.fecha_fin) { %> · Vence: <strong id="banner-fecha"><%= uc.fecha_fin %></strong><% } %>
+              <% if (uc.dias_restantes != null) { %> (<span id="banner-dias"><%= uc.dias_restantes %></span> días restantes)<% } %>
+            </div>
+            <div class="actions" style="margin-top:10px;" id="banner-actions">
+              <% if (isWarn || isDanger || uc.estado === 'sin_suscripcion') { %>
+                <a class="btn primary sm" href="/suscripciones/nueva?socio=<%= uc.socio_id %>" target="_blank">
+                  💳 Cobrar / Renovar Plan
+                </a>
+              <% } %>
+              <a class="btn sm" href="/socios/<%= uc.socio_id %>" target="_blank">Ver Ficha</a>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Componente: Socio Seleccionado para Mostrador / POS -->
+      <div class="card" style="margin-top:16px; background:var(--surface-2); border:1px solid var(--border); padding:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--muted);">
+            👤 Cliente Activo en Mostrador
+          </span>
+          <button type="button" class="btn sm" onclick="desvincularClienteMostrador();" style="padding:2px 8px; font-size:11px;">
+            ✕ Poner Anónimo
+          </button>
+        </div>
+
+        <div id="active-client-info">
+          <% if (ultimoCheckin) { %>
+            <div style="font-size:15px; font-weight:700; color:var(--primary);" id="active-client-name">
+              <%= ultimoCheckin.nombre %>
+            </div>
+            <div class="muted" style="font-size:12px;" id="active-client-doc">
+              DNI: <%= ultimoCheckin.dni %> · Plan: <%= ultimoCheckin.plan %>
+            </div>
+            <input type="hidden" id="active-client-id" value="<%= ultimoCheckin.socio_id %>">
+          <% } else { %>
+            <div style="font-size:14px; font-weight:600; color:var(--muted);" id="active-client-name">
+              Público General / Mostrador
+            </div>
+            <div class="muted" style="font-size:11.5px;" id="active-client-doc">
+              Las ventas se registrarán sin socio asignado (o marca asistencia para asociar).
+            </div>
+            <input type="hidden" id="active-client-id" value="">
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Coincidencias de búsqueda si hubo desambiguación -->
+      <% if (q && encontrados && encontrados.length) { %>
+        <div style="margin-top:16px;">
+          <span class="muted" style="font-size:12px; font-weight:600;">Socios encontrados para "<%= q %>":</span>
+          <div style="max-height:180px; overflow-y:auto; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+            <% encontrados.forEach(function(s){ %>
+              <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-2); padding:8px 10px; border-radius:6px; border:1px solid var(--border);">
+                <div>
+                  <strong style="font-size:13px;"><%= s.apellidos %>, <%= s.nombres %></strong>
+                  <span class="muted" style="font-size:11px; display:block;">DNI: <%= s.dni || '—' %> · <%= s.plan_nombre || 'Sin plan' %></span>
+                </div>
+                <button type="button" class="btn sm primary"
+                        data-id="<%= s.id %>"
+                        data-nombre="<%= s.nombres %> <%= s.apellidos %>"
+                        data-dni="<%= s.dni || '' %>"
+                        data-plan="<%= s.plan_nombre || '' %>"
+                        data-estado="<%= s.estado_membresia %>"
+                        onclick="seleccionarSocioDesdeBoton(this)">
+                  Seleccionar
+                </button>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- ========================================================
+         DIVISIÓN 2: PUNTO DE VENTA RÁPIDO (POS MOSTRADOR)
+         ======================================================== -->
+    <div class="terminal-card terminal-col-pos" style="border-top: 4px solid var(--accent);">
+      <div class="terminal-header">
+        <h2 class="terminal-title">
+          <span>🥤</span> Punto de Venta Rápido
+        </h2>
+        <span class="badge" style="background:rgba(249,115,22,0.15); color:var(--accent); font-weight:700; font-size:11px;">
+          ⚡ 1-Clic
+        </span>
+      </div>
+
+      <!-- Barra de Filtro y Búsqueda de Productos -->
+      <div class="pos-filter-bar">
+        <input type="text" id="pos-search" class="pos-search-input" placeholder="🔎 Filtrar productos (agua, gatorade, barra, batido)..." oninput="filtrarProductos(this.value);" autocomplete="off">
+      </div>
+
+      <!-- Chips de Categorías Rápidas -->
+      <div class="pos-category-chips">
+        <button type="button" class="pos-cat-btn active" onclick="filtrarCategoria('todos', this);">Todos</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('agua', this);">💧 Aguas</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('isotonica', this);">⚡ Isotónicas</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('proteina', this);">🍫 Proteínas</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('batido', this);">🥤 Batidos</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('otros', this);">🧴 Otros</button>
+      </div>
+
+      <!-- Grid de Productos -->
+      <div class="pos-products-grid" id="pos-grid">
+        <% if (!productos || !productos.length) { %>
+          <div style="grid-column:span 3; padding:20px; text-align:center; color:var(--muted);">
+            No hay productos registrados en el inventario. <a href="/productos/nuevo">Crear producto</a>.
+          </div>
+        <% } else { %>
+          <% productos.forEach(function(p){
+               var nomLower = p.nombre.toLowerCase();
+               var icon = '🥤';
+               var cat = 'otros';
+               if (nomLower.includes('agua') || nomLower.includes('mineral') || nomLower.includes('san luis') || nomLower.includes('cielo')) {
+                 icon = '💧'; cat = 'agua';
+               } else if (nomLower.includes('gatorade') || nomLower.includes('sporade') || nomLower.includes('power') || nomLower.includes('isotonica') || nomLower.includes('isotónica') || nomLower.includes('monster') || nomLower.includes('red bull')) {
+                 icon = '⚡'; cat = 'isotonica';
+               } else if (nomLower.includes('barra') || nomLower.includes('snack') || nomLower.includes('galleta') || nomLower.includes('chocolate')) {
+                 icon = '🍫'; cat = 'proteina';
+               } else if (nomLower.includes('batido') || nomLower.includes('whey') || nomLower.includes('shaker') || nomLower.includes('proteina') || nomLower.includes('proteína') || nomLower.includes('creatina')) {
+                 icon = '🥤'; cat = 'batido';
+               } else if (nomLower.includes('toalla') || nomLower.includes('accesorio') || nomLower.includes('faja')) {
+                 icon = '🧴'; cat = 'otros';
+               }
+               var sinStock = p.stock <= 0;
+          %>
+            <div class="pos-prod-card <%= sinStock ? 'out-of-stock' : '' %>"
+                 data-id="<%= p.id %>"
+                 data-nombre="<%= p.nombre %>"
+                 data-precio="<%= p.precio %>"
+                 data-stock="<%= p.stock %>"
+                 data-cat="<%= cat %>"
+                 onclick="agregarCardAlCarrito(this);">
+              <div>
+                <div class="pos-prod-icon"><%= icon %></div>
+                <div class="pos-prod-name" title="<%= p.nombre %>"><%= p.nombre %></div>
+              </div>
+              <div>
+                <div class="pos-prod-price"><%= u.soles(p.precio) %></div>
+                <div class="pos-prod-stock">
+                  <%= sinStock ? 'Agotado' : 'Stock: ' + p.stock %>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <!-- Carrito de Compras Rápido -->
+      <div class="pos-cart-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px;">
+          <strong style="font-size:13.5px; color:var(--text-bright);">🛒 Carrito de Venta</strong>
+          <span id="cart-buyer-badge" class="badge" style="background:rgba(16,185,129,0.12); color:var(--ok-ink); font-size:11px;">
+            Mostrador General
+          </span>
+        </div>
+
+        <div id="cart-items-container" class="pos-cart-list">
+          <p id="cart-empty-msg" class="muted" style="text-align:center; padding:16px 0; font-size:13px; margin:0;">
+            Selecciona productos arriba para agregarlos a la venta.
+          </p>
+        </div>
+
+        <!-- Total de la Venta -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px dashed var(--border); margin-top:6px;">
+          <span style="font-size:14px; font-weight:700;">TOTAL A COBRAR:</span>
+          <span id="cart-total-display" style="font-size:22px; font-weight:800; color:var(--primary);">S/ 0.00</span>
+        </div>
+
+        <!-- Métodos de pago con 1 Clic -->
+        <div style="margin-top:8px;">
+          <label style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">Método de Pago:</label>
+          <div class="pos-methods-row">
+            <button type="button" class="pos-method-btn active" data-metodo="efectivo" onclick="seleccionarMetodoPago('efectivo', this);">💵 Efectivo</button>
+            <button type="button" class="pos-method-btn" data-metodo="yape" onclick="seleccionarMetodoPago('yape', this);">📱 Yape</button>
+            <button type="button" class="pos-method-btn" data-metodo="plin" onclick="seleccionarMetodoPago('plin', this);">🟣 Plin</button>
+            <button type="button" class="pos-method-btn" data-metodo="tarjeta" onclick="seleccionarMetodoPago('tarjeta', this);">💳 Tarjeta</button>
+            <button type="button" class="pos-method-btn" data-metodo="transferencia" onclick="seleccionarMetodoPago('transferencia', this);">🏦 Transf</button>
+          </div>
+        </div>
+
+        <!-- Botón de Cobro Inmediato -->
+        <button type="button" id="pos-checkout-btn" class="pos-checkout-btn" onclick="procesarVentaPOS();" disabled style="margin-top:10px;">
+          <span>⚡</span> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)
+        </button>
+
+        <div id="pos-alert" style="display:none; margin-top:8px; font-size:12.5px; padding:8px 12px; border-radius:6px;"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         DIVISIÓN 3: MONITOR EN VIVO (ACTIVIDAD Y CAJA)
+         ======================================================== -->
+    <div class="terminal-card terminal-col-monitor" style="border-top: 4px solid #53bdeb;">
+      <div class="terminal-header">
+        <h2 class="terminal-title">
+          <span>📊</span> Monitor en Vivo
+        </h2>
+        <a href="/asistencia" style="font-size:12px;">🔄 Refrescar</a>
+      </div>
+
+      <!-- Resumen Rápido de Caja -->
+      <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:12px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">Caja de Hoy:</span>
+            <div style="font-size:20px; font-weight:800; color:var(--ok-ink); margin-top:2px;">
+              <%= caja ? u.soles(caja.total_ingresos) : 'S/ 0.00' %>
+            </div>
+          </div>
+          <div>
+            <% if (caja) { %>
+              <span class="badge ok" style="font-size:11px;">🟢 Caja Abierta</span>
+            <% } else { %>
+              <a href="/caja" class="badge warn" style="font-size:11px; text-decoration:none;">🟡 Abrir Caja</a>
+            <% } %>
+          </div>
+        </div>
+        <div class="muted" style="font-size:11.5px; margin-top:4px;">
+          Cobros socios + ventas mostrador en tiempo real.
+        </div>
+      </div>
+
+      <!-- Feed de Últimas Asistencias -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:13.5px; font-weight:700; color:var(--text-bright);">
+            🏋️ Asistencias del Turno (<span id="asistencias-count"><%= hoy.length %></span>)
+          </h3>
+          <span class="muted" style="font-size:11px;">Hoy</span>
+        </div>
+
+        <div id="asistencias-feed" style="max-height:220px; overflow-y:auto; padding-right:2px; margin-bottom:16px;">
+          <% if (!hoy.length) { %>
+            <p id="asistencias-empty-msg" class="muted" style="font-size:12.5px; padding:10px 0; text-align:center; margin:0;">
+              Aún no hay asistencias registradas hoy.
+            </p>
+          <% } else { %>
+            <% hoy.slice(0, 15).forEach(function(a){ %>
+              <div class="feed-item" id="asist-item-<%= a.socio_id %>">
+                <div>
+                  <a href="/socios/<%= a.socio_id %>" target="_blank" style="font-weight:700; font-size:13px; color:var(--text);">
+                    <%= a.nombres %> <%= a.apellidos %>
+                  </a>
+                  <span class="muted" style="display:block; font-size:11px;">
+                    <%= a.plan_nombre || 'Sin plan' %> · <%= u.fechaHora(a.fecha).split(' ')[1] || '' %>
+                  </span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <button type="button" class="btn sm" style="font-size:11px; padding:3px 8px;"
+                          data-id="<%= a.socio_id %>"
+                          data-nombre="<%= a.nombres %> <%= a.apellidos %>"
+                          data-dni="<%= a.dni || '' %>"
+                          data-plan="<%= a.plan_nombre || '' %>"
+                          data-estado="activo"
+                          onclick="seleccionarSocioDesdeBoton(this);"
+                          title="Vender productos a este socio en el POS">
+                    🛒 Vender
+                  </button>
+                </div>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Feed de Últimas Ventas de Productos -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:13.5px; font-weight:700; color:var(--text-bright);">
+            🥤 Últimas Ventas del Mostrador (<span id="ventas-count"><%= ventasHoy.length %></span>)
+          </h3>
+          <a href="/productos" style="font-size:11px;">Ver todas</a>
+        </div>
+
+        <div id="ventas-feed" style="max-height:240px; overflow-y:auto; padding-right:2px;">
+          <% if (!ventasHoy.length) { %>
+            <p id="ventas-empty-msg" class="muted" style="font-size:12.5px; padding:10px 0; text-align:center; margin:0;">
+              No se han registrado ventas de mostrador hoy.
+            </p>
+          <% } else { %>
+            <% ventasHoy.forEach(function(v){ %>
+              <div class="feed-item">
+                <div style="max-width:65%;">
+                  <strong style="font-size:12.5px; color:var(--text);"><%= v.comprador %></strong>
+                  <span class="muted" style="display:block; font-size:11px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">
+                    <%= v.concepto %>
+                  </span>
+                  <span class="muted" style="font-size:10px;">
+                    <%= u.fechaHora(v.creado_en).split(' ')[1] || '' %> · <span style="text-transform:uppercase;"><%= v.metodo_pago %></span>
+                  </span>
+                </div>
+                <div style="text-align:right;">
+                  <span style="font-weight:800; font-size:13px; color:var(--primary); display:block;">
+                    <%= u.soles(v.monto) %>
+                  </span>
+                </div>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 </div>
 
-<h2>Hoy (<%= hoy.length %>)</h2>
-<div class="card">
-  <% if (!hoy.length) { %><p class="muted mb0">Nadie ha marcado hoy.</p><% } else { %>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Hora</th><th>Socio</th><th>Metodo</th></tr></thead>
-    <tbody>
-    <% hoy.forEach(function(a){ %>
-      <tr>
-        <td><%= u.fechaHora(a.fecha) %></td>
-        <td><a href="/socios/<%= a.socio_id %>"><%= a.apellidos %>, <%= a.nombres %></a></td>
-        <td><%= a.metodo || 'manual' %></td>
-      </tr>
-    <% }); %>
-    </tbody>
-  </table></div>
-  <% } %>
-</div>
+<!-- ============================================================
+     SCRIPTS DE ALTA VELOCIDAD: CHECK-IN + CARRITO POS
+     ============================================================ -->
+<script>
+  // ---------- SONIDOS WEB AUDIO API NATIVOS ----------
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function sonarExito() {
+    try {
+      var ctx = getAudioContext();
+      var now = ctx.currentTime;
+      var osc1 = ctx.createOscillator();
+      var gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now); // D5
+      osc1.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+      gain1.gain.setValueAtTime(0.2, now);
+      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.35);
+    } catch(e) {}
+  }
+
+  function sonarAlerta() {
+    try {
+      var ctx = getAudioContext();
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.setValueAtTime(200, now + 0.15);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } catch(e) {}
+  }
+
+  function sonarCaja() {
+    try {
+      var ctx = getAudioContext();
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(987.77, now); // B5
+      osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    } catch(e) {}
+  }
+
+  // ---------- ESTADO GLOBAL DEL TERMINAL ----------
+  var clienteActivo = {
+    id: '<%= ultimoCheckin ? ultimoCheckin.socio_id : "" %>',
+    nombre: '<%= ultimoCheckin ? ultimoCheckin.nombre : "Público General / Mostrador" %>',
+    dni: '<%= ultimoCheckin ? ultimoCheckin.dni : "" %>',
+    plan: '<%= ultimoCheckin ? ultimoCheckin.plan : "" %>',
+  };
+
+  var carrito = {}; // { prodId: { id, nombre, precio, cantidad, stock } }
+  var metodoSeleccionado = 'efectivo';
+
+  // Helper para agregar al carrito desde el elemento card
+  function agregarCardAlCarrito(card) {
+    var id = card.getAttribute('data-id');
+    var nombre = card.getAttribute('data-nombre');
+    var precio = parseFloat(card.getAttribute('data-precio')) || 0;
+    var stock = parseInt(card.getAttribute('data-stock'), 10) || 0;
+    agregarAlCarrito(id, nombre, precio, stock);
+  }
+
+  // Helper para seleccionar socio desde botón data-*
+  function seleccionarSocioDesdeBoton(btn) {
+    var id = btn.getAttribute('data-id');
+    var nombre = btn.getAttribute('data-nombre');
+    var dni = btn.getAttribute('data-dni');
+    var plan = btn.getAttribute('data-plan');
+    var estado = btn.getAttribute('data-estado');
+    seleccionarSocioManualmente(id, nombre, dni, plan, estado);
+  }
+
+  // ---------- MANEJO DE CHECK-IN RÁPIDO ----------
+  function handleCheckinSubmit(e) {
+    e.preventDefault();
+    var input = document.getElementById('dni-input');
+    var val = (input.value || '').trim();
+    if (!val) return false;
+
+    fetch('/asistencia/marcar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ dni: val }),
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (!data.ok) {
+        sonarAlerta();
+        mostrarBannerError(data.error || 'Socio no encontrado. Revisa el DNI.');
+        return;
+      }
+
+      // Check-in exitoso
+      if (data.estado === 'activo' || data.estado === 'por_vencer') {
+        sonarExito();
+      } else {
+        sonarAlerta();
+      }
+
+      // Actualizar Banner
+      actualizarBannerCheckin(data);
+
+      // Vincular automáticamente al socio como cliente activo en POS
+      seleccionarSocioManualmente(data.socio_id, data.nombre, data.dni, data.plan, data.estado);
+
+      // Agregar al feed de asistencias en tiempo real
+      agregarItemFeedAsistencia(data);
+
+      // Limpiar input y re-enfocar para el siguiente socio
+      input.value = '';
+      input.focus();
+    })
+    .catch(function(err) {
+      // Fallback a envio normal de formulario si falla fetch
+      document.getElementById('checkin-form').submit();
+    });
+
+    return false;
+  }
+
+  function actualizarBannerCheckin(d) {
+    var box = document.getElementById('checkin-result');
+    var isOk = d.estado === 'activo';
+    var isWarn = d.estado === 'por_vencer';
+    var isDanger = d.estado === 'vencido';
+
+    var statusText = isOk ? '🟢 ACCESO CONCEDIDO' : (isWarn ? '🟡 ACCESO CONCEDIDO (POR VENCER)' : '🔴 MEMBRESÍA VENCIDA');
+    var statusColor = isOk ? '#25d366' : (isWarn ? '#fbbf24' : '#f15c6d');
+    var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
+
+    box.style.display = 'block';
+    box.innerHTML =
+      '<div class="active-member-banner ' + bannerClass + '">' +
+        '<div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:' + statusColor + ';">' + statusText + '</div>' +
+        '<div style="font-size:19px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;">' + d.nombre + '</div>' +
+        '<div class="muted" style="font-size:13px;">' +
+          'DNI: <strong>' + (d.dni || '—') + '</strong> · Plan: <strong>' + (d.plan || 'Sin plan') + '</strong>' +
+          (d.fecha_fin ? ' · Vence: <strong>' + d.fecha_fin + '</strong>' : '') +
+          (d.dias_restantes != null ? ' (' + d.dias_restantes + ' días restantes)' : '') +
+        '</div>' +
+        '<div class="actions" style="margin-top:10px;">' +
+          (isWarn || isDanger || d.estado === 'sin_suscripcion'
+            ? '<a class="btn primary sm" href="/suscripciones/nueva?socio=' + d.socio_id + '" target="_blank">💳 Cobrar / Renovar Plan</a>'
+            : '') +
+          '<a class="btn sm" href="/socios/' + d.socio_id + '" target="_blank">Ver Ficha</a>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function mostrarBannerError(msg) {
+    var box = document.getElementById('checkin-result');
+    box.style.display = 'block';
+    box.innerHTML =
+      '<div class="active-member-banner danger">' +
+        '<div style="font-size:11px; font-weight:800; color:#ef4444; text-transform:uppercase;">✕ NO ENCONTRADO</div>' +
+        '<div style="font-size:15px; font-weight:700; color:var(--text); margin-top:4px;">' + msg + '</div>' +
+        '<div style="margin-top:8px;"><a class="btn primary sm" href="/socios/nuevo" target="_blank">+ Registrar Nuevo Socio</a></div>' +
+      '</div>';
+  }
+
+  function seleccionarSocioManualmente(id, nombre, dni, plan, estado) {
+    clienteActivo = { id: id, nombre: nombre, dni: dni, plan: plan };
+    var elId = document.getElementById('active-client-id');
+    var elName = document.getElementById('active-client-name');
+    var elDoc = document.getElementById('active-client-doc');
+    if (elId) elId.value = id;
+    if (elName) elName.textContent = nombre;
+    if (elDoc) elDoc.textContent = 'DNI: ' + (dni || '—') + ' · Plan: ' + (plan || 'Sin plan');
+
+    var badge = document.getElementById('cart-buyer-badge');
+    if (badge) {
+      badge.textContent = '👤 ' + nombre.split(' ')[0];
+      badge.style.background = 'rgba(16,185,129,0.15)';
+      badge.style.color = 'var(--ok-ink)';
+    }
+  }
+
+  function desvincularClienteMostrador() {
+    clienteActivo = { id: '', nombre: 'Público General / Mostrador', dni: '', plan: '' };
+    var elId = document.getElementById('active-client-id');
+    var elName = document.getElementById('active-client-name');
+    var elDoc = document.getElementById('active-client-doc');
+    if (elId) elId.value = '';
+    if (elName) elName.textContent = 'Público General / Mostrador';
+    if (elDoc) elDoc.textContent = 'Las ventas se registrarán sin socio asignado (o marca asistencia para asociar).';
+
+    var badge = document.getElementById('cart-buyer-badge');
+    if (badge) {
+      badge.textContent = 'Mostrador General';
+      badge.style.background = 'rgba(156,163,175,0.15)';
+      badge.style.color = 'var(--muted)';
+    }
+  }
+
+  function agregarItemFeedAsistencia(d) {
+    var empty = document.getElementById('asistencias-empty-msg');
+    if (empty) empty.style.display = 'none';
+
+    var feed = document.getElementById('asistencias-feed');
+    var countEl = document.getElementById('asistencias-count');
+    if (countEl) countEl.textContent = (parseInt(countEl.textContent || '0', 10) + 1);
+
+    var div = document.createElement('div');
+    div.className = 'feed-item';
+    div.innerHTML =
+      '<div>' +
+        '<a href="/socios/' + d.socio_id + '" target="_blank" style="font-weight:700; font-size:13px; color:var(--text);">' + d.nombre + '</a>' +
+        '<span class="muted" style="display:block; font-size:11px;">' + (d.plan || 'Sin plan') + ' · ' + (d.hora || 'Ahora') + '</span>' +
+      '</div>' +
+      '<div style="display:flex; align-items:center; gap:6px;">' +
+        '<button type="button" class="btn sm" style="font-size:11px; padding:3px 8px;" ' +
+          'data-id="' + d.socio_id + '" ' +
+          'data-nombre="' + d.nombre + '" ' +
+          'data-dni="' + (d.dni || '') + '" ' +
+          'data-plan="' + (d.plan || '') + '" ' +
+          'data-estado="' + (d.estado || 'activo') + '" ' +
+          'onclick="seleccionarSocioDesdeBoton(this);">' +
+          '🛒 Vender' +
+        '</button>' +
+      '</div>';
+
+    feed.insertBefore(div, feed.firstChild);
+  }
+
+  // ---------- MANEJO DEL PUNTO DE VENTA (POS) ----------
+  function filtrarProductos(query) {
+    var q = (query || '').toLowerCase().trim();
+    var cards = document.querySelectorAll('.pos-prod-card');
+    cards.forEach(function(card) {
+      var nombre = (card.getAttribute('data-nombre') || '').toLowerCase();
+      if (!q || nombre.indexOf(q) !== -1) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function filtrarCategoria(cat, btn) {
+    document.querySelectorAll('.pos-cat-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+
+    var cards = document.querySelectorAll('.pos-prod-card');
+    cards.forEach(function(card) {
+      var c = card.getAttribute('data-cat');
+      if (cat === 'todos' || c === cat) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function agregarAlCarrito(id, nombre, precio, stock) {
+    if (stock <= 0) return;
+
+    if (carrito[id]) {
+      if (carrito[id].cantidad < stock) {
+        carrito[id].cantidad++;
+      } else {
+        mostrarAlertaPOS('No hay más stock disponible para ' + nombre, 'warn');
+        return;
+      }
+    } else {
+      carrito[id] = {
+        id: id,
+        nombre: nombre,
+        precio: Number(precio),
+        cantidad: 1,
+        stock: Number(stock),
+      };
+    }
+    sonarCaja();
+    renderizarCarrito();
+  }
+
+  function cambiarCantidad(id, delta) {
+    if (!carrito[id]) return;
+    carrito[id].cantidad += delta;
+    if (carrito[id].cantidad <= 0) {
+      delete carrito[id];
+    } else if (carrito[id].cantidad > carrito[id].stock) {
+      carrito[id].cantidad = carrito[id].stock;
+      mostrarAlertaPOS('Límite de stock alcanzado (' + carrito[id].stock + ')', 'warn');
+    }
+    renderizarCarrito();
+  }
+
+  function eliminarItem(id) {
+    delete carrito[id];
+    renderizarCarrito();
+  }
+
+  function renderizarCarrito() {
+    var container = document.getElementById('cart-items-container');
+    var totalDisplay = document.getElementById('cart-total-display');
+    var btnAmount = document.getElementById('btn-total-amount');
+    var checkoutBtn = document.getElementById('pos-checkout-btn');
+
+    var keys = Object.keys(carrito);
+    if (keys.length === 0) {
+      container.innerHTML = '<p id="cart-empty-msg" class="muted" style="text-align:center; padding:16px 0; font-size:13px; margin:0;">Selecciona productos arriba para agregarlos a la venta.</p>';
+      totalDisplay.textContent = 'S/ 0.00';
+      btnAmount.textContent = '0.00';
+      checkoutBtn.disabled = true;
+      return;
+    }
+
+    var total = 0;
+    var html = '';
+
+    keys.forEach(function(id) {
+      var item = carrito[id];
+      var sub = item.precio * item.cantidad;
+      total += sub;
+
+      html +=
+        '<div class="pos-cart-item">' +
+          '<div style="max-width:55%;">' +
+            '<strong style="color:var(--text-bright); font-size:12.5px;">' + item.nombre + '</strong>' +
+            '<div class="muted" style="font-size:11px;">S/ ' + item.precio.toFixed(2) + ' c/u</div>' +
+          '</div>' +
+          '<div style="display:flex; align-items:center; gap:6px;">' +
+            '<button type="button" class="pos-qty-btn" onclick="cambiarCantidad(\'' + id + '\', -1);">-</button>' +
+            '<span style="font-weight:700; font-size:13px; min-width:18px; text-align:center;">' + item.cantidad + '</span>' +
+            '<button type="button" class="pos-qty-btn" onclick="cambiarCantidad(\'' + id + '\', 1);">+</button>' +
+            '<strong style="margin-left:6px; min-width:50px; text-align:right; font-size:13px;">S/ ' + sub.toFixed(2) + '</strong>' +
+            '<button type="button" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:12px; margin-left:4px;" onclick="eliminarItem(\'' + id + '\');">✕</button>' +
+          '</div>' +
+        '</div>';
+    });
+
+    container.innerHTML = html;
+    totalDisplay.textContent = 'S/ ' + total.toFixed(2);
+    btnAmount.textContent = total.toFixed(2);
+    checkoutBtn.disabled = false;
+  }
+
+  function seleccionarMetodoPago(metodo, btn) {
+    metodoSeleccionado = metodo;
+    document.querySelectorAll('.pos-method-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+  }
+
+  function mostrarAlertaPOS(texto, tipo) {
+    var el = document.getElementById('pos-alert');
+    el.style.display = 'block';
+    el.textContent = texto;
+    if (tipo === 'ok') {
+      el.style.background = 'rgba(16,185,129,0.15)';
+      el.style.color = 'var(--ok-ink)';
+      el.style.border = '1px solid var(--ok-border)';
+    } else {
+      el.style.background = 'rgba(239,68,68,0.15)';
+      el.style.color = 'var(--danger-ink)';
+      el.style.border = '1px solid var(--danger-border)';
+    }
+    setTimeout(function() { el.style.display = 'none'; }, 4500);
+  }
+
+  function procesarVentaPOS() {
+    var keys = Object.keys(carrito);
+    if (!keys.length) return;
+
+    var btn = document.getElementById('pos-checkout-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Procesando cobro...';
+
+    var itemsPayload = keys.map(function(k) {
+      return { producto_id: k, cantidad: carrito[k].cantidad, precio_unitario: carrito[k].precio };
+    });
+
+    var payload = {
+      items: itemsPayload,
+      socio_id: clienteActivo.id || null,
+      metodo_pago: metodoSeleccionado,
+    };
+
+    fetch('/productos/venta-rapida', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⚡</span> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)';
+
+      if (!res.ok) {
+        sonarAlerta();
+        mostrarAlertaPOS(res.error || 'Error al procesar la venta.', 'error');
+        return;
+      }
+
+      // Venta exitosa
+      sonarCaja();
+      mostrarAlertaPOS('✓ Venta de S/ ' + res.total.toFixed(2) + ' cobrada con ' + res.metodo_pago.toUpperCase() + ' (' + res.socio + ')', 'ok');
+
+      // Actualizar stocks en los botones de productos del DOM
+      res.items.forEach(function(it) {
+        var card = document.querySelector('.pos-prod-card[data-id="' + it.producto_id + '"]');
+        if (card) {
+          var currentStock = parseInt(card.getAttribute('data-stock') || '0', 10);
+          var newStock = Math.max(0, currentStock - it.cantidad);
+          card.setAttribute('data-stock', newStock);
+          var stockLabel = card.querySelector('.pos-prod-stock');
+          if (stockLabel) {
+            stockLabel.textContent = newStock <= 0 ? 'Agotado' : 'Stock: ' + newStock;
+          }
+          if (newStock <= 0) {
+            card.classList.add('out-of-stock');
+          }
+        }
+      });
+
+      // Agregar al feed de ventas de la columna 3
+      agregarItemFeedVenta(res);
+
+      // Limpiar carrito
+      carrito = {};
+      renderizarCarrito();
+
+      // Regresar foco al input de DNI para la siguiente persona
+      var input = document.getElementById('dni-input');
+      if (input) input.focus();
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⚡</span> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)';
+      sonarAlerta();
+      mostrarAlertaPOS('Error de conexión al procesar venta: ' + err.message, 'error');
+    });
+  }
+
+  function agregarItemFeedVenta(v) {
+    var empty = document.getElementById('ventas-empty-msg');
+    if (empty) empty.style.display = 'none';
+
+    var feed = document.getElementById('ventas-feed');
+    var countEl = document.getElementById('ventas-count');
+    if (countEl) countEl.textContent = (parseInt(countEl.textContent || '0', 10) + 1);
+
+    var nowStr = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    var div = document.createElement('div');
+    div.className = 'feed-item';
+    div.innerHTML =
+      '<div style="max-width:65%;">' +
+        '<strong style="font-size:12.5px; color:var(--text);">' + (v.socio || 'Cliente General') + '</strong>' +
+        '<span class="muted" style="display:block; font-size:11px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">' +
+          v.concepto +
+        '</span>' +
+        '<span class="muted" style="font-size:10px;">' + nowStr + ' · <span style="text-transform:uppercase;">' + v.metodo_pago + '</span></span>' +
+      '</div>' +
+      '<div style="text-align:right;">' +
+        '<span style="font-weight:800; font-size:13px; color:var(--primary); display:block;">S/ ' + v.total.toFixed(2) + '</span>' +
+      '</div>';
+
+    feed.insertBefore(div, feed.firstChild);
+  }
+
+  // Atajos de teclado: F2 para ir a DNI
+  window.addEventListener('keydown', function(e) {
+    if (e.key === 'F2') {
+      e.preventDefault();
+      var inp = document.getElementById('dni-input');
+      if (inp) { inp.focus(); inp.select(); }
+    }
+  });
+
+  // Foco inicial
+  window.addEventListener('DOMContentLoaded', function() {
+    var inp = document.getElementById('dni-input');
+    if (inp) { inp.focus(); inp.select(); }
+  });
+</script>

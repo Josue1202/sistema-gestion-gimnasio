@@ -1,38 +1,109 @@
-<h1>Inicio</h1>
-
-<div class="kpis">
-  <div class="kpi"><div class="label">Socios activos</div><div class="value"><%= kpis.socios_activos || 0 %></div></div>
-  <div class="kpi"><div class="label">Vencidos</div><div class="value"><%= kpis.socios_vencidos || 0 %></div></div>
-  <div class="kpi"><div class="label">Vencen en 7 dias</div><div class="value"><%= kpis.vencen_7d || 0 %></div></div>
-  <div class="kpi"><div class="label">Ingresos hoy</div><div class="value"><%= u.soles(kpis.ingresos_hoy) %></div></div>
-  <div class="kpi"><div class="label">Ingresos del mes</div><div class="value"><%= u.soles(kpis.ingresos_mes) %></div></div>
-  <div class="kpi"><div class="label">Asistencias hoy</div><div class="value"><%= kpis.asistencias_hoy || 0 %></div></div>
-</div>
-
-<div class="card" style="margin-top:16px;">
-  <div class="toolbar">
-    <strong>Caja</strong>
-    <% if (caja) { %>
-      <a class="btn sm" href="/caja">Abierta desde <%= u.fechaHora(caja.fecha_apertura) %> · esperado en efectivo <%= u.soles(caja.efectivo_esperado) %></a>
-    <% } else { %>
-      <a class="btn sm primary" href="/caja">Abrir caja</a>
-    <% } %>
+<div class="toolbar" style="margin-bottom:18px;">
+  <div>
+    <h1 class="mb0" style="display:flex; align-items:center; gap:8px;">
+      <span>Panel de Control</span>
+    </h1>
+    <p class="muted" style="margin-top:4px;">Resumen operativo del gimnasio en tiempo real.</p>
+  </div>
+  <div class="actions">
+    <a class="btn primary" href="/asistencia">⚡ Check-in Rápido</a>
+    <a class="btn" href="/socios/nuevo">+ Registrar Socio</a>
+    <a class="btn" href="/caja">💰 Ir a Caja</a>
   </div>
 </div>
 
-<h2>Vencen en los proximos 7 dias</h2>
+<!-- Estado de Caja -->
+<% if (!caja) { %>
+  <div class="flash error" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <strong>⚠️ La caja del día está cerrada.</strong>
+      <span style="opacity:0.9;">Abre caja para registrar cobros y pagos de mostrador.</span>
+    </div>
+    <a class="btn sm primary" href="/caja">Abrir Caja Ahora</a>
+  </div>
+<% } else { %>
+  <div class="card" style="padding:12px 16px; margin-bottom:16px; background:var(--surface-2); border-left:4px solid var(--primary);">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <div>
+        <span class="badge ok" style="font-size:11px;">CAJA ABIERTA</span>
+        <span style="font-size:13.5px; margin-left:8px;">
+          Abierta <%= u.fechaHora(caja.fecha_apertura) %> · Efectivo esperado: <strong><%= u.soles(caja.efectivo_esperado) %></strong>
+        </span>
+      </div>
+      <a class="btn sm" href="/caja">Ver movimientos de caja »</a>
+    </div>
+  </div>
+<% } %>
+
+<!-- KPIs Principales -->
+<div class="kpis">
+  <div class="kpi">
+    <div class="label">👥 Socios activos</div>
+    <div class="value" style="color:#25d366;"><%= kpis.socios_activos || 0 %></div>
+  </div>
+  <div class="kpi">
+    <div class="label">⚠️ Vencidos</div>
+    <div class="value" style="color:#f15c6d;"><%= kpis.socios_vencidos || 0 %></div>
+  </div>
+  <div class="kpi">
+    <div class="label">⏳ Vencen en 7 días</div>
+    <div class="value" style="color:#fbbf24;"><%= kpis.vencen_7d || 0 %></div>
+  </div>
+  <div class="kpi">
+    <div class="label">💵 Ingresos de hoy</div>
+    <div class="value" style="color:#53bdeb;"><%= u.soles(kpis.ingresos_hoy) %></div>
+  </div>
+  <div class="kpi">
+    <div class="label">📈 Ingresos del mes</div>
+    <div class="value" style="color:#a78bfa;"><%= u.soles(kpis.ingresos_mes) %></div>
+  </div>
+  <div class="kpi">
+    <div class="label">🏋️‍♂️ Asistencias hoy</div>
+    <div class="value" style="color:#00a884;"><%= kpis.asistencias_hoy || 0 %></div>
+  </div>
+</div>
+
+<!-- Vencimientos en los próximos 7 días -->
+<div class="toolbar" style="margin-top:28px;">
+  <h2 class="mb0">Vencimientos en los próximos 7 días (<%= porVencer.length %>)</h2>
+  <a class="btn sm" href="/mensajes">Gestionar recordatorios »</a>
+</div>
+
 <div class="card">
-  <% if (!porVencer.length) { %><p class="muted mb0">Nadie por vencer.</p><% } else { %>
+  <% if (!porVencer.length) { %>
+    <p class="muted mb0">No hay membresías por vencer en los próximos 7 días.</p>
+  <% } else { %>
   <div class="table-wrap"><table>
-    <thead><tr><th>Socio</th><th>Plan</th><th>Vence</th><th class="num">Dias</th><th>Accion</th></tr></thead>
+    <thead><tr><th>Socio</th><th>Plan</th><th>Fecha de Vencimiento</th><th class="num">Días</th><th>Acción Rápida</th></tr></thead>
     <tbody>
     <% porVencer.forEach(function(r){ var link = linkPara(r.dias_restantes === 0 ? 'recordatorio_hoy' : 'recordatorio_3d', r); %>
       <tr>
-        <td><a href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a></td>
+        <td>
+          <a href="/socios/<%= r.socio_id %>" style="font-weight:600;">
+            <%= r.nombres %> <%= r.apellidos %>
+          </a>
+        </td>
         <td><%= r.plan_nombre %></td>
         <td><%= u.fecha(r.fecha_fin) %></td>
-        <td class="num"><span class="badge <%= r.dias_restantes <= 1 ? 'danger' : 'warn' %>"><%= r.dias_restantes %></span></td>
-        <td><% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">WhatsApp</a><% } else { %><span class="muted">sin telefono</span><% } %></td>
+        <td class="num">
+          <span class="badge <%= r.dias_restantes <= 1 ? 'danger' : 'warn' %>">
+            <%= r.dias_restantes === 0 ? '¡Hoy!' : r.dias_restantes + ' d' %>
+          </span>
+        </td>
+        <td class="actions">
+          <% if (r.telefono) { %>
+            <form method="post" action="/dashboard/enviar-whatsapp" style="margin:0; display:inline;">
+              <input type="hidden" name="socio_id" value="<%= r.socio_id %>">
+              <input type="hidden" name="telefono" value="<%= r.telefono %>">
+              <input type="hidden" name="plantilla_clave" value="<%= r.dias_restantes === 0 ? 'recordatorio_hoy' : 'recordatorio_3d' %>">
+              <button class="btn sm wa" type="submit" title="Enviar recordatorio automático directamente por WhatsApp">🚀 WhatsApp</button>
+            </form>
+            <% if (link) { %>
+              <a class="muted" href="<%= link %>" target="_blank" rel="noopener" style="font-size:11px; text-decoration:underline;" title="Abrir en WhatsApp Web en una pestaña si el servidor no está vinculado">web</a>
+            <% } %>
+          <% } %>
+          <a class="btn sm primary" href="/suscripciones/nueva?socio=<%= r.socio_id %>">Renovar</a>
+        </td>
       </tr>
     <% }); %>
     </tbody>
@@ -42,17 +113,35 @@
 
 <div class="row">
   <div>
-    <h2>Vencidos</h2>
+    <div class="toolbar">
+      <h2 class="mb0">Membresías Vencidas (<%= vencidos.length %>)</h2>
+      <a class="btn sm" href="/socios?estado=vencido">Ver todos</a>
+    </div>
     <div class="card">
-      <% if (!vencidos.length) { %><p class="muted mb0">Ninguno.</p><% } else { %>
+      <% if (!vencidos.length) { %>
+        <p class="muted mb0">No hay socios con membresía vencida.</p>
+      <% } else { %>
       <div class="table-wrap"><table>
-        <thead><tr><th>Socio</th><th class="num">Dias</th><th></th></tr></thead>
+        <thead><tr><th>Socio</th><th class="num">Venció hace</th><th></th></tr></thead>
         <tbody>
         <% vencidos.forEach(function(r){ var link = linkPara('vencido', r); %>
           <tr>
             <td><a href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a></td>
-            <td class="num"><%= r.dias_vencido %></td>
-            <td><% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">WhatsApp</a><% } %></td>
+            <td class="num"><span class="badge danger"><%= r.dias_vencido %> d</span></td>
+            <td class="actions">
+              <% if (r.telefono) { %>
+                <form method="post" action="/dashboard/enviar-whatsapp" style="margin:0; display:inline;">
+                  <input type="hidden" name="socio_id" value="<%= r.socio_id %>">
+                  <input type="hidden" name="telefono" value="<%= r.telefono %>">
+                  <input type="hidden" name="plantilla_clave" value="vencido">
+                  <button class="btn sm wa" type="submit" title="Enviar aviso de vencimiento directamente por WhatsApp">🚀 Recordar</button>
+                </form>
+                <% if (link) { %>
+                  <a class="muted" href="<%= link %>" target="_blank" rel="noopener" style="font-size:11px; text-decoration:underline;" title="Abrir en WhatsApp Web en una pestaña si el servidor no está vinculado">web</a>
+                <% } %>
+              <% } %>
+              <a class="btn sm" href="/suscripciones/nueva?socio=<%= r.socio_id %>">Cobrar</a>
+            </td>
           </tr>
         <% }); %>
         </tbody>
@@ -60,18 +149,26 @@
       <% } %>
     </div>
   </div>
+
   <div>
-    <h2>Sin venir hace 14+ dias</h2>
+    <div class="toolbar">
+      <h2 class="mb0">En riesgo (Sin venir 14+ días) (<%= riesgo.length %>)</h2>
+      <a class="btn sm" href="/mensajes">Reactivar</a>
+    </div>
     <div class="card">
-      <% if (!riesgo.length) { %><p class="muted mb0">Ninguno.</p><% } else { %>
+      <% if (!riesgo.length) { %>
+        <p class="muted mb0">Todos los socios activos están asistiendo regularmente.</p>
+      <% } else { %>
       <div class="table-wrap"><table>
-        <thead><tr><th>Socio</th><th class="num">Dias</th><th></th></tr></thead>
+        <thead><tr><th>Socio</th><th class="num">Ausente</th><th></th></tr></thead>
         <tbody>
         <% riesgo.forEach(function(r){ var link = linkPara('te_extranamos', r); %>
           <tr>
             <td><a href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a></td>
-            <td class="num"><%= r.dias_sin_venir == null ? '—' : r.dias_sin_venir %></td>
-            <td><% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">WhatsApp</a><% } %></td>
+            <td class="num"><span class="badge warn"><%= r.dias_sin_venir == null ? '—' : r.dias_sin_venir + ' d' %></span></td>
+            <td>
+              <% if (link) { %><a class="btn sm wa" href="<%= link %>" target="_blank" rel="noopener">Recuperar</a><% } %>
+            </td>
           </tr>
         <% }); %>
         </tbody>
@@ -82,11 +179,15 @@
 </div>
 
 <% if (cumples.length) { %>
-<h2>Cumpleanos hoy 🎂</h2>
+<div class="toolbar" style="margin-top:20px;">
+  <h2 class="mb0">Cumpleaños de hoy 🎂 (<%= cumples.length %>)</h2>
+</div>
 <div class="card">
   <div class="pill-list">
   <% cumples.forEach(function(r){ %>
-    <a class="btn sm" href="/socios/<%= r.socio_id %>"><%= r.nombres %> <%= r.apellidos %></a>
+    <a class="btn sm" href="/socios/<%= r.socio_id %>" style="padding:8px 14px;">
+      🎉 <%= r.nombres %> <%= r.apellidos %>
+    </a>
   <% }); %>
   </div>
 </div>

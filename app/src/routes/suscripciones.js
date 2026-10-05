@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const db = require('../db');
-const { hoyISO, addDias, postWebhook, fecha, soles } = require('../util');
+const { hoyISO, addDias, dateToISO, postWebhook, sendEvolutionWhatsApp, waLink, fecha, fechaHora, soles } = require('../util');
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.get('/nueva', async (req, res, next) => {
     // Sugerencia de inicio: si sigue vigente, arranca al dia siguiente del vencimiento; si no, hoy.
     let inicio = hoyISO();
     if (actual && actual.fecha_fin) {
-      const fin = (actual.fecha_fin instanceof Date) ? actual.fecha_fin.toISOString().slice(0, 10) : String(actual.fecha_fin).slice(0, 10);
+      const fin = dateToISO(actual.fecha_fin);
       if (fin >= hoyISO()) inicio = addDias(fin, 1);
     }
     res.render('suscripciones/form', {
@@ -70,7 +70,7 @@ router.post('/', async (req, res, next) => {
         [socio.id, result.sub.id, 'manual', req.session.user.nombre]);
     }
 
-    // Aviso a n8n (best-effort). n8n decide si manda "pago_confirmado".
+    // Aviso a n8n (best-effort)
     postWebhook('pago', {
       evento: 'pago_registrado',
       socio_id: socio.id,
@@ -84,8 +84,81 @@ router.post('/', async (req, res, next) => {
       fecha_fin_txt: fecha(fin),
     });
 
-    req.flash('ok', `Renovacion registrada: ${plan.nombre}, ${soles(precio)}. Vence ${fecha(fin)}.`);
-    res.redirect('/socios/' + socio.id);
+    req.flash('ok', `Pago registrado: ${plan.nombre} (${soles(precio)}). Vence ${fecha(fin)}.`);
+    res.redirect('/suscripciones/' + result.sub.id + '/ticket?nuevo=1');
+  } catch (e) { next(e); }
+});
+
+// ---------- Ver / Imprimir Ticket de Pago ----------
+router.get('/:id/ticket', async (req, res, next) => {
+  try {
+    const sub = await db.one(
+      `SELECT su.*, p.nombre AS plan_nombre, p.duracion_dias,
+              s.nombres, s.apellidos, s.dni, s.telefono, s.email
+       FROM suscripciones su
+       JOIN socios s ON s.id = su.socio_id
+       JOIN planes p ON p.id = su.plan_id
+       WHERE su.id = $1`, [req.params.id]);
+
+    if (!sub) {
+      req.flash('error', 'Suscripción no encontrada.');
+      return res.redirect('/dashboard');
+    }
+
+    const pago = await db.one('SELECT * FROM pagos WHERE suscripcion_id = $1 ORDER BY creado_en DESC LIMIT 1', [sub.id]);
+
+    const gymNombre = res.locals.gymName || 'Gimnasio';
+    const textoWhatsApp = `¡Hola ${sub.nombres}! 🏋️\nComprobante de pago en *${gymNombre}*:\n` +
+      `• Plan: *${sub.plan_nombre}*\n` +
+      `• Válido: ${fecha(sub.fecha_inicio)} al ${fecha(sub.fecha_fin)}\n` +
+      `• Monto pagado: *${soles(sub.precio_pagado)}* (${pago ? pago.metodo_pago.toUpperCase() : 'EFECTIVO'})\n` +
+      `• Fecha de pago: ${fechaHora(pago ? pago.creado_en : sub.creado_en)}\n\n` +
+      `¡Gracias por entrenar con nosotros! 💪`;
+
+    const waHref = sub.telefono ? waLink(sub.telefono, textoWhatsApp) : null;
+
+    res.render('suscripciones/ticket', {
+      title: 'Comprobante de Pago',
+      sub,
+      pago,
+      esNuevo: req.query.nuevo === '1',
+      textoWhatsApp,
+      waHref,
+    });
+  } catch (e) { next(e); }
+});
+
+// ---------- Enviar Ticket por WhatsApp Directo ----------
+router.post('/:id/enviar-ticket', async (req, res, next) => {
+  try {
+    const sub = await db.one(
+      `SELECT su.*, p.nombre AS plan_nombre, s.nombres, s.apellidos, s.telefono
+       FROM suscripciones su
+       JOIN socios s ON s.id = su.socio_id
+       JOIN planes p ON p.id = su.plan_id
+       WHERE su.id = $1`, [req.params.id]);
+
+    if (!sub || !sub.telefono) {
+      req.flash('error', 'El socio no tiene un teléfono registrado.');
+      return res.redirect('/suscripciones/' + req.params.id + '/ticket');
+    }
+
+    const pago = await db.one('SELECT * FROM pagos WHERE suscripcion_id = $1 ORDER BY creado_en DESC LIMIT 1', [sub.id]);
+    const gymNombre = res.locals.gymName || 'Gimnasio';
+    const texto = `¡Hola ${sub.nombres}! 🏋️\nComprobante de pago en *${gymNombre}*:\n` +
+      `• Plan: *${sub.plan_nombre}*\n` +
+      `• Vigencia: ${fecha(sub.fecha_inicio)} al ${fecha(sub.fecha_fin)}\n` +
+      `• Monto: *${soles(sub.precio_pagado)}* (${pago ? pago.metodo_pago.toUpperCase() : 'EFECTIVO'})\n` +
+      `• Registrado: ${fechaHora(pago ? pago.creado_en : sub.creado_en)}\n\n` +
+      `¡A entrenar con todo! 💪`;
+
+    const r = await sendEvolutionWhatsApp(sub.telefono, texto);
+    if (r.ok) {
+      req.flash('ok', 'Comprobante enviado a WhatsApp exitosamente.');
+    } else {
+      req.flash('info', 'No se pudo enviar automáticamente (' + (r.error || 'WhatsApp desconectado') + '). Puedes enviarlo con el botón de WhatsApp Web.');
+    }
+    res.redirect('/suscripciones/' + sub.id + '/ticket');
   } catch (e) { next(e); }
 });
 

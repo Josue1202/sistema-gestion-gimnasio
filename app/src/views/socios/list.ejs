@@ -1,40 +1,82 @@
 <div class="toolbar">
-  <h1 class="mb0">Socios <span class="muted" style="font-size:14px;">(<%= total %>)</span></h1>
-  <a class="btn primary" href="/socios/nuevo">+ Nuevo socio</a>
+  <div>
+    <h1 class="mb0">Directorio de Socios</h1>
+    <p class="muted" style="margin-top:4px;">Total registrados en el sistema: <strong><%= total %></strong> socios.</p>
+  </div>
+  <div class="actions">
+    <a class="btn primary" href="/socios/nuevo">+ Nuevo Socio</a>
+  </div>
 </div>
 
-<form method="get" action="/socios" class="toolbar">
-  <div class="search">
-    <input type="text" name="q" value="<%= q %>" placeholder="Nombre, DNI o telefono" autofocus>
-    <select name="estado">
-      <option value="">Todos los estados</option>
-      <option value="activo"        <%= estado==='activo'?'selected':'' %>>Activos</option>
-      <option value="por_vencer"    <%= estado==='por_vencer'?'selected':'' %>>Por vencer (7 dias)</option>
-      <option value="vencido"       <%= estado==='vencido'?'selected':'' %>>Vencidos</option>
-      <option value="congelado"     <%= estado==='congelado'?'selected':'' %>>Congelados</option>
-      <option value="sin_suscripcion" <%= estado==='sin_suscripcion'?'selected':'' %>>Sin suscripcion</option>
-    </select>
-    <button class="btn" type="submit">Buscar</button>
-    <% if (q || estado) { %><a class="btn" href="/socios">Limpiar</a><% } %>
+<form method="get" action="/socios" class="card" style="padding:14px; margin-bottom:16px;">
+  <div class="toolbar" style="margin-bottom:0;">
+    <div class="search" style="flex:1;">
+      <input type="text" name="q" value="<%= q %>" placeholder="Buscar por Nombre, DNI o Teléfono..." autofocus
+             style="min-width:280px; font-weight:500;">
+      <select name="estado" style="max-width:200px;">
+        <option value="">Todos los estados</option>
+        <option value="activo"        <%= estado==='activo'?'selected':'' %>>🟢 Activos</option>
+        <option value="por_vencer"    <%= estado==='por_vencer'?'selected':'' %>>🟡 Por vencer (7 días)</option>
+        <option value="vencido"       <%= estado==='vencido'?'selected':'' %>>🔴 Vencidos</option>
+        <option value="congelado"     <%= estado==='congelado'?'selected':'' %>>⚪ Congelados</option>
+        <option value="sin_suscripcion" <%= estado==='sin_suscripcion'?'selected':'' %>>⚪ Sin suscripción</option>
+      </select>
+      <button class="btn" type="submit">🔍 Filtrar</button>
+      <% if (q || estado) { %>
+        <a class="btn" href="/socios">Limpiar</a>
+      <% } %>
+    </div>
   </div>
 </form>
 
 <div class="card">
   <% if (!socios.length) { %>
-    <p class="muted mb0">Sin resultados.</p>
+    <p class="muted mb0" style="padding:16px 0; text-align:center;">No se encontraron socios con los filtros aplicados.</p>
   <% } else { %>
   <div class="table-wrap"><table>
-    <thead><tr><th>Socio</th><th>DNI</th><th>Telefono</th><th>Plan</th><th>Vence</th><th>Estado</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Socio</th>
+        <th>DNI / Doc</th>
+        <th>WhatsApp</th>
+        <th>Plan Vigente</th>
+        <th>Vencimiento</th>
+        <th>Estado</th>
+        <th class="right">Acciones</th>
+      </tr>
+    </thead>
     <tbody>
     <% socios.forEach(function(s){
        var est = s.estado_membresia;
        if (est === 'activo' && s.dias_restantes != null && s.dias_restantes <= 7) est = 'por_vencer';
+       var ini = (s.nombres.charAt(0) + (s.apellidos ? s.apellidos.charAt(0) : '')).toUpperCase();
+       var colors = ['#00a884', '#005c4b', '#53bdeb', '#25d366', '#a78bfa', '#f59e0b'];
+       var color = colors[(s.nombres.charCodeAt(0) + (s.apellidos ? s.apellidos.charCodeAt(0) : 0)) % colors.length];
     %>
       <tr>
-        <td><a href="/socios/<%= s.id %>"><strong><%= s.apellidos %></strong>, <%= s.nombres %></a></td>
-        <td><%= s.dni || '' %></td>
-        <td><%= s.telefono || '' %></td>
-        <td><%= s.plan_nombre || '—' %></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:34px; height:34px; border-radius:50%; background:<%= color %>; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">
+              <%= ini %>
+            </div>
+            <div>
+              <a href="/socios/<%= s.id %>" style="font-weight:700; font-size:14px; color:var(--text-bright);">
+                <%= s.apellidos %>, <%= s.nombres %>
+              </a>
+            </div>
+          </div>
+        </td>
+        <td><%= s.dni || '—' %></td>
+        <td>
+          <% if (s.telefono) { %>
+            <a href="https://wa.me/<%= s.telefono %>" target="_blank" rel="noopener" style="color:var(--muted); font-size:13px;">
+              <%= s.telefono %>
+            </a>
+          <% } else { %>
+            <span class="muted">—</span>
+          <% } %>
+        </td>
+        <td><strong><%= s.plan_nombre || '—' %></strong></td>
         <td><%= s.fecha_fin ? u.fecha(s.fecha_fin) : '—' %></td>
         <td>
           <% if (est==='activo') { %><span class="badge ok">Activo</span>
@@ -42,6 +84,10 @@
           <% } else if (est==='vencido') { %><span class="badge danger">Vencido</span>
           <% } else if (est==='congelado') { %><span class="badge muted">Congelado</span>
           <% } else { %><span class="badge muted">Sin plan</span><% } %>
+        </td>
+        <td class="right actions" style="justify-content:flex-end;">
+          <a class="btn sm" href="/socios/<%= s.id %>">Ficha</a>
+          <a class="btn sm primary" href="/suscripciones/nueva?socio=<%= s.id %>">Cobrar</a>
         </td>
       </tr>
     <% }); %>
@@ -51,8 +97,8 @@
 </div>
 
 <% if (page > 1 || hayMas) { %>
-<div class="actions">
-  <% if (page > 1) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page-1 %>">« Anterior</a><% } %>
-  <% if (hayMas) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page+1 %>">Siguiente »</a><% } %>
+<div class="actions" style="justify-content:center; margin-top:20px;">
+  <% if (page > 1) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page-1 %>">« Página Anterior</a><% } %>
+  <% if (hayMas) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page+1 %>">Página Siguiente »</a><% } %>
 </div>
 <% } %>

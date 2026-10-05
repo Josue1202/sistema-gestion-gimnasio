@@ -2,7 +2,7 @@
 const express = require('express');
 const db = require('../db');
 const { plantillasMap, varsDe } = require('../mensajeria');
-const { renderPlantilla, waLink } = require('../util');
+const { renderPlantilla, waLink, sendEvolutionWhatsApp } = require('../util');
 
 const router = express.Router();
 
@@ -62,6 +62,33 @@ router.get('/', async (req, res, next) => {
       historial,
       sinPlantilla: Object.keys(VENTANA).filter((k) => !plantillas[k]),
     });
+  } catch (e) { next(e); }
+});
+
+router.post('/enviar-directo', async (req, res, next) => {
+  try {
+    const { socio_id, telefono, plantilla_clave, contenido } = req.body;
+    if (!telefono) {
+      req.flash('error', 'El socio no tiene teléfono registrado.');
+      return res.redirect('/mensajes');
+    }
+    const r = await sendEvolutionWhatsApp(telefono, contenido);
+    if (r.ok) {
+      await db.query(
+        `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, enviado_en, referencia_tipo)
+         VALUES ($1, $2, 'whatsapp', $3, $4, 'enviado', now(), 'manual')`,
+        [socio_id || null, telefono, plantilla_clave || null, contenido || '']
+      );
+      req.flash('ok', '📲 Mensaje enviado directamente por WhatsApp.');
+    } else {
+      await db.query(
+        `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, error, enviado_en, referencia_tipo)
+         VALUES ($1, $2, 'whatsapp', $3, $4, 'fallido', $5, now(), 'manual')`,
+        [socio_id || null, telefono, plantilla_clave || null, contenido || '', r.error || 'Error desconocido']
+      );
+      req.flash('error', `No se pudo enviar por WhatsApp: ${r.error || 'Desconectado'}`);
+    }
+    res.redirect('/mensajes');
   } catch (e) { next(e); }
 });
 

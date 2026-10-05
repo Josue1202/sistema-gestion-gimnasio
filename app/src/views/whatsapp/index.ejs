@@ -1,0 +1,187 @@
+<div class="toolbar">
+  <div>
+    <h1 class="mb0">Conexión de WhatsApp</h1>
+    <p class="muted" style="margin-top:4px;">Canal de comunicación para confirmaciones de pago, vencimientos y avisos automáticos.</p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="/mensajes">Ir a Mensajería</a>
+  </div>
+</div>
+
+<div class="row" style="margin-top:16px;">
+  <div style="flex:1.2;">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 class="mt0 mb0">Estado del servicio</h2>
+        <% if (estado === 'open') { %>
+          <span class="badge ok" style="font-size:14px; padding:6px 14px;">🟢 CONECTADO Y ACTIVO</span>
+        <% } else if (estado === 'connecting') { %>
+          <span class="badge warn" style="font-size:14px; padding:6px 14px;">🟡 GENERANDO CONEXIÓN...</span>
+        <% } else { %>
+          <span class="badge danger" style="font-size:14px; padding:6px 14px;">🔴 DESCONECTADO (ESCANEAR QR)</span>
+        <% } %>
+      </div>
+
+      <% if (estado === 'open') { %>
+        <div style="background:var(--bubble-green); border:1px solid var(--bubble-green-border); border-radius:14px; padding:20px; margin-bottom:20px;">
+          <h3 style="margin-top:0; color:#25d366; display:flex; align-items:center; gap:8px;">
+            <span>✓</span> WhatsApp está listo y vinculado
+          </h3>
+          <% if (info && info.ownerJid) { %>
+            <p style="margin:4px 0 10px; font-weight:600;">
+              Número vinculado: +<%= info.ownerJid.split('@')[0] %>
+              <% if (info.profileName) { %> (<%= info.profileName %>)<% } %>
+            </p>
+          <% } %>
+          <p class="muted" style="margin-bottom:0; font-size:13.5px;">
+            Los mensajes de confirmación de pago, avisos de vencimiento (3 días y hoy) y saludos de cumpleaños se están procesando automáticamente.
+          </p>
+        </div>
+
+        <div class="actions">
+          <form method="post" action="/whatsapp/desconectar" onsubmit="return confirm('¿Seguro que deseas desvincular este número de WhatsApp?');">
+            <button class="btn danger" type="submit">Desvincular WhatsApp actual</button>
+          </form>
+          <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('Esto cerrará la sesión actual y creará un QR nuevo. ¿Continuar?');">
+            <button class="btn" type="submit">🔄 Reiniciar conexión de cero</button>
+          </form>
+        </div>
+
+      <% } else { %>
+        <div style="text-align:center; padding:10px 0;">
+          <div style="display:inline-block; text-align:left; background:var(--surface-2); padding:14px 20px; border-radius:10px; margin-bottom:20px; font-size:13.5px; line-height:1.7;">
+            1. Abre <strong>WhatsApp</strong> en el teléfono del gimnasio.<br>
+            2. Toca <strong>Menú (⋮)</strong> o <strong>Configuración</strong> > <strong>Dispositivos vinculados</strong>.<br>
+            3. Toca <strong>Vincular un dispositivo</strong> y apunta tu cámara al código QR de abajo.
+          </div>
+
+          <div id="qr-container" style="min-height:270px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div id="qr-box" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.2); display:inline-block;">
+              <img id="qr-img" src="<%= qr ? (qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr) : '' %>"
+                   alt="Código QR de WhatsApp"
+                   style="width:240px; height:240px; display:<%= qr ? 'block' : 'none' %>;">
+              <div id="qr-spinner" style="display:<%= qr ? 'none' : 'block' %>; padding:40px; text-align:center; color:#4a5568;">
+                <div style="font-size:28px; margin-bottom:10px;">⏳</div>
+                Generando nuevo código QR...
+              </div>
+            </div>
+            
+            <div style="width:240px; margin-top:12px;">
+              <div class="bar-track" style="height:4px;">
+                <div id="qr-timer-bar" class="bar" style="width:100%; transition: width 1s linear;"></div>
+              </div>
+              <p class="muted" style="font-size:12px; margin-top:6px;">
+                Actualización automática en <span id="countdown">15</span>s
+              </p>
+            </div>
+          </div>
+
+          <div class="actions" style="justify-content:center; margin-top:18px;">
+            <button class="btn sm" type="button" onclick="recargarQRManual();">
+              🔄 Actualizar Código QR Ahora
+            </button>
+            <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('¿El celular dice que no se pudo vincular? Esto creará una sesión 100% limpia. ¿Deseas reiniciar?');" style="margin:0;">
+              <button class="btn sm danger" type="submit">
+                ⚠️ Reiniciar sesión limpia
+              </button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div style="flex:1;">
+    <div class="card">
+      <h2 class="mt0">Probar envío de WhatsApp</h2>
+      <p class="muted" style="font-size:13px;">Envía un mensaje de prueba a tu número personal para verificar que los mensajes lleguen correctamente.</p>
+      
+      <form method="post" action="/whatsapp/probar" class="stack">
+        <div>
+          <label>Número de WhatsApp (con código de país o 9 dígitos de Perú)</label>
+          <input type="text" name="telefono" placeholder="Ej: 987654321 o 51987654321" required>
+        </div>
+        <div>
+          <label>Mensaje de prueba</label>
+          <textarea name="mensaje" rows="3" placeholder="Escribe un mensaje de prueba...">¡Hola! Este es un mensaje de prueba desde Zona Fitness 🏋️‍♂️</textarea>
+        </div>
+        <button class="btn primary" type="submit" <%= estado !== 'open' ? 'disabled' : '' %>>
+
+          Enviar mensaje de prueba
+        </button>
+        <% if (estado !== 'open') { %>
+          <span class="muted" style="font-size:12px;">(Debes vincular el código QR primero para enviar)</span>
+        <% } %>
+      </form>
+    </div>
+
+    <div class="card" style="background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.25);">
+      <h3 class="mt0" style="color:#2563eb;">🤖 ¿Cómo funciona la automatización?</h3>
+      <ul style="font-size:13px; color:var(--ink); line-height:1.7; padding-left:18px; margin-bottom:0;">
+        <li><strong>Solo escaneas una vez:</strong> Al escanear este QR desde tu WhatsApp, el servidor del gimnasio queda enlazado permanentemente.</li>
+        <li><strong>NO necesitas WhatsApp Web abierto:</strong> No hace falta tener abierto WhatsApp en la computadora ni ninguna pestaña en Chrome. Todo corre de forma invisible en el servidor.</li>
+        <li><strong>Envío instantáneo:</strong> Cuando registras pagos, bienvenida o recordatorios, el sistema manda el mensaje directo al teléfono del cliente en 1 segundo.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 class="mt0">💡 ¿Qué hacer si no vincula o dice error?</h3>
+      <ul style="font-size:13px; color:var(--muted); line-height:1.7; padding-left:18px; margin-bottom:0;">
+        <li>Si tu celular dice <em>"No se pudo vincular"</em>, pulsa el botón rojo <strong>"Reiniciar sesión limpia"</strong> para renovar el código QR.</li>
+        <li>Asegúrate de que el celular tenga conexión a internet estable.</li>
+        <li>Si ya tienes el límite de 4 dispositivos vinculados en tu WhatsApp, desvincula uno antiguo desde tu teléfono.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var estadoActual = '<%= estado %>';
+    if (estadoActual === 'open') return;
+
+    var timeLeft = 15;
+    var qrImg = document.getElementById('qr-img');
+    var qrSpinner = document.getElementById('qr-spinner');
+    var timerBar = document.getElementById('qr-timer-bar');
+    var countdownEl = document.getElementById('countdown');
+
+    function actualizarTimer() {
+      timeLeft--;
+      if (countdownEl) countdownEl.textContent = timeLeft;
+      if (timerBar) timerBar.style.width = (timeLeft / 15 * 100) + '%';
+
+      if (timeLeft <= 0) {
+        timeLeft = 15;
+        recargarQR();
+      }
+    }
+
+    function recargarQR() {
+      fetch('/whatsapp/qr-live')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.ok && data.estado === 'open') {
+            window.location.reload();
+            return;
+          }
+          if (data.ok && data.qr) {
+            var src = data.qr.startsWith('data:') ? data.qr : 'data:image/png;base64,' + data.qr;
+            qrImg.src = src;
+            qrImg.style.display = 'block';
+            if (qrSpinner) qrSpinner.style.display = 'none';
+          }
+        })
+        .catch(function() {});
+    }
+
+    window.recargarQRManual = function() {
+      timeLeft = 15;
+      if (qrSpinner) qrSpinner.style.display = 'block';
+      if (qrImg) qrImg.style.display = 'none';
+      recargarQR();
+    };
+
+    setInterval(actualizarTimer, 1000);
+  })();
+</script>

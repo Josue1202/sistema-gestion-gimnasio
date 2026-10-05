@@ -20,6 +20,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layout');
 
+// Locals globales inmediatos
+app.use((req, res, next) => {
+  res.locals.gymName = process.env.GYM_NAME || 'Zona Fitness';
+  res.locals.title = res.locals.gymName;
+  res.locals.currentPath = req.path || '';
+  res.locals.user = null;
+  res.locals.u = util;
+  next();
+});
+
 // Parsers y estaticos
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -27,7 +37,11 @@ app.use('/public', express.static(path.join(__dirname, '..', 'public'), { maxAge
 
 // Sesion
 app.use(session({
-  store: new PgSession({ pool, createTableIfMissing: true }),
+  store: new PgSession({
+    pool,
+    createTableIfMissing: true,
+    pruneSessionInterval: 60 * 15, // Limpiar sesiones vencidas cada 15 min
+  }),
   secret: process.env.SESSION_SECRET || 'cambia-este-secreto',
   resave: false,
   saveUninitialized: false,
@@ -47,8 +61,10 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.currentPath = req.path;
   res.locals.u = util; // helpers en las vistas: u.soles(), u.fecha(), ...
-  res.locals.title = 'Gimnasio';
+  res.locals.gymName = process.env.GYM_NAME || 'Zona Fitness';
+  res.locals.title = res.locals.gymName;
   next();
+
 });
 
 // Salud (sin auth)
@@ -71,6 +87,8 @@ app.use('/productos', require('./routes/productos'));
 app.use('/reportes', require('./routes/reportes'));
 app.use('/mensajes', require('./routes/mensajes'));
 app.use('/plantillas', require('./routes/plantillas'));
+app.use('/whatsapp', require('./routes/whatsapp'));
+
 
 // 404
 app.use((req, res) => {

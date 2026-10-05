@@ -2,9 +2,10 @@
 const express = require('express');
 const db = require('../db');
 const { plantillasMap, varsDe } = require('../mensajeria');
-const { renderPlantilla, waLink, hoyISO, normalizarTelefono } = require('../util');
+const { renderPlantilla, waLink, hoyISO, normalizarTelefono, sendEvolutionWhatsApp } = require('../util');
 
 const router = express.Router();
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function limpiarSocio(b) {
@@ -94,13 +95,24 @@ router.get('/:id', async (req, res, next) => {
     ]);
     const filaMsg = Object.assign({}, socio, estado || {});
     const links = {};
+    const plantillasDisponibles = [];
     ['bienvenida', 'pago_confirmado', 'recordatorio_3d', 'recordatorio_hoy', 'vencido', 'te_extranamos', 'cumpleanos'].forEach((clave) => {
       const p = plantillas[clave];
-      if (p && socio.telefono) links[clave] = waLink(socio.telefono, renderPlantilla(p.cuerpo, varsDe(filaMsg)));
+      if (p) {
+        const texto = renderPlantilla(p.cuerpo, varsDe(filaMsg));
+        const link = socio.telefono ? waLink(socio.telefono, texto) : null;
+        links[clave] = link;
+        plantillasDisponibles.push({
+          clave,
+          titulo: p.descripcion || clave.replace(/_/g, ' '),
+          cuerpo: texto,
+          link,
+        });
+      }
     });
     res.render('socios/detail', {
       title: socio.nombres + ' ' + socio.apellidos,
-      socio, estado: estado || {}, subs, pagos, asistencias, planes, links,
+      socio, estado: estado || {}, subs, pagos, asistencias, planes, links, plantillasDisponibles,
       cajaAbierta: !!cajaAbierta, hoy: hoyISO(), esNuevo: req.query.nuevo === '1',
     });
   } catch (e) { next(e); }
@@ -156,4 +168,51 @@ router.post('/:id/asistencia', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ---------- Enviar WhatsApp Directo desde el detalle ----------
+router.post('/:id/enviar-whatsapp', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { clave } = req.body;
+    const socio = await db.one('SELECT * FROM socios WHERE id = $1', [id]);
+    if (!socio) {
+      req.flash('error', 'Socio no encontrado.');
+      return res.redirect('/socios');
+    }
+    if (!socio.telefono) {
+      req.flash('error', 'El socio no tiene un teléfono registrado.');
+      return res.redirect('/socios/' + id);
+    }
+    const [estado, plantillas] = await Promise.all([
+      db.one('SELECT * FROM v_socios_estado WHERE id = $1', [id]),
+      plantillasMap(),
+    ]);
+    const p = plantillas[clave];
+    if (!p) {
+      req.flash('error', 'Plantilla de mensaje no encontrada: ' + clave);
+      return res.redirect('/socios/' + id);
+    }
+    const filaMsg = Object.assign({}, socio, estado || {});
+    const texto = renderPlantilla(p.cuerpo, varsDe(filaMsg));
+
+    const result = await sendEvolutionWhatsApp(socio.telefono, texto);
+    if (result.ok) {
+      await db.query(
+        `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, enviado_en, referencia_tipo)
+         VALUES ($1, $2, 'whatsapp', $3, $4, 'enviado', now(), 'manual')`,
+        [socio.id, socio.telefono, clave, texto]
+      );
+      req.flash('ok', `📲 Mensaje "${clave.replace(/_/g, ' ')}" enviado exitosamente por WhatsApp a ${socio.nombres}.`);
+    } else {
+      await db.query(
+        `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, error, enviado_en, referencia_tipo)
+         VALUES ($1, $2, 'whatsapp', $3, $4, 'fallido', $5, now(), 'manual')`,
+        [socio.id, socio.telefono, clave, texto, result.error || 'Error desconocido']
+      );
+      req.flash('error', `No se pudo enviar por WhatsApp: ${result.error || 'Desconectado'}`);
+    }
+    res.redirect('/socios/' + id);
+  } catch (e) { next(e); }
+});
+
 module.exports = router;
+
