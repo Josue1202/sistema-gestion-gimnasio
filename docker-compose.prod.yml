@@ -38,11 +38,13 @@ services:
       GYM_NAME: ${GYM_NAME:-Zona Fitness}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       SESSION_SECRET: ${SESSION_SECRET}
-      COOKIE_SECURE: "true"
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
       N8N_WEBHOOK_URL: http://n8n:5678/webhook
       EVOLUTION_API_URL: http://evolution-api:8080
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
 
+    ports:
+      - "8084:3000"
     expose:
       - "3000"
     depends_on:
@@ -55,9 +57,9 @@ services:
     environment:
       N8N_HOST: ${N8N_HOST}
       N8N_PORT: 5678
-      N8N_PROTOCOL: https
-      N8N_EDITOR_BASE_URL: https://${N8N_HOST}/
-      WEBHOOK_URL: https://${N8N_HOST}/
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL:-http://100.117.103.36:5679/}
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://n8n:5678/}
       N8N_PROXY_HOPS: "1"
       GENERIC_TIMEZONE: ${TZ:-America/Lima}
       TZ: ${TZ:-America/Lima}
@@ -77,6 +79,8 @@ services:
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
       EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-gym}
       GYM_OWNER_PHONE: ${GYM_OWNER_PHONE:-}
+    ports:
+      - "5679:5678"
     expose:
       - "5678"
     volumes:
@@ -89,7 +93,7 @@ services:
     image: evoapicloud/evolution-api:latest
     restart: unless-stopped
     environment:
-      SERVER_URL: https://${EVOLUTION_HOST}
+      SERVER_URL: ${EVOLUTION_SERVER_URL:-http://100.117.103.36:8085}
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
       AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
       DEL_INSTANCE: "false"
@@ -107,6 +111,8 @@ services:
       CACHE_REDIS_ENABLED: "false"
       CACHE_LOCAL_ENABLED: "true"
       WEBHOOK_GLOBAL_ENABLED: "false"
+    ports:
+      - "8085:8080"
     expose:
       - "8080"
     volumes:
