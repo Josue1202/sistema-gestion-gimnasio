@@ -100,7 +100,7 @@ app.use((err, req, res, next) => {
   console.error('[error]', err);
   res.status(500).render('error', {
     title: 'Error', code: 500,
-    mensaje: process.env.NODE_ENV === 'production' ? 'Ocurrio un error inesperado.' : String(err.stack || err),
+    mensaje: String(err.message || err.stack || err),
   });
 });
 
