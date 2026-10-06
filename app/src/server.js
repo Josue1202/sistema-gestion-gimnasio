@@ -70,6 +70,31 @@ app.use((req, res, next) => {
 // Salud (sin auth)
 app.get('/health', (req, res) => res.type('text').send('ok'));
 
+async function initDatabase() {
+  const chk = await pool.query("SELECT to_regclass('public.usuarios') AS tbl");
+  if (!chk.rows[0].tbl) {
+    console.log('[db] Inicializando tablas y datos base del gimnasio...');
+    const fs = require('fs');
+    const sqlPath = path.join(__dirname, 'init_db.sql');
+    if (fs.existsSync(sqlPath)) {
+      let sql = fs.readFileSync(sqlPath, 'utf8').replace(/^\uFEFF/, '');
+      await pool.query(sql);
+      console.log('[db] Tablas, vistas y datos base creados exitosamente!');
+    }
+  }
+}
+
+// Endpoint de inicializacion / diagnostico de base de datos
+app.get('/init-db', async (req, res) => {
+  try {
+    await initDatabase();
+    res.json({ ok: true, message: 'Base de datos inicializada o tablas ya presentes' });
+  } catch (err) {
+    console.error('[init-db] error:', err);
+    res.status(500).json({ ok: false, error: err.message, stack: err.stack, detail: err.detail });
+  }
+});
+
 // Auth (login / setup / logout)
 app.use('/', authRouter);
 
@@ -115,25 +140,16 @@ async function start() {
     await pool.query('SELECT 1');
     console.log('[db] conexion OK');
 
-    const chk = await pool.query("SELECT to_regclass('public.usuarios') AS tbl");
-    if (!chk.rows[0].tbl) {
-      console.log('[db] Inicializando tablas y datos base del gimnasio...');
-      const fs = require('fs');
-      const sqlPath = path.join(__dirname, 'init_db.sql');
-      if (fs.existsSync(sqlPath)) {
-        const sql = fs.readFileSync(sqlPath, 'utf8');
-        await pool.query(sql);
-        console.log('[db] Tablas, vistas y datos base creados exitosamente!');
-      }
-    }
+    await initDatabase();
 
     const n = await needsSetup();
     if (n) console.log('[setup] No hay contrasena de admin. Ve a /setup para crearla.');
   } catch (e) {
-    console.error('[db] Error al inicializar:', e.message);
+    console.error('[db] Error al inicializar:', e);
   }
 
   app.listen(PORT, () => console.log(`[app] escuchando en http://localhost:${PORT}`));
 }
 
 start();
+

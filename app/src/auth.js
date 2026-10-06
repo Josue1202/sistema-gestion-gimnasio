@@ -6,8 +6,14 @@ const db = require('./db');
 const router = express.Router();
 
 async function needsSetup() {
-  const r = await db.one("SELECT count(*)::int AS n FROM usuarios WHERE password_hash IS NOT NULL AND activo = true");
-  return !r || r.n === 0;
+  try {
+    const chk = await db.one("SELECT to_regclass('public.usuarios') AS tbl");
+    if (!chk || !chk.tbl) return true;
+    const r = await db.one("SELECT count(*)::int AS n FROM usuarios WHERE password_hash IS NOT NULL AND activo = true");
+    return !r || r.n === 0;
+  } catch (_) {
+    return true;
+  }
 }
 
 function requireAuth(req, res, next) {

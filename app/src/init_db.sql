@@ -1,11 +1,11 @@
-﻿-- ============================================================
+-- ============================================================
 --  Sistema de gestion de gimnasio - Esquema base
 --  Postgres 16+
 -- ============================================================
 
-SET client_encoding = 'UTF8';
+-- SET client_encoding
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;   -- gen_random_uuid()
+-- CREATE EXTENSION   -- gen_random_uuid()
 
 -- ------------------------------------------------------------
 --  Utilidad: refresca "actualizado_en" en cada UPDATE
@@ -544,7 +544,7 @@ SELECT
 --  (Datos de PRUEBA -> ver db/seed_demo.sql, se corre aparte)
 -- ============================================================
 
-SET client_encoding = 'UTF8';
+-- SET client_encoding
 
 -- ---------- Planes (ajusta precios a tu gimnasio) ----------
 INSERT INTO planes (nombre, descripcion, precio, duracion_dias) VALUES
