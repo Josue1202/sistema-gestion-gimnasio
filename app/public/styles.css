@@ -5,7 +5,7 @@
    Canvas: #121212 | Card: #1c1c1c | Secondary: #232323 | Wells: #1f1f1f
    ============================================================ */
 
-:root, [data-theme="supabase"] {
+:root {
   /* Lienzo y Superficies Oficiales Supabase Modern Dark */
   --bg: #121212;                 /* Dark Graphite Técnico Supabase */
   --surface: #1c1c1c;            /* Superficie principal de tarjetas y paneles */
@@ -228,28 +228,6 @@ a:hover {
 }
 
 .nav .spacer { flex: 1; }
-
-/* Conmutador de Tema */
-.theme-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
-  border-radius: var(--radius-full);
-  font-size: 11.5px;
-  font-weight: 700;
-  border: 1px solid var(--border-strong);
-  background: var(--surface-input);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-right: 8px;
-}
-.theme-toggle-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary);
-  color: var(--text-bright);
-}
 
 /* Status Pill WhatsApp */
 .wa-status-pill {
@@ -1225,80 +1203,4 @@ input::placeholder, textarea::placeholder {
   border-color: var(--border-strong);
 }
 
-/* ============================================================
-   TEMA ALTERNATIVO: GIANTUCCHI NEXTGEN DARK ([data-theme="giantucchi"])
-   ============================================================ */
 
-[data-theme="giantucchi"] {
-  --bg: #050505;
-  --surface: #0a0a0f;
-  --surface-2: #101018;
-  --surface-input: #141420;
-  --surface-hover: #1c1c2e;
-  
-  --border: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: #06b6d4;
-
-  --text: #e2e8f0;
-  --text-bright: #ffffff;
-  --muted: #94a3b8;
-  --muted-dark: #64748b;
-
-  --primary: #ffffff;
-  --primary-hover: #f1f5f9;
-  --primary-ink: #050505;
-  --primary-glow: rgba(255, 255, 255, 0.22);
-  --accent: #22d3ee;
-
-  --spectrum-bar: linear-gradient(90deg, #06b6d4 0%, #3b82f6 20%, #8b5cf6 40%, #ec4899 60%, #f97316 80%, #eab308 100%);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="giantucchi"] body {
-  background-image: none;
-}
-
-[data-theme="giantucchi"] .giantucchi-badge-pro {
-  background: rgba(6, 182, 212, 0.15);
-  color: #22d3ee;
-  border-color: rgba(6, 182, 212, 0.35);
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
-}
-
-[data-theme="giantucchi"] .nav a.item.active {
-  color: #22d3ee;
-  background: rgba(6, 182, 212, 0.12);
-  border-color: rgba(6, 182, 212, 0.35);
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.15);
-}
-
-[data-theme="giantucchi"] .btn.primary {
-  background: #ffffff;
-  color: #050505;
-  border: 1px solid #ffffff;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
-}
-
-[data-theme="giantucchi"] .btn.primary:hover {
-  background: #f1f5f9;
-  border-color: #f1f5f9;
-  color: #000000;
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
-}
-
-[data-theme="giantucchi"] .pos-checkout-btn {
-  background: #ffffff;
-  color: #050505;
-  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
-}
-
-[data-theme="giantucchi"] .pos-checkout-btn:hover {
-  background: #f1f5f9;
-  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.4);
-}
-
-[data-theme="giantucchi"] .auth-wrap {
-  background: radial-gradient(ellipse at 50% 0%, #16162a 0%, #050505 75%);
-}

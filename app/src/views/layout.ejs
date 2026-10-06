@@ -9,12 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
-  <script>
-    (function() {
-      var savedTheme = localStorage.getItem('gym_theme') || 'supabase';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-  </script>
 </head>
 <body>
   <% const nav = [
@@ -31,12 +25,12 @@
   ]; %>
   
   <header class="navbar-wrapper">
-    <div class="giantucchi-spectrum-bar"></div>
+    <div class="supabase-top-bar"></div>
     <nav class="nav">
       <a href="/dashboard" class="brand">
         <span class="brand-icon">🏋️</span>
         <span class="brand-name"><%= gymName %></span>
-        <span class="giantucchi-badge-pro">PRO</span>
+        <span class="brand-badge-pro">PRO</span>
       </a>
 
       <!-- Botón móvil para menú -->
@@ -54,12 +48,6 @@
       </div>
 
       <span class="spacer"></span>
-
-      <!-- Conmutador de Tema Supabase / Giantucchi -->
-      <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" title="Alternar tema: Supabase / Giantucchi" onclick="toggleTheme();">
-        <span id="theme-toggle-icon">⚡</span>
-        <span id="theme-toggle-label">Supabase</span>
-      </button>
 
       <!-- Estado de WhatsApp en vivo -->
       <a href="/whatsapp" id="nav-wa-pill" class="wa-status-pill loading" title="Ver estado de conexión de WhatsApp">
@@ -116,28 +104,6 @@
       checkWa();
       setInterval(checkWa, 15000);
     })();
-
-    // Lógica interactiva para alternar temas (Giantucchi / Supabase)
-    function updateThemeBtn(theme) {
-      var icon = document.getElementById('theme-toggle-icon');
-      var label = document.getElementById('theme-toggle-label');
-      if (!icon || !label) return;
-      if (theme === 'supabase') {
-        icon.textContent = '⚡';
-        label.textContent = 'Supabase';
-      } else {
-        icon.textContent = '🌌';
-        label.textContent = 'Giantucchi';
-      }
-    }
-    function toggleTheme() {
-      var current = document.documentElement.getAttribute('data-theme') || 'supabase';
-      var next = current === 'supabase' ? 'giantucchi' : 'supabase';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('gym_theme', next);
-      updateThemeBtn(next);
-    }
-    updateThemeBtn(document.documentElement.getAttribute('data-theme') || 'supabase');
   </script>
 </body>
 </html>
