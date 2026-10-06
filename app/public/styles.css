@@ -1,59 +1,79 @@
 /* ============================================================
-   ZONA FITNESS - DESIGN SYSTEM PREMIUM (WHATSAPP DARK AESTHETIC)
-   Inspirado en la paleta cromática y ergonomía de WhatsApp Web Dark
+   ZONA FITNESS PRO - GIANTUCCHI NEXTGEN DESIGN SYSTEM
+   Official Giantucchi Ecosystem Spec: Dark Obsidian Edition
+   Spectrum Accent: #06b6d4, #3b82f6, #8b5cf6, #ec4899, #f97316
+   Canvas: #050505 | Card: #0a0a0f | Secondary: #101018 | Wells: #141420
    ============================================================ */
 
 :root {
-  /* Lienzo y Superficies Oficiales WhatsApp Web Dark */
-  --bg: #111b21;                 /* Fondo oscuro mate principal de WhatsApp */
-  --surface: #202c33;            /* Fondo de tarjetas, paneles y header */
-  --surface-2: #222e35;          /* Superficie secundaria / contenedores internos */
-  --surface-input: #2a3942;      /* Fondo de inputs, buscadores y píldoras */
-  --surface-hover: #2a3942;      /* Hover en elementos interactivos y filas */
-  --border: #222d34;             /* Separadores sutiles de WhatsApp */
-  --border-subtle: #1c272d;      /* Divisores tenues */
-  --border-strong: #2f3b43;      /* Bordes de inputs y botones secundarios */
+  /* Lienzo y Superficies Oficiales Giantucchi */
+  --bg: #050505;                 /* Pitch space black profundo */
+  --surface: #0a0a0f;            /* Superficie principal de tarjetas y paneles */
+  --surface-2: #101018;          /* Superficie secundaria / contenedores internos */
+  --surface-input: #141420;      /* Inputs, buscadores, píldoras y wells */
+  --surface-hover: #1c1c2e;      /* Estado hover interactivo */
+  
+  /* Bordes Traslúcidos Hairline */
+  --border: rgba(255, 255, 255, 0.08);       /* Borde base sutil de vidrio */
+  --border-subtle: rgba(255, 255, 255, 0.04);/* Divisores internos tenues */
+  --border-strong: rgba(255, 255, 255, 0.16);/* Bordes de inputs e interactivos */
+  --border-focus: #06b6d4;                   /* Borde de foco cian Giantucchi */
 
-  /* Tipografía WhatsApp */
-  --text: #e9edef;               /* Texto principal de alto contraste suave */
-  --text-bright: #ffffff;        /* Títulos y texto destacado */
-  --muted: #8696a0;              /* Subtítulos, timestamps e íconos inactivos */
-  --muted-dark: #667781;         /* Texto secundario de menor jerarquía */
+  /* Tipografía Giantucchi */
+  --text: #e2e8f0;               /* Texto principal de alto contraste suave */
+  --text-bright: #ffffff;        /* Encabezados y valores clave */
+  --muted: #94a3b8;              /* Subtítulos, timestamps e íconos inactivos */
+  --muted-dark: #64748b;         /* Texto secundario de menor jerarquía */
 
-  /* Acentos Verdes WhatsApp */
-  --primary: #00a884;            /* Verde esmeralda signature de WhatsApp Dark */
-  --primary-hover: #06cf9c;
-  --primary-ink: #0b141a;        /* Texto oscuro legible sobre el verde brillante */
-  --primary-glow: rgba(0, 168, 132, 0.3);
-  --accent: #25d366;             /* Verde vibrante clásico WhatsApp para precios y badges */
-  --bubble-green: #005c4b;       /* Verde de burbuja de mensaje enviado */
-  --bubble-green-hover: #026b57;
-  --bubble-green-border: rgba(37, 211, 102, 0.35);
+  /* Giantucchi Brand Accents (Espectro Cromático) */
+  --g-cyan: #06b6d4;
+  --g-blue: #3b82f6;
+  --g-violet: #8b5cf6;
+  --g-pink: #ec4899;
+  --g-orange: #f97316;
+  --g-emerald: #10b981;
+  --spectrum-gradient: linear-gradient(135deg, #06b6d4 0%, #3b82f6 20%, #8b5cf6 40%, #ec4899 60%, #f97316 80%, #eab308 100%);
+  --spectrum-bar: linear-gradient(90deg, #06b6d4 0%, #3b82f6 20%, #8b5cf6 40%, #ec4899 60%, #f97316 80%, #eab308 100%);
 
-  /* Estados Adaptados al Modo Oscuro */
-  --ok-bg: rgba(0, 168, 132, 0.16);
-  --ok-ink: #25d366;
-  --ok-border: rgba(37, 211, 102, 0.35);
+  /* Botón Principal High-Contrast Giantucchi */
+  --primary: #ffffff;
+  --primary-hover: #f1f5f9;
+  --primary-ink: #050505;
+  --primary-glow: rgba(255, 255, 255, 0.22);
+  --accent: #22d3ee;             /* Cian de acento para métricas y enlaces */
 
-  --warn-bg: rgba(245, 158, 11, 0.15);
+  /* WhatsApp Official Colors (Preservados para integración WA) */
+  --wa-green: #25d366;
+  --wa-emerald: #00a884;
+  --wa-dark: #005c4b;
+  --wa-glow: rgba(37, 211, 102, 0.35);
+
+  /* Estados Adaptados al Modo Oscuro Giantucchi */
+  --ok-bg: rgba(16, 185, 129, 0.14);
+  --ok-ink: #34d399;
+  --ok-border: rgba(52, 211, 153, 0.3);
+
+  --warn-bg: rgba(245, 158, 11, 0.14);
   --warn-ink: #fbbf24;
-  --warn-border: rgba(245, 158, 11, 0.35);
+  --warn-border: rgba(251, 191, 36, 0.3);
 
-  --danger-bg: rgba(241, 92, 109, 0.15);
-  --danger-ink: #f15c6d;
-  --danger-border: rgba(241, 92, 109, 0.35);
+  --danger-bg: rgba(239, 68, 68, 0.14);
+  --danger-ink: #f87171;
+  --danger-border: rgba(248, 113, 113, 0.3);
 
-  --muted-bg: rgba(134, 150, 160, 0.12);
-  --muted-ink: #8696a0;
+  --muted-bg: rgba(148, 163, 184, 0.12);
+  --muted-ink: #94a3b8;
 
-  /* Formas y Radios (Cápsulas / Píldoras Estilo WhatsApp) */
+  /* Formas y Radios */
   --radius-full: 9999px;
   --radius-lg: 16px;
   --radius: 12px;
   --radius-sm: 8px;
 
-  --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45), 0 2px 6px -1px rgba(0, 0, 0, 0.25);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* Sombras Profundas y Resplandores */
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --shadow-cyan: 0 0 24px rgba(6, 182, 212, 0.25);
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -68,27 +88,81 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Scrollbar estilizado Giantucchi */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c1c2e;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a44;
+}
+
 a {
-  color: var(--primary);
+  color: var(--g-cyan);
   text-decoration: none;
   transition: all 0.15s ease;
 }
 a:hover {
-  color: var(--primary-hover);
+  color: #38bdf8;
   text-decoration: none;
 }
 
 /* ============================================================
-   NAVBAR & HEADER (ESTILO WHATSAPP WEB TOPBAR)
+   GIANTUCCHI SPECTRUM ACCENTS
+   ============================================================ */
+
+.giantucchi-spectrum-bar {
+  height: 2.5px;
+  width: 100%;
+  background: var(--spectrum-bar);
+  display: block;
+}
+
+.giantucchi-spectrum-bar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: var(--spectrum-bar);
+  z-index: 1000;
+}
+
+.giantucchi-badge-pro {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+}
+
+/* ============================================================
+   NAVBAR & HEADER (GLASSMORPHIC OBSIDIAN)
    ============================================================ */
 
 .navbar-wrapper {
-  background: var(--surface);
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 .nav {
@@ -98,7 +172,7 @@ a:hover {
   align-items: center;
   gap: 8px;
   padding: 0 20px;
-  min-height: 58px;
+  min-height: 60px;
 }
 
 .nav .brand {
@@ -116,7 +190,7 @@ a:hover {
 .nav .brand-icon {
   font-size: 22px;
   display: inline-block;
-  filter: drop-shadow(0 2px 4px rgba(0, 168, 132, 0.4));
+  filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.5));
 }
 
 .nav-items {
@@ -136,19 +210,22 @@ a:hover {
   border-radius: var(--radius-full);
   transition: all 0.18s ease;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
 .nav a.item:hover {
   color: var(--text-bright);
   background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.08);
   text-decoration: none;
 }
 
 .nav a.item.active {
-  color: #ffffff;
-  background: var(--bubble-green);
-  border: 1px solid var(--bubble-green-border);
+  color: #22d3ee;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.35);
   font-weight: 700;
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.15);
 }
 
 .nav-ico {
@@ -182,13 +259,14 @@ a:hover {
 }
 
 .wa-status-pill.open {
-  background: var(--bubble-green);
-  border-color: var(--bubble-green-border);
-  color: var(--accent);
+  background: rgba(37, 211, 102, 0.12);
+  border-color: rgba(37, 211, 102, 0.4);
+  color: #25d366;
+  box-shadow: 0 0 12px rgba(37, 211, 102, 0.2);
 }
 .wa-status-pill.open .wa-dot {
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
+  background: var(--wa-green);
+  box-shadow: 0 0 8px var(--wa-green);
 }
 
 .wa-status-pill.close, .wa-status-pill.offline {
@@ -201,7 +279,7 @@ a:hover {
   box-shadow: 0 0 8px var(--danger-ink);
 }
 
-/* Perfil de usuario */
+/* Perfil de usuario Giantucchi */
 .user-profile {
   display: flex;
   align-items: center;
@@ -214,14 +292,14 @@ a:hover {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--primary);
-  color: #0b141a;
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(0, 168, 132, 0.3);
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
 }
 
 .user-profile .who {
@@ -247,14 +325,14 @@ a:hover {
   .nav-items {
     display: none;
     position: absolute;
-    top: 58px;
+    top: 62px;
     left: 0;
     right: 0;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     flex-direction: column;
-    padding: 12px 18px;
-    gap: 6px;
+    padding: 14px 18px;
+    gap: 8px;
     box-shadow: var(--shadow);
   }
   .nav-items.open { display: flex; }
@@ -269,11 +347,11 @@ a:hover {
 .wrap {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 20px 80px;
+  padding: 28px 20px 80px;
 }
 
 h1 {
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.025em;
   margin: 0 0 16px;
@@ -281,7 +359,7 @@ h1 {
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 18.5px;
   font-weight: 700;
   letter-spacing: -0.015em;
   margin: 26px 0 12px;
@@ -306,7 +384,7 @@ h3 {
 }
 
 /* ============================================================
-   TARJETAS & PANELES
+   TARJETAS & PANELES (GIANTUCCHI GLASS OBSIDIAN)
    ============================================================ */
 
 .card {
@@ -314,19 +392,19 @@ h3 {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: 22px;
+  padding: 24px;
   margin-bottom: 20px;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-  border-color: var(--border-strong);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .card h2:first-child, .card h3:first-child { margin-top: 0; }
 
 /* ============================================================
-   KPIS / MÉTRICAS (ESTILO WHATSAPP CARDS)
+   KPIS / MÉTRICAS (SPECTRUM BORDER HIGHLIGHTS)
    ============================================================ */
 
 .kpis {
@@ -339,16 +417,17 @@ h3 {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 16px 18px;
+  padding: 18px 20px;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kpi:hover {
   transform: translateY(-2px);
-  border-color: var(--border-strong);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7);
 }
 
 .kpi::before {
@@ -361,12 +440,13 @@ h3 {
   background: var(--border);
 }
 
-.kpi:nth-child(1)::before { background: var(--primary); }
-.kpi:nth-child(2)::before { background: #f15c6d; }
+/* Spectrum Hairlines por posición */
+.kpi:nth-child(1)::before { background: var(--g-cyan); }
+.kpi:nth-child(2)::before { background: #ef4444; }
 .kpi:nth-child(3)::before { background: #f59e0b; }
-.kpi:nth-child(4)::before { background: #53bdeb; }
-.kpi:nth-child(5)::before { background: #a78bfa; }
-.kpi:nth-child(6)::before { background: var(--accent); }
+.kpi:nth-child(4)::before { background: var(--g-blue); }
+.kpi:nth-child(5)::before { background: var(--g-violet); }
+.kpi:nth-child(6)::before { background: var(--g-emerald); }
 
 .kpi .label {
   color: var(--muted);
@@ -377,7 +457,7 @@ h3 {
 }
 
 .kpi .value {
-  font-size: 26px;
+  font-size: 27px;
   font-weight: 800;
   letter-spacing: -0.02em;
   margin-top: 6px;
@@ -385,13 +465,14 @@ h3 {
 }
 
 /* ============================================================
-   TABLAS MODERNAS
+   TABLAS MODERNAS OBSIDIAN
    ============================================================ */
 
 .table-wrap {
   overflow-x: auto;
   border-radius: var(--radius);
   border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 table {
@@ -402,7 +483,7 @@ table {
 }
 
 th, td {
-  padding: 12px 14px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
@@ -432,7 +513,7 @@ td.num, th.num {
 }
 
 /* ============================================================
-   BADGES & PILLS
+   BADGES & PILLS NEON
    ============================================================ */
 
 .badge {
@@ -441,15 +522,15 @@ td.num, th.num {
   gap: 5px;
   padding: 4px 12px;
   border-radius: var(--radius-full);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 .badge.ok {
-  background: var(--bubble-green);
-  color: #25d366;
-  border: 1px solid var(--bubble-green-border);
+  background: var(--ok-bg);
+  color: var(--ok-ink);
+  border: 1px solid var(--ok-border);
 }
 
 .badge.warn {
@@ -470,28 +551,34 @@ td.num, th.num {
   border: 1px solid var(--border);
 }
 
+.badge.cyan, .badge.info {
+  background: rgba(6, 182, 212, 0.14);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
 /* ============================================================
-   FORMULARIOS & INPUTS (PÍLDORAS ESTILO WHATSAPP)
+   FORMULARIOS & INPUTS
    ============================================================ */
 
 form.stack {
   display: grid;
-  gap: 15px;
+  gap: 16px;
 }
 
 label {
   display: block;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--muted);
   margin-bottom: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 input, select, textarea {
   width: 100%;
-  padding: 10px 16px;
+  padding: 11px 16px;
   font: inherit;
   font-size: 13.5px;
   color: var(--text-bright);
@@ -507,12 +594,12 @@ textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+  border-color: var(--g-cyan);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.25);
 }
 
 input::placeholder, textarea::placeholder {
-  color: var(--muted);
+  color: var(--muted-dark);
 }
 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -522,7 +609,7 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ============================================================
-   BOTONES (PÍLDORAS REDONDEADAS WHATSAPP)
+   BOTONES (GIANTUCCHI SIGNATURE HIGH-CONTRAST & PILLS)
    ============================================================ */
 
 .btn {
@@ -530,7 +617,7 @@ input::placeholder, textarea::placeholder {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 8px 18px;
+  padding: 9px 18px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-strong);
   background: var(--surface-input);
@@ -547,23 +634,26 @@ input::placeholder, textarea::placeholder {
 
 .btn:hover {
   background: var(--surface-hover);
-  border-color: var(--primary);
+  border-color: rgba(6, 182, 212, 0.5);
   color: var(--text-bright);
   transform: translateY(-1px);
 }
 
+/* Primary CTA Giantucchi Signature: Solid White High-Contrast */
 .btn.primary {
-  background: var(--primary);
-  color: #0b141a;
-  border: 1px solid var(--primary);
-  box-shadow: 0 2px 12px var(--primary-glow);
+  background: #ffffff;
+  color: #050505;
+  border: 1px solid #ffffff;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
 }
 
 .btn.primary:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: #f1f5f9;
+  border-color: #f1f5f9;
   color: #000000;
-  box-shadow: 0 4px 16px rgba(0, 168, 132, 0.45);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn.sm {
@@ -571,10 +661,11 @@ input::placeholder, textarea::placeholder {
   font-size: 12px;
 }
 
+/* WhatsApp Green CTA */
 .btn.wa {
-  background: #25d366;
-  color: #0c1317;
-  border: 1px solid #25d366;
+  background: var(--wa-green);
+  color: #050505;
+  border: 1px solid var(--wa-green);
   font-weight: 800;
 }
 
@@ -582,7 +673,7 @@ input::placeholder, textarea::placeholder {
   background: #20ba5a;
   border-color: #20ba5a;
   color: #000000;
-  box-shadow: 0 2px 10px rgba(37, 211, 102, 0.4);
+  box-shadow: 0 2px 12px rgba(37, 211, 102, 0.45);
 }
 
 .btn.danger {
@@ -591,8 +682,9 @@ input::placeholder, textarea::placeholder {
   background: var(--danger-bg);
 }
 .btn.danger:hover {
-  background: rgba(241, 92, 109, 0.25);
+  background: rgba(239, 68, 68, 0.25);
   border-color: var(--danger-ink);
+  color: #ffffff;
 }
 
 .actions {
@@ -623,9 +715,9 @@ input::placeholder, textarea::placeholder {
 }
 
 .flash.ok {
-  background: var(--bubble-green);
+  background: var(--ok-bg);
   color: #ffffff;
-  border: 1px solid var(--bubble-green-border);
+  border: 1px solid var(--ok-border);
 }
 
 .flash.error {
@@ -655,7 +747,7 @@ input::placeholder, textarea::placeholder {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .search {
@@ -683,14 +775,14 @@ input::placeholder, textarea::placeholder {
 
 .bar {
   height: 100%;
-  background: var(--primary);
+  background: var(--g-cyan);
   border-radius: var(--radius-full);
   min-width: 3px;
   transition: width 0.3s ease;
 }
 
 /* ============================================================
-   PÁGINAS DE ACCESO / LOGIN (WHATSAPP WEB CARD)
+   PÁGINAS DE ACCESO / LOGIN (GIANTUCCHI OBSIDIAN HERO)
    ============================================================ */
 
 .auth-wrap {
@@ -698,7 +790,7 @@ input::placeholder, textarea::placeholder {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: radial-gradient(circle at top, #202c33 0%, #111b21 70%);
+  background: radial-gradient(ellipse at 50% 0%, #16162a 0%, #050505 75%);
 }
 
 .auth-card {
@@ -710,12 +802,12 @@ input::placeholder, textarea::placeholder {
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 32px 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 34px 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
 }
 
 /* ============================================================
-   ESTILOS DE IMPRESIÓN (TICKETS Y COMPROBANTES)
+   ESTILOS DE IMPRESIÓN (TICKETS Y COMPROBANTES TÉRMICOS)
    ============================================================ */
 
 @media print {
@@ -725,7 +817,7 @@ input::placeholder, textarea::placeholder {
     margin: 0 !important;
     padding: 0 !important;
   }
-  .navbar-wrapper, .no-print, .flash, .toolbar, .actions, button {
+  .navbar-wrapper, .giantucchi-spectrum-bar, .no-print, .flash, .toolbar, .actions, button {
     display: none !important;
   }
   .wrap, .terminal-container {
@@ -822,40 +914,40 @@ input::placeholder, textarea::placeholder {
   letter-spacing: 0.03em;
   padding: 14px 20px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--primary);
+  border: 2px solid var(--g-cyan);
   background: var(--surface-input);
   color: var(--text-bright);
-  box-shadow: 0 0 16px var(--primary-glow);
+  box-shadow: var(--shadow-cyan);
   transition: all 0.2s ease;
 }
 
 .checkin-input-wrap input:focus {
-  border-color: #06cf9c;
-  box-shadow: 0 0 24px rgba(0, 168, 132, 0.45);
+  border-color: #22d3ee;
+  box-shadow: 0 0 28px rgba(6, 182, 212, 0.45);
   outline: none;
 }
 
-/* Burbuja de miembro activo (Estilo burbuja enviada WhatsApp) */
+/* Banner de resultado del Check-in */
 .active-member-banner {
-  background: var(--bubble-green);
-  border: 1px solid var(--bubble-green-border);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
   margin-top: 14px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(0, 92, 75, 0.35);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
 }
 
 .active-member-banner.warn {
-  background: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: none;
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
 }
 
 .active-member-banner.danger {
-  background: rgba(241, 92, 109, 0.12);
-  border-color: rgba(241, 92, 109, 0.4);
-  box-shadow: none;
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
 }
 
 /* Columna 2: POS Productos */
@@ -876,7 +968,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .pos-search-input:focus {
-  border-color: var(--primary);
+  border-color: var(--g-cyan);
   outline: none;
 }
 
@@ -903,14 +995,15 @@ input::placeholder, textarea::placeholder {
 
 .pos-cat-btn:hover {
   color: var(--text-bright);
-  border-color: var(--primary);
+  border-color: var(--g-cyan);
 }
 
 .pos-cat-btn.active {
-  background: var(--primary);
-  color: #0b141a;
-  border-color: var(--primary);
+  background: var(--g-cyan);
+  color: #050505;
+  border-color: var(--g-cyan);
   font-weight: 800;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
 }
 
 .pos-products-grid {
@@ -940,8 +1033,8 @@ input::placeholder, textarea::placeholder {
 .pos-prod-card:hover {
   transform: translateY(-2px);
   background: var(--surface-hover);
-  border-color: var(--primary);
-  box-shadow: 0 4px 14px rgba(0, 168, 132, 0.2);
+  border-color: var(--g-cyan);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.2);
 }
 
 .pos-prod-card:active {
@@ -1028,7 +1121,7 @@ input::placeholder, textarea::placeholder {
 
 .pos-qty-btn:hover {
   background: var(--surface-hover);
-  border-color: var(--primary);
+  border-color: var(--g-cyan);
   color: var(--text-bright);
 }
 
@@ -1053,20 +1146,21 @@ input::placeholder, textarea::placeholder {
 }
 
 .pos-method-btn:hover {
-  border-color: var(--primary);
+  border-color: var(--g-cyan);
   color: var(--text-bright);
 }
 
 .pos-method-btn.active {
-  background: var(--bubble-green);
-  border-color: var(--primary);
-  color: #25d366;
+  background: rgba(6, 182, 212, 0.15);
+  border-color: var(--g-cyan);
+  color: #22d3ee;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
 }
 
 .pos-checkout-btn {
   width: 100%;
-  background: linear-gradient(135deg, var(--primary) 0%, #008f6f 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: #050505;
   border: none;
   border-radius: var(--radius-full);
   padding: 13px 18px;
@@ -1078,29 +1172,29 @@ input::placeholder, textarea::placeholder {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 4px 16px var(--primary-glow);
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
   transition: all 0.18s ease;
 }
 
 .pos-checkout-btn:hover {
-  background: linear-gradient(135deg, var(--primary-hover) 0%, #00a884 100%);
+  background: #f1f5f9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 168, 132, 0.45);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.4);
 }
 
 .pos-checkout-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.35;
   cursor: not-allowed;
   transform: none;
-  filter: grayscale(0.6);
+  filter: grayscale(1);
 }
 
-/* Feed en vivo (Columna 3 - Estilo Chats de WhatsApp) */
+/* Feed en vivo (Columna 3 - Monitor POS) */
 .feed-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius);
   background: var(--surface-2);
   border: 1px solid var(--border-subtle);
