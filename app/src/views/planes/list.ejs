@@ -1,6 +1,8 @@
 <div class="toolbar">
   <h1 class="mb0">Planes y precios</h1>
-  <a class="btn primary" href="/planes/nuevo">+ Nuevo plan</a>
+  <button class="btn primary" type="button" onclick="abrirModalPlanNuevo();" style="display:inline-flex; align-items:center; gap:6px;">
+    <%- u.icon('plus', 15) %> Nuevo plan
+  </button>
 </div>
 
 <div class="card">
@@ -15,13 +17,98 @@
         <td class="num"><%= p.duracion_dias %></td>
         <td><span class="badge <%= p.activo ? 'ok' : 'muted' %>"><%= p.activo ? 'Activo' : 'Inactivo' %></span></td>
         <td class="actions">
-          <a class="btn sm" href="/planes/<%= p.id %>/editar">Editar</a>
+          <button class="btn sm" type="button"
+                  data-id="<%= p.id %>"
+                  data-nombre="<%= p.nombre %>"
+                  data-descripcion="<%= p.descripcion || '' %>"
+                  data-precio="<%= p.precio %>"
+                  data-dias="<%= p.duracion_dias %>"
+                  onclick="abrirModalPlanEditar(this);"
+                  style="display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('edit', 13) %> Editar
+          </button>
           <form method="post" action="/planes/<%= p.id %>/toggle" style="margin:0;">
             <button class="btn sm" type="submit"><%= p.activo ? 'Desactivar' : 'Activar' %></button>
           </form>
         </td>
       </tr>
     <% }); %>
+    <% if (!planes.length) { %><tr><td colspan="6" class="muted">Sin planes registrados.</td></tr><% } %>
     </tbody>
   </table></div>
 </div>
+
+<!-- Modal Flotante: Crear / Editar Plan -->
+<div id="modal-plan" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-plan');">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('planes', 16) %> <span id="plan-modal-title">Nuevo Plan</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-plan');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form id="form-plan" method="post" action="/planes" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div style="margin-bottom:12px;">
+          <label for="plan-nombre">Nombre del Plan *</label>
+          <input id="plan-nombre" name="nombre" required placeholder="Ej: Mensual Full, Trimestral, Anual VIP...">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label for="plan-desc">Descripción</label>
+          <input id="plan-desc" name="descripcion" placeholder="Ej: Acceso total a pesas, cardio y asesoría...">
+        </div>
+        <div class="grid2">
+          <div>
+            <label for="plan-precio">Precio (S/) *</label>
+            <input type="number" step="0.01" min="0" id="plan-precio" name="precio" placeholder="0.00" required>
+          </div>
+          <div>
+            <label for="plan-dias">Duración (días) *</label>
+            <input type="number" min="1" id="plan-dias" name="duracion_dias" placeholder="30" required>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-plan');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar Plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalPlanNuevo() {
+    document.getElementById('plan-modal-title').textContent = 'Nuevo Plan';
+    var f = document.getElementById('form-plan');
+    f.action = '/planes';
+    f.reset();
+    document.getElementById('modal-plan').classList.add('open');
+    setTimeout(function(){ document.getElementById('plan-nombre').focus(); }, 60);
+  }
+
+  function abrirModalPlanEditar(btn) {
+    document.getElementById('plan-modal-title').textContent = 'Editar Plan';
+    var f = document.getElementById('form-plan');
+    f.action = '/planes/' + btn.getAttribute('data-id');
+    document.getElementById('plan-nombre').value = btn.getAttribute('data-nombre') || '';
+    document.getElementById('plan-desc').value = btn.getAttribute('data-descripcion') || '';
+    document.getElementById('plan-precio').value = btn.getAttribute('data-precio') || '';
+    document.getElementById('plan-dias').value = btn.getAttribute('data-dias') || '';
+    document.getElementById('modal-plan').classList.add('open');
+    setTimeout(function(){ document.getElementById('plan-nombre').focus(); }, 60);
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
+</script>

@@ -10,7 +10,7 @@
       </p>
     </div>
     <div class="actions">
-      <a class="btn primary" href="/socios/nuevo" target="_blank" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('userPlus', 16) %> Nuevo Socio</a>
+      <button class="btn primary" type="button" onclick="abrirModalSocioTerminal();" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('userPlus', 16) %> Nuevo Socio</button>
       <a class="btn" href="/caja" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('caja', 16) %> Caja del Día</a>
       <a class="btn" href="/productos" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('productos', 16) %> Inventario</a>
     </div>
@@ -907,4 +907,202 @@
     var inp = document.getElementById('dni-input');
     if (inp) { inp.focus(); inp.select(); }
   });
+
+  // ---------- MODAL FLOTANTE NUEVO SOCIO EN TERMINAL ----------
+  function abrirModalSocioTerminal() {
+    var f = document.getElementById('form-socio-terminal');
+    if (f) f.reset();
+    document.getElementById('modal-socio-terminal').classList.add('open');
+    setTimeout(function() { document.getElementById('term-socio-nombres').focus(); }, 60);
+  }
+
+  function handleSocioTerminalSubmit(e) {
+    e.preventDefault();
+    var f = e.target;
+    var btn = f.querySelector('button[type="submit"]');
+    var alertBox = document.getElementById('term-socio-alert');
+    alertBox.style.display = 'none';
+
+    var data = {
+      nombres: f.nombres.value.trim(),
+      apellidos: f.apellidos.value.trim(),
+      dni: f.dni.value.trim(),
+      telefono: f.telefono.value.trim(),
+      fecha_nacimiento: f.fecha_nacimiento.value.trim(),
+      email: f.email.value.trim(),
+      genero: f.genero.value,
+      direccion: f.direccion.value.trim(),
+      contacto_emergencia_nombre: f.contacto_emergencia_nombre.value.trim(),
+      contacto_emergencia_telefono: f.contacto_emergencia_telefono.value.trim(),
+      notas: f.notas.value.trim(),
+      acepta_marketing: f.acepta_marketing.checked ? 'on' : 'off',
+    };
+
+    if (!data.nombres || !data.apellidos) {
+      alertBox.textContent = 'Nombres y apellidos son obligatorios.';
+      alertBox.style.display = 'block';
+      alertBox.className = 'flash error';
+      return false;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    fetch('/socios', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      btn.disabled = false;
+      btn.textContent = 'Guardar Socio';
+      if (res.ok) {
+        sonarExito();
+        cerrarModal('modal-socio-terminal');
+        // Auto-seleccionar al socio recién creado en el mostrador del Terminal
+        seleccionarSocioManualmente(res.id, res.nombres + ' ' + res.apellidos, res.dni, 'Sin plan', 'sin_suscripcion');
+        // Mostrar alerta rápida
+        var resultDiv = document.getElementById('checkin-result');
+        if (resultDiv) {
+          resultDiv.style.display = 'block';
+          resultDiv.innerHTML =
+            '<div class="active-member-banner warn">' +
+              '<div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#fbbf24; display:flex; align-items:center; gap:6px;">' +
+                SVG_ICONS.alertCircle + ' SOCIO RECIÉN REGISTRADO (SIN PLAN)' +
+              '</div>' +
+              '<div style="font-size:18px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;">' +
+                res.nombres + ' ' + res.apellidos +
+              '</div>' +
+              '<div class="muted" style="font-size:12.5px;">DNI: <strong>' + (res.dni || '—') + '</strong> · ¡Listo para cobrar suscripción!</div>' +
+              '<div class="actions" style="margin-top:10px;">' +
+                '<a class="btn primary sm" href="/suscripciones/nueva?socio=' + res.id + '" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">' +
+                  SVG_ICONS.card + ' Cobrar / Asignar Plan Ahora' +
+                '</a>' +
+                '<a class="btn sm" href="/socios/' + res.id + '" target="_blank">Ver Ficha</a>' +
+              '</div>' +
+            '</div>';
+        }
+      } else {
+        sonarAlerta();
+        alertBox.textContent = res.error || 'Error al registrar socio.';
+        alertBox.style.display = 'block';
+        alertBox.className = 'flash error';
+      }
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = 'Guardar Socio';
+      sonarAlerta();
+      alertBox.textContent = 'Error de conexión: ' + err.message;
+      alertBox.style.display = 'block';
+      alertBox.className = 'flash error';
+    });
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
 </script>
+
+<!-- Modal Flotante: Registrar Socio desde Terminal -->
+<div id="modal-socio-terminal" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio-terminal');">
+  <div class="modal-dialog lg">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('userPlus', 16) %> Registrar Nuevo Socio al Mostrador
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio-terminal');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form id="form-socio-terminal" onsubmit="return handleSocioTerminalSubmit(event);" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div id="term-socio-alert" style="display:none; margin-bottom:12px;"></div>
+        <div class="grid2">
+          <div>
+            <label for="term-socio-nombres">Nombres *</label>
+            <input id="term-socio-nombres" name="nombres" required placeholder="Ej: Juan Carlos">
+          </div>
+          <div>
+            <label for="term-socio-apellidos">Apellidos *</label>
+            <input id="term-socio-apellidos" name="apellidos" required placeholder="Ej: Pérez García">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="term-socio-dni">DNI / Documento</label>
+            <input id="term-socio-dni" name="dni" placeholder="8 dígitos...">
+          </div>
+          <div>
+            <label for="term-socio-tel">Teléfono (WhatsApp)</label>
+            <input id="term-socio-tel" name="telefono" placeholder="Ej: 987654321">
+          </div>
+          <div>
+            <label for="term-socio-fnac">Fecha de Nacimiento</label>
+            <input type="date" id="term-socio-fnac" name="fecha_nacimiento">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="term-socio-email">Correo Electrónico</label>
+            <input type="email" id="term-socio-email" name="email" placeholder="socio@email.com">
+          </div>
+          <div>
+            <label for="term-socio-genero">Género</label>
+            <select id="term-socio-genero" name="genero">
+              <option value="">—</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div>
+            <label for="term-socio-dir">Dirección</label>
+            <input id="term-socio-dir" name="direccion" placeholder="Av. Principal 123...">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="term-socio-cemer">Contacto de Emergencia</label>
+            <input id="term-socio-cemer" name="contacto_emergencia_nombre" placeholder="Familiar / Amigo">
+          </div>
+          <div>
+            <label for="term-socio-temer">Teléfono de Emergencia</label>
+            <input id="term-socio-temer" name="contacto_emergencia_telefono" placeholder="Número de contacto">
+          </div>
+        </div>
+
+        <div>
+          <label for="term-socio-notas">Notas / Salud</label>
+          <textarea id="term-socio-notas" name="notas" rows="2" placeholder="Observaciones, lesiones..."></textarea>
+        </div>
+
+        <div>
+          <label style="display:flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="term-socio-mkt" name="acepta_marketing" style="width:auto;" checked>
+            <span>Acepta avisos y confirmaciones de pago por WhatsApp</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-socio-terminal');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar Socio</button>
+      </div>
+    </form>
+  </div>
+</div>

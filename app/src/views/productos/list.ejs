@@ -1,6 +1,8 @@
 <div class="toolbar">
   <h1 class="mb0">Productos</h1>
-  <a class="btn primary" href="/productos/nuevo">+ Nuevo producto</a>
+  <button class="btn primary" type="button" onclick="abrirModalProductoNuevo();" style="display:inline-flex; align-items:center; gap:6px;">
+    <%- u.icon('plus', 15) %> Nuevo producto
+  </button>
 </div>
 
 <div class="card">
@@ -27,7 +29,16 @@
           <% } %>
         </td>
         <td class="actions">
-          <a class="btn sm" href="/productos/<%= p.id %>/editar">Editar</a>
+          <button class="btn sm" type="button"
+                  data-id="<%= p.id %>"
+                  data-nombre="<%= p.nombre %>"
+                  data-precio="<%= p.precio %>"
+                  data-costo="<%= p.costo || '' %>"
+                  data-stock="<%= p.stock %>"
+                  onclick="abrirModalProductoEditar(this);"
+                  style="display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('edit', 13) %> Editar
+          </button>
           <form method="post" action="/productos/<%= p.id %>/toggle" style="margin:0;">
             <button class="btn sm" type="submit"><%= p.activo ? 'Desactivar' : 'Activar' %></button>
           </form>
@@ -58,3 +69,79 @@
   </table></div>
   <% } %>
 </div>
+
+<!-- Modal Flotante: Crear / Editar Producto -->
+<div id="modal-producto" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-producto');">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('productos', 16) %> <span id="prod-modal-title">Nuevo Producto</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-producto');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form id="form-producto" method="post" action="/productos" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div style="margin-bottom:12px;">
+          <label for="prod-nombre">Nombre del Producto *</label>
+          <input id="prod-nombre" name="nombre" required placeholder="Ej: Agua San Luis 500ml, Batido Proteico...">
+        </div>
+        <div class="grid3">
+          <div>
+            <label for="prod-precio">Precio venta (S/) *</label>
+            <input type="number" step="0.01" min="0" id="prod-precio" name="precio" placeholder="0.00" required>
+          </div>
+          <div>
+            <label for="prod-costo">Costo (S/)</label>
+            <input type="number" step="0.01" min="0" id="prod-costo" name="costo" placeholder="0.00">
+          </div>
+          <div>
+            <label for="prod-stock">Stock actual</label>
+            <input type="number" id="prod-stock" name="stock" value="0" min="0">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-producto');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar Producto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalProductoNuevo() {
+    document.getElementById('prod-modal-title').textContent = 'Nuevo Producto';
+    var f = document.getElementById('form-producto');
+    f.action = '/productos';
+    f.reset();
+    document.getElementById('prod-stock').value = '0';
+    document.getElementById('modal-producto').classList.add('open');
+    setTimeout(function(){ document.getElementById('prod-nombre').focus(); }, 60);
+  }
+
+  function abrirModalProductoEditar(btn) {
+    document.getElementById('prod-modal-title').textContent = 'Editar Producto';
+    var f = document.getElementById('form-producto');
+    f.action = '/productos/' + btn.getAttribute('data-id');
+    document.getElementById('prod-nombre').value = btn.getAttribute('data-nombre') || '';
+    document.getElementById('prod-precio').value = btn.getAttribute('data-precio') || '';
+    document.getElementById('prod-costo').value = btn.getAttribute('data-costo') || '';
+    document.getElementById('prod-stock').value = btn.getAttribute('data-stock') || '0';
+    document.getElementById('modal-producto').classList.add('open');
+    setTimeout(function(){ document.getElementById('prod-nombre').focus(); }, 60);
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
+</script>

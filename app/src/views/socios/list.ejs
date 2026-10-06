@@ -4,9 +4,9 @@
     <p class="muted" style="margin-top:4px;">Total registrados en el sistema: <strong><%= total %></strong> socios.</p>
   </div>
   <div class="actions">
-    <a class="btn primary" href="/socios/nuevo" style="display:inline-flex; align-items:center; gap:6px;">
+    <button class="btn primary" type="button" onclick="abrirModalSocioNuevo();" style="display:inline-flex; align-items:center; gap:6px;">
       <%- u.icon('userPlus', 16) %> Nuevo Socio
-    </a>
+    </button>
   </div>
 </div>
 
@@ -89,6 +89,24 @@
         </td>
         <td class="right actions" style="justify-content:flex-end;">
           <a class="btn sm" href="/socios/<%= s.id %>">Ficha</a>
+          <button class="btn sm" type="button"
+                  data-id="<%= s.id %>"
+                  data-nombres="<%= s.nombres %>"
+                  data-apellidos="<%= s.apellidos %>"
+                  data-dni="<%= s.dni || '' %>"
+                  data-telefono="<%= s.telefono || '' %>"
+                  data-email="<%= s.email || '' %>"
+                  data-genero="<%= s.genero || '' %>"
+                  data-direccion="<%= s.direccion || '' %>"
+                  data-fecha-nacimiento="<%= s.fecha_nacimiento ? (s.fecha_nacimiento.toISOString ? s.fecha_nacimiento.toISOString().slice(0,10) : String(s.fecha_nacimiento).slice(0,10)) : '' %>"
+                  data-contacto-nombre="<%= s.contacto_emergencia_nombre || '' %>"
+                  data-contacto-telefono="<%= s.contacto_emergencia_telefono || '' %>"
+                  data-notas="<%= s.notas || '' %>"
+                  data-marketing="<%= s.acepta_marketing ? '1' : '0' %>"
+                  onclick="abrirModalSocioEditar(this);"
+                  style="display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('edit', 12) %> Editar
+          </button>
           <a class="btn sm primary" href="/suscripciones/nueva?socio=<%= s.id %>">Cobrar</a>
         </td>
       </tr>
@@ -104,3 +122,137 @@
   <% if (hayMas) { %><a class="btn" href="/socios?q=<%= encodeURIComponent(q) %>&estado=<%= estado %>&page=<%= page+1 %>">Página Siguiente »</a><% } %>
 </div>
 <% } %>
+
+<!-- Modal Flotante: Crear / Editar Socio -->
+<div id="modal-socio" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio');">
+  <div class="modal-dialog lg">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('userPlus', 16) %> <span id="socio-modal-title">Registrar Nuevo Socio</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form id="form-socio" method="post" action="/socios" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div class="grid2">
+          <div>
+            <label for="socio-nombres">Nombres *</label>
+            <input id="socio-nombres" name="nombres" required placeholder="Ej: Juan Carlos">
+          </div>
+          <div>
+            <label for="socio-apellidos">Apellidos *</label>
+            <input id="socio-apellidos" name="apellidos" required placeholder="Ej: Pérez García">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="socio-dni">DNI / Documento</label>
+            <input id="socio-dni" name="dni" placeholder="8 dígitos...">
+          </div>
+          <div>
+            <label for="socio-tel">Teléfono (WhatsApp)</label>
+            <input id="socio-tel" name="telefono" placeholder="Ej: 987654321">
+          </div>
+          <div>
+            <label for="socio-fnac">Fecha de Nacimiento</label>
+            <input type="date" id="socio-fnac" name="fecha_nacimiento">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="socio-email">Correo Electrónico</label>
+            <input type="email" id="socio-email" name="email" placeholder="socio@email.com">
+          </div>
+          <div>
+            <label for="socio-genero">Género</label>
+            <select id="socio-genero" name="genero">
+              <option value="">—</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div>
+            <label for="socio-dir">Dirección</label>
+            <input id="socio-dir" name="direccion" placeholder="Av. Principal 123...">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="socio-cemer">Contacto de Emergencia</label>
+            <input id="socio-cemer" name="contacto_emergencia_nombre" placeholder="Nombre de familiar / amigo">
+          </div>
+          <div>
+            <label for="socio-temer">Teléfono de Emergencia</label>
+            <input id="socio-temer" name="contacto_emergencia_telefono" placeholder="Número de contacto">
+          </div>
+        </div>
+
+        <div>
+          <label for="socio-notas">Notas / Historial de Salud</label>
+          <textarea id="socio-notas" name="notas" rows="2" placeholder="Lesiones previas, alergias, observaciones..."></textarea>
+        </div>
+
+        <div>
+          <label style="display:flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="socio-mkt" name="acepta_marketing" style="width:auto;" checked>
+            <span>Acepta recibir recordatorios y avisos promocionales por WhatsApp</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-socio');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar Socio</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalSocioNuevo() {
+    document.getElementById('socio-modal-title').textContent = 'Registrar Nuevo Socio';
+    var f = document.getElementById('form-socio');
+    f.action = '/socios';
+    f.reset();
+    document.getElementById('socio-mkt').checked = true;
+    document.getElementById('modal-socio').classList.add('open');
+    setTimeout(function(){ document.getElementById('socio-nombres').focus(); }, 60);
+  }
+
+  function abrirModalSocioEditar(btn) {
+    document.getElementById('socio-modal-title').textContent = 'Editar Socio: ' + btn.getAttribute('data-nombres') + ' ' + btn.getAttribute('data-apellidos');
+    var f = document.getElementById('form-socio');
+    f.action = '/socios/' + btn.getAttribute('data-id');
+    document.getElementById('socio-nombres').value = btn.getAttribute('data-nombres') || '';
+    document.getElementById('socio-apellidos').value = btn.getAttribute('data-apellidos') || '';
+    document.getElementById('socio-dni').value = btn.getAttribute('data-dni') || '';
+    document.getElementById('socio-tel').value = btn.getAttribute('data-telefono') || '';
+    document.getElementById('socio-fnac').value = btn.getAttribute('data-fecha-nacimiento') || '';
+    document.getElementById('socio-email').value = btn.getAttribute('data-email') || '';
+    document.getElementById('socio-genero').value = btn.getAttribute('data-genero') || '';
+    document.getElementById('socio-dir').value = btn.getAttribute('data-direccion') || '';
+    document.getElementById('socio-cemer').value = btn.getAttribute('data-contacto-nombre') || '';
+    document.getElementById('socio-temer').value = btn.getAttribute('data-contacto-telefono') || '';
+    document.getElementById('socio-notas').value = btn.getAttribute('data-notas') || '';
+    document.getElementById('socio-mkt').checked = btn.getAttribute('data-marketing') === '1';
+    document.getElementById('modal-socio').classList.add('open');
+    setTimeout(function(){ document.getElementById('socio-nombres').focus(); }, 60);
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
+</script>

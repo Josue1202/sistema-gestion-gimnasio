@@ -13,7 +13,7 @@
   </div>
   <div class="actions">
     <a class="btn primary" href="/suscripciones/nueva?socio=<%= socio.id %>" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('card', 14) %> Renovar / Cobrar</a>
-    <a class="btn" href="/socios/<%= socio.id %>/editar" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('edit', 14) %> Editar Datos</a>
+    <button class="btn" type="button" onclick="abrirModalSocioEditar();" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('edit', 14) %> Editar Datos</button>
     <a class="btn" href="/socios">Volver al listado</a>
   </div>
 </div>
@@ -233,3 +233,112 @@
     <button class="btn danger sm" type="submit">Dar de baja al socio</button>
   </form>
 </div>
+
+<!-- Modal Flotante: Editar Datos del Socio -->
+<div id="modal-socio-edit" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio-edit');">
+  <div class="modal-dialog lg">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('edit', 16) %> Editar Datos del Socio
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio-edit');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form method="post" action="/socios/<%= socio.id %>" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div class="grid2">
+          <div>
+            <label for="ed-nombres">Nombres *</label>
+            <input id="ed-nombres" name="nombres" value="<%= socio.nombres || '' %>" required autofocus>
+          </div>
+          <div>
+            <label for="ed-apellidos">Apellidos *</label>
+            <input id="ed-apellidos" name="apellidos" value="<%= socio.apellidos || '' %>" required>
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="ed-dni">DNI / Documento</label>
+            <input id="ed-dni" name="dni" value="<%= socio.dni || '' %>">
+          </div>
+          <div>
+            <label for="ed-tel">Teléfono (WhatsApp)</label>
+            <input id="ed-tel" name="telefono" value="<%= socio.telefono || '' %>" placeholder="51987654321">
+          </div>
+          <div>
+            <label for="ed-fnac">Fecha de Nacimiento</label>
+            <input type="date" id="ed-fnac" name="fecha_nacimiento" value="<%= socio.fecha_nacimiento ? (socio.fecha_nacimiento.toISOString ? socio.fecha_nacimiento.toISOString().slice(0,10) : String(socio.fecha_nacimiento).slice(0,10)) : '' %>">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="ed-email">Correo Electrónico</label>
+            <input type="email" id="ed-email" name="email" value="<%= socio.email || '' %>">
+          </div>
+          <div>
+            <label for="ed-genero">Género</label>
+            <select id="ed-genero" name="genero">
+              <option value="">—</option>
+              <option value="M" <%= socio.genero==='M'?'selected':'' %>>Masculino</option>
+              <option value="F" <%= socio.genero==='F'?'selected':'' %>>Femenino</option>
+              <option value="otro" <%= socio.genero==='otro'?'selected':'' %>>Otro</option>
+            </select>
+          </div>
+          <div>
+            <label for="ed-dir">Dirección</label>
+            <input id="ed-dir" name="direccion" value="<%= socio.direccion || '' %>">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="ed-cemer">Contacto de Emergencia</label>
+            <input id="ed-cemer" name="contacto_emergencia_nombre" value="<%= socio.contacto_emergencia_nombre || '' %>">
+          </div>
+          <div>
+            <label for="ed-temer">Teléfono de Emergencia</label>
+            <input id="ed-temer" name="contacto_emergencia_telefono" value="<%= socio.contacto_emergencia_telefono || '' %>">
+          </div>
+        </div>
+
+        <div>
+          <label for="ed-notas">Notas / Salud</label>
+          <textarea id="ed-notas" name="notas" rows="2"><%= socio.notas || '' %></textarea>
+        </div>
+
+        <div>
+          <label style="display:flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" name="acepta_marketing" style="width:auto;" <%= socio.acepta_marketing ? 'checked' : '' %>>
+            <span>Acepta mensajes promocionales y recordatorios</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-socio-edit');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalSocioEditar() {
+    document.getElementById('modal-socio-edit').classList.add('open');
+    setTimeout(function(){ document.getElementById('ed-nombres').focus(); }, 60);
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
+</script>

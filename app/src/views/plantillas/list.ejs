@@ -1,6 +1,8 @@
 <div class="toolbar">
   <h1 class="mb0">Plantillas de mensaje</h1>
-  <a class="btn primary" href="/plantillas/nueva">+ Nueva</a>
+  <button class="btn primary" type="button" onclick="abrirModalPlantillaNueva();" style="display:inline-flex; align-items:center; gap:6px;">
+    <%- u.icon('plus', 15) %> Nueva plantilla
+  </button>
 </div>
 
 <p class="muted">Marcadores disponibles: <code>{{nombres}}</code> <code>{{apellidos}}</code> <code>{{plan}}</code> <code>{{fecha_fin}}</code> <code>{{dias_restantes}}</code> <code>{{monto}}</code></p>
@@ -15,9 +17,119 @@
         <td><%= p.descripcion || '' %></td>
         <td style="max-width:380px;"><span class="muted" style="font-size:13px;"><%= p.cuerpo %></span></td>
         <td><span class="badge <%= p.activo ? 'ok' : 'muted' %>"><%= p.activo ? 'Activa' : 'Inactiva' %></span></td>
-        <td><a class="btn sm" href="/plantillas/<%= p.id %>/editar">Editar</a></td>
+        <td class="actions">
+          <button class="btn sm" type="button"
+                  data-id="<%= p.id %>"
+                  data-clave="<%= p.clave %>"
+                  data-descripcion="<%= p.descripcion || '' %>"
+                  data-canal="<%= p.canal || 'whatsapp' %>"
+                  data-asunto="<%= p.asunto || '' %>"
+                  data-cuerpo="<%= encodeURIComponent(p.cuerpo || '') %>"
+                  data-activo="<%= p.activo ? '1' : '0' %>"
+                  onclick="abrirModalPlantillaEditar(this);"
+                  style="display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('edit', 13) %> Editar
+          </button>
+        </td>
       </tr>
     <% }); %>
+    <% if (!plantillas.length) { %><tr><td colspan="5" class="muted">Sin plantillas registradas.</td></tr><% } %>
     </tbody>
   </table></div>
 </div>
+
+<!-- Modal Flotante: Crear / Editar Plantilla -->
+<div id="modal-plantilla" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-plantilla');">
+  <div class="modal-dialog lg">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('plantillas', 16) %> <span id="tpl-modal-title">Nueva Plantilla</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-plantilla');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form id="form-plantilla" method="post" action="/plantillas" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div id="tpl-clave-wrap" style="margin-bottom:12px;">
+          <label for="tpl-clave">Clave del Sistema (sin espacios) *</label>
+          <input id="tpl-clave" name="clave" required placeholder="Ej: recordatorio_3d, bienvenida, vencido...">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label for="tpl-desc">Descripción</label>
+          <input id="tpl-desc" name="descripcion" placeholder="Ej: Aviso preventivo de vencimiento a 3 días...">
+        </div>
+        <div class="grid2" style="margin-bottom:12px;">
+          <div>
+            <label for="tpl-canal">Canal de Envío</label>
+            <select id="tpl-canal" name="canal">
+              <option value="whatsapp">WhatsApp</option>
+              <option value="email">Email</option>
+              <option value="sms">SMS</option>
+            </select>
+          </div>
+          <div>
+            <label for="tpl-asunto">Asunto (solo email)</label>
+            <input id="tpl-asunto" name="asunto" placeholder="Opcional para correo...">
+          </div>
+        </div>
+        <div>
+          <label for="tpl-cuerpo">Cuerpo del Mensaje *</label>
+          <textarea id="tpl-cuerpo" name="cuerpo" rows="5" required placeholder="Hola {{nombres}}, te recordamos que tu membresía vence el..."></textarea>
+        </div>
+        <div id="tpl-activo-wrap" style="margin-top:10px;">
+          <label style="display:flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="tpl-activo" name="activo" style="width:auto;" checked>
+            <span>Plantilla activa para envíos automáticos</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-plantilla');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar Plantilla</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalPlantillaNueva() {
+    document.getElementById('tpl-modal-title').textContent = 'Nueva Plantilla';
+    var f = document.getElementById('form-plantilla');
+    f.action = '/plantillas';
+    f.reset();
+    document.getElementById('tpl-clave-wrap').style.display = 'block';
+    document.getElementById('tpl-clave').required = true;
+    document.getElementById('tpl-clave').readOnly = false;
+    document.getElementById('modal-plantilla').classList.add('open');
+    setTimeout(function(){ document.getElementById('tpl-clave').focus(); }, 60);
+  }
+
+  function abrirModalPlantillaEditar(btn) {
+    document.getElementById('tpl-modal-title').textContent = 'Editar Plantilla: ' + btn.getAttribute('data-clave');
+    var f = document.getElementById('form-plantilla');
+    f.action = '/plantillas/' + btn.getAttribute('data-id');
+    document.getElementById('tpl-clave-wrap').style.display = 'block';
+    document.getElementById('tpl-clave').value = btn.getAttribute('data-clave');
+    document.getElementById('tpl-clave').readOnly = true;
+    document.getElementById('tpl-desc').value = btn.getAttribute('data-descripcion') || '';
+    document.getElementById('tpl-canal').value = btn.getAttribute('data-canal') || 'whatsapp';
+    document.getElementById('tpl-asunto').value = btn.getAttribute('data-asunto') || '';
+    document.getElementById('tpl-cuerpo').value = decodeURIComponent(btn.getAttribute('data-cuerpo') || '');
+    document.getElementById('tpl-activo').checked = btn.getAttribute('data-activo') === '1';
+    document.getElementById('modal-plantilla').classList.add('open');
+    setTimeout(function(){ document.getElementById('tpl-desc').focus(); }, 60);
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
+</script>

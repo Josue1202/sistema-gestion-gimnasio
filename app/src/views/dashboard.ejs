@@ -7,7 +7,7 @@
   </div>
   <div class="actions">
     <a class="btn primary" href="/asistencia"><%- u.icon('terminal', 15) %> Check-in Rápido</a>
-    <a class="btn" href="/socios/nuevo"><%- u.icon('userPlus', 15) %> Registrar Socio</a>
+    <button class="btn" type="button" onclick="abrirModalSocioDashboard();" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('userPlus', 15) %> Registrar Socio</button>
     <a class="btn" href="/caja"><%- u.icon('caja', 15) %> Ir a Caja</a>
   </div>
 </div>
@@ -192,3 +192,112 @@
   </div>
 </div>
 <% } %>
+
+<!-- Modal Flotante: Registrar Socio desde Dashboard -->
+<div id="modal-socio-dash" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio-dash');">
+  <div class="modal-dialog lg">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('userPlus', 16) %> Registrar Nuevo Socio
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio-dash');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form method="post" action="/socios" class="stack" style="margin:0;">
+      <div class="modal-body">
+        <div class="grid2">
+          <div>
+            <label for="dash-socio-nombres">Nombres *</label>
+            <input id="dash-socio-nombres" name="nombres" required placeholder="Ej: Juan Carlos">
+          </div>
+          <div>
+            <label for="dash-socio-apellidos">Apellidos *</label>
+            <input id="dash-socio-apellidos" name="apellidos" required placeholder="Ej: Pérez García">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="dash-socio-dni">DNI / Documento</label>
+            <input id="dash-socio-dni" name="dni" placeholder="8 dígitos...">
+          </div>
+          <div>
+            <label for="dash-socio-tel">Teléfono (WhatsApp)</label>
+            <input id="dash-socio-tel" name="telefono" placeholder="Ej: 987654321">
+          </div>
+          <div>
+            <label for="dash-socio-fnac">Fecha de Nacimiento</label>
+            <input type="date" id="dash-socio-fnac" name="fecha_nacimiento">
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div>
+            <label for="dash-socio-email">Correo Electrónico</label>
+            <input type="email" id="dash-socio-email" name="email" placeholder="socio@email.com">
+          </div>
+          <div>
+            <label for="dash-socio-genero">Género</label>
+            <select id="dash-socio-genero" name="genero">
+              <option value="">—</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div>
+            <label for="dash-socio-dir">Dirección</label>
+            <input id="dash-socio-dir" name="direccion" placeholder="Av. Principal 123...">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="dash-socio-cemer">Contacto de Emergencia</label>
+            <input id="dash-socio-cemer" name="contacto_emergencia_nombre" placeholder="Familiar / Amigo">
+          </div>
+          <div>
+            <label for="dash-socio-temer">Teléfono de Emergencia</label>
+            <input id="dash-socio-temer" name="contacto_emergencia_telefono" placeholder="Número de contacto">
+          </div>
+        </div>
+
+        <div>
+          <label for="dash-socio-notas">Notas / Salud</label>
+          <textarea id="dash-socio-notas" name="notas" rows="2" placeholder="Observaciones, lesiones..."></textarea>
+        </div>
+
+        <div>
+          <label style="display:flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" name="acepta_marketing" style="width:auto;" checked>
+            <span>Acepta avisos y confirmaciones de pago por WhatsApp</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="cerrarModal('modal-socio-dash');">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar y Asignar Plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalSocioDashboard() {
+    document.getElementById('modal-socio-dash').classList.add('open');
+    setTimeout(function() { document.getElementById('dash-socio-nombres').focus(); }, 60);
+  }
+
+  function cerrarModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelector('.modal-backdrop.open');
+      if (open) open.classList.remove('open');
+    }
+  });
+</script>

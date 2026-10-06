@@ -61,17 +61,33 @@ router.get('/nuevo', (req, res) => {
 router.post('/', async (req, res, next) => {
   try {
     const d = limpiarSocio(req.body);
-    if (!d.nombres || !d.apellidos) { req.flash('error', 'Nombres y apellidos son obligatorios.'); return res.redirect('/socios/nuevo'); }
+    if (!d.nombres || !d.apellidos) {
+      if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        return res.status(400).json({ ok: false, error: 'Nombres y apellidos son obligatorios.' });
+      }
+      req.flash('error', 'Nombres y apellidos son obligatorios.');
+      return res.redirect('/socios/nuevo');
+    }
     const row = await db.one(
       `INSERT INTO socios (nombres, apellidos, dni, telefono, email, fecha_nacimiento, genero, direccion,
         contacto_emergencia_nombre, contacto_emergencia_telefono, notas, acepta_marketing)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
       [d.nombres, d.apellidos, d.dni, d.telefono, d.email, d.fecha_nacimiento, d.genero, d.direccion,
        d.contacto_emergencia_nombre, d.contacto_emergencia_telefono, d.notas, d.acepta_marketing]);
+    
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({ ok: true, id: row.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni });
+    }
     req.flash('ok', 'Socio registrado.');
     res.redirect('/socios/' + row.id + '?nuevo=1');
   } catch (e) {
-    if (e.code === '23505') { req.flash('error', 'Ya existe un socio con ese DNI.'); return res.redirect('/socios/nuevo'); }
+    if (e.code === '23505') {
+      if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        return res.status(400).json({ ok: false, error: 'Ya existe un socio con ese DNI.' });
+      }
+      req.flash('error', 'Ya existe un socio con ese DNI.');
+      return res.redirect('/socios/nuevo');
+    }
     next(e);
   }
 });
