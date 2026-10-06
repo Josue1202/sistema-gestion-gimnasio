@@ -201,7 +201,7 @@ router.post('/:id/enviar-whatsapp', async (req, res, next) => {
          VALUES ($1, $2, 'whatsapp', $3, $4, 'enviado', now(), 'manual')`,
         [socio.id, socio.telefono, clave, texto]
       );
-      req.flash('ok', `📲 Mensaje "${clave.replace(/_/g, ' ')}" enviado exitosamente por WhatsApp a ${socio.nombres}.`);
+      req.flash('ok', `Mensaje "${clave.replace(/_/g, ' ')}" enviado exitosamente por WhatsApp a ${socio.nombres}.`);
     } else {
       await db.query(
         `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, error, enviado_en, referencia_tipo)

@@ -3,16 +3,16 @@
   <div class="toolbar" style="margin-bottom:16px;">
     <div>
       <h1 class="mb0" style="display:flex; align-items:center; gap:10px; font-size:24px;">
-        <span>⚡</span> Terminal de Recepción & Mostrador POS
+        <%- u.icon('terminal', 24) %> Terminal de Recepción & Mostrador POS
       </h1>
       <p class="muted" style="margin-top:4px; font-size:13.5px;">
         Control de acceso inmediato, venta rápida de productos y atención continua sin cambiar de pantalla.
       </p>
     </div>
     <div class="actions">
-      <a class="btn primary" href="/socios/nuevo" target="_blank">+ Nuevo Socio</a>
-      <a class="btn" href="/caja">💰 Caja del Día</a>
-      <a class="btn" href="/productos">📦 Inventario</a>
+      <a class="btn primary" href="/socios/nuevo" target="_blank" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('userPlus', 16) %> Nuevo Socio</a>
+      <a class="btn" href="/caja" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('caja', 16) %> Caja del Día</a>
+      <a class="btn" href="/productos" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('productos', 16) %> Inventario</a>
     </div>
   </div>
 
@@ -25,9 +25,11 @@
     <div class="terminal-card terminal-col-checkin" style="border-top: 4px solid var(--primary);">
       <div class="terminal-header">
         <h2 class="terminal-title">
-          <span>⚡</span> Check-in de Asistencia
+          <%- u.icon('zap', 20) %> Check-in de Asistencia
         </h2>
-        <span class="badge ok" style="font-size:11px;">Lector Activo</span>
+        <span class="badge ok" style="font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+          <%- u.icon('checkCircle', 12) %> Lector Activo
+        </span>
       </div>
 
       <!-- Input de marcado rápido -->
@@ -38,8 +40,8 @@
           </label>
           <input type="text" id="dni-input" name="dni" placeholder="Ej: 45678901..." autofocus autocomplete="off">
         </div>
-        <button class="btn primary" type="submit" style="width:100%; font-size:14.5px; font-weight:700; padding:11px;">
-          ✓ Marcar Acceso (Enter)
+        <button class="btn primary" type="submit" style="width:100%; font-size:14.5px; font-weight:700; padding:11px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+          <%- u.icon('checkCircle', 18) %> Marcar Acceso (Enter)
         </button>
       </form>
 
@@ -54,8 +56,14 @@
              var statusColor = isOk ? '#3ECF8E' : (isWarn ? '#fbbf24' : '#f15c6d');
         %>
           <div class="active-member-banner <%= bannerClass %>" id="banner-box">
-            <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:<%= statusColor %>;" id="banner-status">
-              <%= isOk ? '🟢 ACCESO CONCEDIDO' : (isWarn ? '🟡 ACCESO CONCEDIDO (POR VENCER)' : '🔴 MEMBRESÍA VENCIDA') %>
+            <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:<%= statusColor %>; display:flex; align-items:center; gap:6px;" id="banner-status">
+              <% if (isOk) { %>
+                <%- u.icon('checkCircle', 16) %> ACCESO CONCEDIDO
+              <% } else if (isWarn) { %>
+                <%- u.icon('alertCircle', 16) %> ACCESO CONCEDIDO (POR VENCER)
+              <% } else { %>
+                <%- u.icon('closeCircle', 16) %> MEMBRESÍA VENCIDA
+              <% } %>
             </div>
             <div style="font-size:19px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;" id="banner-name">
               <%= uc.nombre %>
@@ -67,8 +75,8 @@
             </div>
             <div class="actions" style="margin-top:10px;" id="banner-actions">
               <% if (isWarn || isDanger || uc.estado === 'sin_suscripcion') { %>
-                <a class="btn primary sm" href="/suscripciones/nueva?socio=<%= uc.socio_id %>" target="_blank">
-                  💳 Cobrar / Renovar Plan
+                <a class="btn primary sm" href="/suscripciones/nueva?socio=<%= uc.socio_id %>" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">
+                  <%- u.icon('card', 14) %> Cobrar / Renovar Plan
                 </a>
               <% } %>
               <a class="btn sm" href="/socios/<%= uc.socio_id %>" target="_blank">Ver Ficha</a>
@@ -80,11 +88,11 @@
       <!-- Componente: Socio Seleccionado para Mostrador / POS -->
       <div class="card" style="margin-top:16px; background:var(--surface-2); border:1px solid var(--border); padding:14px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--muted);">
-            👤 Cliente Activo en Mostrador
+          <span style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--muted); display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('user', 14) %> Cliente Activo en Mostrador
           </span>
-          <button type="button" class="btn sm" onclick="desvincularClienteMostrador();" style="padding:2px 8px; font-size:11px;">
-            ✕ Poner Anónimo
+          <button type="button" class="btn sm" onclick="desvincularClienteMostrador();" style="padding:2px 8px; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('close', 12) %> Poner Anónimo
           </button>
         </div>
 
@@ -142,26 +150,26 @@
     <div class="terminal-card terminal-col-pos" style="border-top: 4px solid var(--accent);">
       <div class="terminal-header">
         <h2 class="terminal-title">
-          <span>🥤</span> Punto de Venta Rápido
+          <%- u.icon('coffee', 20) %> Punto de Venta Rápido
         </h2>
-        <span class="badge" style="background:rgba(249,115,22,0.15); color:var(--accent); font-weight:700; font-size:11px;">
-          ⚡ 1-Clic
+        <span class="badge" style="background:rgba(249,115,22,0.15); color:var(--accent); font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+          <%- u.icon('zap', 12) %> 1-Clic
         </span>
       </div>
 
       <!-- Barra de Filtro y Búsqueda de Productos -->
       <div class="pos-filter-bar">
-        <input type="text" id="pos-search" class="pos-search-input" placeholder="🔎 Filtrar productos (agua, gatorade, barra, batido)..." oninput="filtrarProductos(this.value);" autocomplete="off">
+        <input type="text" id="pos-search" class="pos-search-input" placeholder="Filtrar productos (agua, gatorade, barra, batido)..." oninput="filtrarProductos(this.value);" autocomplete="off">
       </div>
 
       <!-- Chips de Categorías Rápidas -->
       <div class="pos-category-chips">
         <button type="button" class="pos-cat-btn active" onclick="filtrarCategoria('todos', this);">Todos</button>
-        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('agua', this);">💧 Aguas</button>
-        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('isotonica', this);">⚡ Isotónicas</button>
-        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('proteina', this);">🍫 Proteínas</button>
-        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('batido', this);">🥤 Batidos</button>
-        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('otros', this);">🧴 Otros</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('agua', this);"><%- u.icon('water', 14) %> Aguas</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('isotonica', this);"><%- u.icon('zap', 14) %> Isotónicas</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('proteina', this);"><%- u.icon('bag', 14) %> Proteínas</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('batido', this);"><%- u.icon('coffee', 14) %> Batidos</button>
+        <button type="button" class="pos-cat-btn" onclick="filtrarCategoria('otros', this);"><%- u.icon('tag', 14) %> Otros</button>
       </div>
 
       <!-- Grid de Productos -->
@@ -173,18 +181,18 @@
         <% } else { %>
           <% productos.forEach(function(p){
                var nomLower = p.nombre.toLowerCase();
-               var icon = '🥤';
+               var iconKey = 'coffee';
                var cat = 'otros';
                if (nomLower.includes('agua') || nomLower.includes('mineral') || nomLower.includes('san luis') || nomLower.includes('cielo')) {
-                 icon = '💧'; cat = 'agua';
+                 iconKey = 'water'; cat = 'agua';
                } else if (nomLower.includes('gatorade') || nomLower.includes('sporade') || nomLower.includes('power') || nomLower.includes('isotonica') || nomLower.includes('isotónica') || nomLower.includes('monster') || nomLower.includes('red bull')) {
-                 icon = '⚡'; cat = 'isotonica';
+                 iconKey = 'zap'; cat = 'isotonica';
                } else if (nomLower.includes('barra') || nomLower.includes('snack') || nomLower.includes('galleta') || nomLower.includes('chocolate')) {
-                 icon = '🍫'; cat = 'proteina';
+                 iconKey = 'bag'; cat = 'proteina';
                } else if (nomLower.includes('batido') || nomLower.includes('whey') || nomLower.includes('shaker') || nomLower.includes('proteina') || nomLower.includes('proteína') || nomLower.includes('creatina')) {
-                 icon = '🥤'; cat = 'batido';
-               } else if (nomLower.includes('toalla') || nomLower.includes('accesorio') || nomLower.includes('faja')) {
-                 icon = '🧴'; cat = 'otros';
+                 iconKey = 'coffee'; cat = 'batido';
+               } else {
+                 iconKey = 'tag'; cat = 'otros';
                }
                var sinStock = p.stock <= 0;
           %>
@@ -196,7 +204,7 @@
                  data-cat="<%= cat %>"
                  onclick="agregarCardAlCarrito(this);">
               <div>
-                <div class="pos-prod-icon"><%= icon %></div>
+                <div class="pos-prod-icon"><%- u.icon(iconKey, 24) %></div>
                 <div class="pos-prod-name" title="<%= p.nombre %>"><%= p.nombre %></div>
               </div>
               <div>
@@ -213,7 +221,9 @@
       <!-- Carrito de Compras Rápido -->
       <div class="pos-cart-box">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px;">
-          <strong style="font-size:13.5px; color:var(--text-bright);">🛒 Carrito de Venta</strong>
+          <strong style="font-size:13.5px; color:var(--text-bright); display:flex; align-items:center; gap:6px;">
+            <%- u.icon('cart', 16) %> Carrito de Venta
+          </strong>
           <span id="cart-buyer-badge" class="badge" style="background:rgba(16,185,129,0.12); color:var(--ok-ink); font-size:11px;">
             Mostrador General
           </span>
@@ -235,17 +245,19 @@
         <div style="margin-top:8px;">
           <label style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">Método de Pago:</label>
           <div class="pos-methods-row">
-            <button type="button" class="pos-method-btn active" data-metodo="efectivo" onclick="seleccionarMetodoPago('efectivo', this);">💵 Efectivo</button>
-            <button type="button" class="pos-method-btn" data-metodo="yape" onclick="seleccionarMetodoPago('yape', this);">📱 Yape</button>
-            <button type="button" class="pos-method-btn" data-metodo="plin" onclick="seleccionarMetodoPago('plin', this);">🟣 Plin</button>
-            <button type="button" class="pos-method-btn" data-metodo="tarjeta" onclick="seleccionarMetodoPago('tarjeta', this);">💳 Tarjeta</button>
-            <button type="button" class="pos-method-btn" data-metodo="transferencia" onclick="seleccionarMetodoPago('transferencia', this);">🏦 Transf</button>
+            <button type="button" class="pos-method-btn active" data-metodo="efectivo" onclick="seleccionarMetodoPago('efectivo', this);"><%- u.icon('cash', 14) %> Efectivo</button>
+            <button type="button" class="pos-method-btn" data-metodo="yape" onclick="seleccionarMetodoPago('yape', this);"><%- u.icon('mobile', 14) %> Yape</button>
+            <button type="button" class="pos-method-btn" data-metodo="plin" onclick="seleccionarMetodoPago('plin', this);"><%- u.icon('mobile', 14) %> Plin</button>
+            <button type="button" class="pos-method-btn" data-metodo="tarjeta" onclick="seleccionarMetodoPago('tarjeta', this);"><%- u.icon('card', 14) %> Tarjeta</button>
+            <button type="button" class="pos-method-btn" data-metodo="transferencia" onclick="seleccionarMetodoPago('transferencia', this);"><%- u.icon('building', 14) %> Transf</button>
           </div>
         </div>
 
         <!-- Botón de Cobro Inmediato -->
         <button type="button" id="pos-checkout-btn" class="pos-checkout-btn" onclick="procesarVentaPOS();" disabled style="margin-top:10px;">
-          <span>⚡</span> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)
+          <span style="display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('zap', 16) %> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)
+          </span>
         </button>
 
         <div id="pos-alert" style="display:none; margin-top:8px; font-size:12.5px; padding:8px 12px; border-radius:6px;"></div>
@@ -258,9 +270,11 @@
     <div class="terminal-card terminal-col-monitor" style="border-top: 4px solid #53bdeb;">
       <div class="terminal-header">
         <h2 class="terminal-title">
-          <span>📊</span> Monitor en Vivo
+          <%- u.icon('reportes', 20) %> Monitor en Vivo
         </h2>
-        <a href="/asistencia" style="font-size:12px;">🔄 Refrescar</a>
+        <a href="/asistencia" style="font-size:12px; display:inline-flex; align-items:center; gap:4px;">
+          <%- u.icon('refresh', 13) %> Refrescar
+        </a>
       </div>
 
       <!-- Resumen Rápido de Caja -->
@@ -274,9 +288,13 @@
           </div>
           <div>
             <% if (caja) { %>
-              <span class="badge ok" style="font-size:11px;">🟢 Caja Abierta</span>
+              <span class="badge ok" style="font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+                <%- u.icon('checkCircle', 12) %> Caja Abierta
+              </span>
             <% } else { %>
-              <a href="/caja" class="badge warn" style="font-size:11px; text-decoration:none;">🟡 Abrir Caja</a>
+              <a href="/caja" class="badge warn" style="font-size:11px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                <%- u.icon('alertCircle', 12) %> Abrir Caja
+              </a>
             <% } %>
           </div>
         </div>
@@ -288,8 +306,8 @@
       <!-- Feed de Últimas Asistencias -->
       <div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:13.5px; font-weight:700; color:var(--text-bright);">
-            🏋️ Asistencias del Turno (<span id="asistencias-count"><%= hoy.length %></span>)
+          <h3 style="margin:0; font-size:13.5px; font-weight:700; color:var(--text-bright); display:flex; align-items:center; gap:6px;">
+            <%- u.icon('gym', 16) %> Asistencias del Turno (<span id="asistencias-count"><%= hoy.length %></span>)
           </h3>
           <span class="muted" style="font-size:11px;">Hoy</span>
         </div>
@@ -311,7 +329,7 @@
                   </span>
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
-                  <button type="button" class="btn sm" style="font-size:11px; padding:3px 8px;"
+                  <button type="button" class="btn sm" style="font-size:11px; padding:3px 8px; display:inline-flex; align-items:center; gap:4px;"
                           data-id="<%= a.socio_id %>"
                           data-nombre="<%= a.nombres %> <%= a.apellidos %>"
                           data-dni="<%= a.dni || '' %>"
@@ -319,7 +337,7 @@
                           data-estado="activo"
                           onclick="seleccionarSocioDesdeBoton(this);"
                           title="Vender productos a este socio en el POS">
-                    🛒 Vender
+                    <%- u.icon('cart', 12) %> Vender
                   </button>
                 </div>
               </div>
@@ -331,8 +349,8 @@
       <!-- Feed de Últimas Ventas de Productos -->
       <div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:13.5px; font-weight:700; color:var(--text-bright);">
-            🥤 Últimas Ventas del Mostrador (<span id="ventas-count"><%= ventasHoy.length %></span>)
+          <h3 style="margin:0; font-size:13.5px; font-weight:700; color:var(--text-bright); display:flex; align-items:center; gap:6px;">
+            <%- u.icon('coffee', 16) %> Últimas Ventas del Mostrador (<span id="ventas-count"><%= ventasHoy.length %></span>)
           </h3>
           <a href="/productos" style="font-size:11px;">Ver todas</a>
         </div>
@@ -516,20 +534,36 @@
     return false;
   }
 
+  // Coolicons SVG Dictionary para manipulación dinámica en DOM cliente
+  var SVG_ICONS = {
+    checkCircle: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 10L11 14L9 12M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    alertCircle: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 8.4502V12.4502M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 15.4502V15.5502L11.9502 15.5498V15.4502H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    closeCircle: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 9L11.9999 11.9999M11.9999 11.9999L14.9999 14.9999M11.9999 11.9999L9 14.9999M11.9999 11.9999L14.9999 9M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    card: '<svg class="coolicon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11V15.8002C3 16.9203 3 17.4801 3.21799 17.9079C3.40973 18.2842 3.71547 18.5905 4.0918 18.7822C4.5192 19 5.07899 19 6.19691 19H17.8031C18.921 19 19.48 19 19.9074 18.7822C20.2837 18.5905 20.5905 18.2842 20.7822 17.9079C21 17.4805 21 16.9215 21 15.8036V11M3 11V9M3 11H21M3 9V8.2002C3 7.08009 3 6.51962 3.21799 6.0918C3.40973 5.71547 3.71547 5.40973 4.0918 5.21799C4.51962 5 5.08009 5 6.2002 5H17.8002C18.9203 5 19.4796 5 19.9074 5.21799C20.2837 5.40973 20.5905 5.71547 20.7822 6.0918C21 6.5192 21 7.07899 21 8.19691V9M3 9H21M7 15H11M21 11V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    cart: '<svg class="coolicon" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17C15.8954 17 15 17.8954 15 19C15 20.1046 15.8954 21 17 21C18.1046 21 19 20.1046 19 19C19 17.8954 18.1046 17 17 17ZM17 17H9.29395C8.83288 17 8.60193 17 8.41211 16.918C8.24466 16.8456 8.09938 16.7291 7.99354 16.5805C7.8749 16.414 7.82719 16.1913 7.73274 15.7505L5.27148 4.26465C5.17484 3.81363 5.12587 3.58838 5.00586 3.41992C4.90002 3.27135 4.75477 3.15441 4.58732 3.08205C4.39746 3 4.16779 3 3.70653 3H3M6 6H18.8732C19.595 6 19.9555 6 20.1978 6.15036C20.41 6.28206 20.5653 6.48862 20.633 6.729C20.7104 7.00343 20.611 7.34996 20.411 8.04346L19.0264 12.8435C18.9068 13.2581 18.8469 13.465 18.7256 13.6189C18.6185 13.7547 18.4772 13.861 18.317 13.9263C18.1361 14 17.9211 14 17.4921 14H7.73047M8 21C6.89543 21 6 20.1046 6 19C6 17.8954 6.89543 17 8 17C9.10457 17 10 17.8954 10 19C10 20.1046 9.10457 21 8 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    user: '<svg class="coolicon" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 21C19 17.134 15.866 14 12 14C8.13401 14 5 17.134 5 21M12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7C16 9.20914 14.2091 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    zap: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    close: '<svg class="coolicon" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 16L12 12M12 12L8 8M12 12L16 8M12 12L8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
   function actualizarBannerCheckin(d) {
     var box = document.getElementById('checkin-result');
     var isOk = d.estado === 'activo';
     var isWarn = d.estado === 'por_vencer';
     var isDanger = d.estado === 'vencido';
 
-    var statusText = isOk ? '🟢 ACCESO CONCEDIDO' : (isWarn ? '🟡 ACCESO CONCEDIDO (POR VENCER)' : '🔴 MEMBRESÍA VENCIDA');
+    var statusHtml = isOk
+      ? '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.checkCircle + ' ACCESO CONCEDIDO</span>'
+      : (isWarn
+          ? '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.alertCircle + ' ACCESO CONCEDIDO (POR VENCER)</span>'
+          : '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.closeCircle + ' MEMBRESÍA VENCIDA</span>');
     var statusColor = isOk ? '#3ECF8E' : (isWarn ? '#fbbf24' : '#f15c6d');
     var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
 
     box.style.display = 'block';
     box.innerHTML =
       '<div class="active-member-banner ' + bannerClass + '">' +
-        '<div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:' + statusColor + ';">' + statusText + '</div>' +
+        '<div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:' + statusColor + ';">' + statusHtml + '</div>' +
         '<div style="font-size:19px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;">' + d.nombre + '</div>' +
         '<div class="muted" style="font-size:13px;">' +
           'DNI: <strong>' + (d.dni || '—') + '</strong> · Plan: <strong>' + (d.plan || 'Sin plan') + '</strong>' +
@@ -538,7 +572,7 @@
         '</div>' +
         '<div class="actions" style="margin-top:10px;">' +
           (isWarn || isDanger || d.estado === 'sin_suscripcion'
-            ? '<a class="btn primary sm" href="/suscripciones/nueva?socio=' + d.socio_id + '" target="_blank">💳 Cobrar / Renovar Plan</a>'
+            ? '<a class="btn primary sm" href="/suscripciones/nueva?socio=' + d.socio_id + '" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.card + ' Cobrar / Renovar Plan</a>'
             : '') +
           '<a class="btn sm" href="/socios/' + d.socio_id + '" target="_blank">Ver Ficha</a>' +
         '</div>' +
@@ -550,7 +584,7 @@
     box.style.display = 'block';
     box.innerHTML =
       '<div class="active-member-banner danger">' +
-        '<div style="font-size:11px; font-weight:800; color:#ef4444; text-transform:uppercase;">✕ NO ENCONTRADO</div>' +
+        '<div style="font-size:11px; font-weight:800; color:#ef4444; text-transform:uppercase; display:flex; align-items:center; gap:6px;">' + SVG_ICONS.closeCircle + ' NO ENCONTRADO</div>' +
         '<div style="font-size:15px; font-weight:700; color:var(--text); margin-top:4px;">' + msg + '</div>' +
         '<div style="margin-top:8px;"><a class="btn primary sm" href="/socios/nuevo" target="_blank">+ Registrar Nuevo Socio</a></div>' +
       '</div>';
@@ -567,7 +601,7 @@
 
     var badge = document.getElementById('cart-buyer-badge');
     if (badge) {
-      badge.textContent = '👤 ' + nombre.split(' ')[0];
+      badge.innerHTML = '<span style="display:inline-flex; align-items:center; gap:4px;">' + SVG_ICONS.user + ' ' + (nombre.split(' ')[0]) + '</span>';
       badge.style.background = 'rgba(16,185,129,0.15)';
       badge.style.color = 'var(--ok-ink)';
     }
@@ -606,14 +640,14 @@
         '<span class="muted" style="display:block; font-size:11px;">' + (d.plan || 'Sin plan') + ' · ' + (d.hora || 'Ahora') + '</span>' +
       '</div>' +
       '<div style="display:flex; align-items:center; gap:6px;">' +
-        '<button type="button" class="btn sm" style="font-size:11px; padding:3px 8px;" ' +
+        '<button type="button" class="btn sm" style="font-size:11px; padding:3px 8px; display:inline-flex; align-items:center; gap:4px;" ' +
           'data-id="' + d.socio_id + '" ' +
           'data-nombre="' + d.nombre + '" ' +
           'data-dni="' + (d.dni || '') + '" ' +
           'data-plan="' + (d.plan || '') + '" ' +
           'data-estado="' + (d.estado || 'activo') + '" ' +
           'onclick="seleccionarSocioDesdeBoton(this);">' +
-          '🛒 Vender' +
+          SVG_ICONS.cart + ' Vender' +
         '</button>' +
       '</div>';
 
@@ -723,7 +757,7 @@
             '<span style="font-weight:700; font-size:13px; min-width:18px; text-align:center;">' + item.cantidad + '</span>' +
             '<button type="button" class="pos-qty-btn" onclick="cambiarCantidad(\'' + id + '\', 1);">+</button>' +
             '<strong style="margin-left:6px; min-width:50px; text-align:right; font-size:13px;">S/ ' + sub.toFixed(2) + '</strong>' +
-            '<button type="button" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:12px; margin-left:4px;" onclick="eliminarItem(\'' + id + '\');">✕</button>' +
+            '<button type="button" style="background:none; border:none; cursor:pointer; color:var(--muted); display:inline-flex; align-items:center; margin-left:4px;" onclick="eliminarItem(\'' + id + '\');" title="Quitar">' + SVG_ICONS.close + '</button>' +
           '</div>' +
         '</div>';
     });
@@ -762,7 +796,7 @@
 
     var btn = document.getElementById('pos-checkout-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳</span> Procesando cobro...';
+    btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.card + ' Procesando cobro...</span>';
 
     var itemsPayload = keys.map(function(k) {
       return { producto_id: k, cantidad: carrito[k].cantidad, precio_unitario: carrito[k].precio };
@@ -785,7 +819,7 @@
     .then(function(r) { return r.json(); })
     .then(function(res) {
       btn.disabled = false;
-      btn.innerHTML = '<span>⚡</span> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)';
+      btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.zap + ' Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)</span>';
 
       if (!res.ok) {
         sonarAlerta();
@@ -795,7 +829,7 @@
 
       // Venta exitosa
       sonarCaja();
-      mostrarAlertaPOS('✓ Venta de S/ ' + res.total.toFixed(2) + ' cobrada con ' + res.metodo_pago.toUpperCase() + ' (' + res.socio + ')', 'ok');
+      mostrarAlertaPOS('Venta de S/ ' + res.total.toFixed(2) + ' cobrada con ' + res.metodo_pago.toUpperCase() + ' (' + res.socio + ')', 'ok');
 
       // Actualizar stocks en los botones de productos del DOM
       res.items.forEach(function(it) {
@@ -827,7 +861,7 @@
     })
     .catch(function(err) {
       btn.disabled = false;
-      btn.innerHTML = '<span>⚡</span> Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)';
+      btn.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.zap + ' Cobrar y Entregar (S/ <span id="btn-total-amount">0.00</span>)</span>';
       sonarAlerta();
       mostrarAlertaPOS('Error de conexión al procesar venta: ' + err.message, 'error');
     });

@@ -6,9 +6,9 @@
     <p class="muted" style="margin-top:4px;">Resumen operativo del gimnasio en tiempo real.</p>
   </div>
   <div class="actions">
-    <a class="btn primary" href="/asistencia">⚡ Check-in Rápido</a>
-    <a class="btn" href="/socios/nuevo">+ Registrar Socio</a>
-    <a class="btn" href="/caja">💰 Ir a Caja</a>
+    <a class="btn primary" href="/asistencia"><%- u.icon('terminal', 15) %> Check-in Rápido</a>
+    <a class="btn" href="/socios/nuevo"><%- u.icon('userPlus', 15) %> Registrar Socio</a>
+    <a class="btn" href="/caja"><%- u.icon('caja', 15) %> Ir a Caja</a>
   </div>
 </div>
 
@@ -16,7 +16,7 @@
 <% if (!caja) { %>
   <div class="flash error" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
     <div>
-      <strong>⚠️ La caja del día está cerrada.</strong>
+      <strong><%- u.icon('alert', 16) %> La caja del día está cerrada.</strong>
       <span style="opacity:0.9;">Abre caja para registrar cobros y pagos de mostrador.</span>
     </div>
     <a class="btn sm primary" href="/caja">Abrir Caja Ahora</a>
@@ -38,27 +38,27 @@
 <!-- KPIs Principales -->
 <div class="kpis">
   <div class="kpi">
-    <div class="label">👥 Socios activos</div>
+    <div class="label" style="display:flex; align-items:center; gap:6px;"><%- u.icon('socios', 15) %> Socios activos</div>
     <div class="value" style="color:var(--primary);"><%= kpis.socios_activos || 0 %></div>
   </div>
   <div class="kpi">
-    <div class="label">⚠️ Vencidos</div>
-    <div class="value" style="color:#f15c6d;"><%= kpis.socios_vencidos || 0 %></div>
+    <div class="label" style="display:flex; align-items:center; gap:6px;"><%- u.icon('alert', 15) %> Vencidos</div>
+    <div class="value" style="color:#ef4444;"><%= kpis.socios_vencidos || 0 %></div>
   </div>
   <div class="kpi">
-    <div class="label">⏳ Vencen en 7 días</div>
+    <div class="label" style="display:flex; align-items:center; gap:6px;"><%- u.icon('clock', 15) %> Vencen en 7 días</div>
     <div class="value" style="color:#fbbf24;"><%= kpis.vencen_7d || 0 %></div>
   </div>
   <div class="kpi">
-    <div class="label">💵 Ingresos de hoy</div>
-    <div class="value" style="color:#53bdeb;"><%= u.soles(kpis.ingresos_hoy) %></div>
+    <div class="label" style="display:flex; align-items:center; gap:6px;"><%- u.icon('dollar', 15) %> Ingresos de hoy</div>
+    <div class="value" style="color:#3b82f6;"><%= u.soles(kpis.ingresos_hoy) %></div>
   </div>
   <div class="kpi">
-    <div class="label">📈 Ingresos del mes</div>
-    <div class="value" style="color:#a78bfa;"><%= u.soles(kpis.ingresos_mes) %></div>
+    <div class="label" style="display:flex; align-items:center; gap:6px;"><%- u.icon('reportes', 15) %> Ingresos del mes</div>
+    <div class="value" style="color:#8b5cf6;"><%= u.soles(kpis.ingresos_mes) %></div>
   </div>
   <div class="kpi">
-    <div class="label">🏋️‍♂️ Asistencias hoy</div>
+    <div class="label" style="display:flex; align-items:center; gap:6px;"><%- u.icon('checkCircle', 15) %> Asistencias hoy</div>
     <div class="value" style="color:var(--primary);"><%= kpis.asistencias_hoy || 0 %></div>
   </div>
 </div>
@@ -96,7 +96,7 @@
               <input type="hidden" name="socio_id" value="<%= r.socio_id %>">
               <input type="hidden" name="telefono" value="<%= r.telefono %>">
               <input type="hidden" name="plantilla_clave" value="<%= r.dias_restantes === 0 ? 'recordatorio_hoy' : 'recordatorio_3d' %>">
-              <button class="btn sm wa" type="submit" title="Enviar recordatorio automático directamente por WhatsApp">🚀 WhatsApp</button>
+              <button class="btn sm wa" type="submit" title="Enviar recordatorio automático directamente por WhatsApp"><%- u.icon('whatsapp', 14) %> WhatsApp</button>
             </form>
             <% if (link) { %>
               <a class="muted" href="<%= link %>" target="_blank" rel="noopener" style="font-size:11px; text-decoration:underline;" title="Abrir en WhatsApp Web en una pestaña si el servidor no está vinculado">web</a>
@@ -134,7 +134,7 @@
                   <input type="hidden" name="socio_id" value="<%= r.socio_id %>">
                   <input type="hidden" name="telefono" value="<%= r.telefono %>">
                   <input type="hidden" name="plantilla_clave" value="vencido">
-                  <button class="btn sm wa" type="submit" title="Enviar aviso de vencimiento directamente por WhatsApp">🚀 Recordar</button>
+                  <button class="btn sm wa" type="submit" title="Enviar aviso de vencimiento directamente por WhatsApp"><%- u.icon('whatsapp', 14) %> Recordar</button>
                 </form>
                 <% if (link) { %>
                   <a class="muted" href="<%= link %>" target="_blank" rel="noopener" style="font-size:11px; text-decoration:underline;" title="Abrir en WhatsApp Web en una pestaña si el servidor no está vinculado">web</a>
@@ -180,13 +180,13 @@
 
 <% if (cumples.length) { %>
 <div class="toolbar" style="margin-top:20px;">
-  <h2 class="mb0">Cumpleaños de hoy 🎂 (<%= cumples.length %>)</h2>
+  <h2 class="mb0" style="display:flex; align-items:center; gap:8px;">Cumpleaños de hoy (<%= cumples.length %>)</h2>
 </div>
 <div class="card">
   <div class="pill-list">
   <% cumples.forEach(function(r){ %>
     <a class="btn sm" href="/socios/<%= r.socio_id %>" style="padding:8px 14px;">
-      🎉 <%= r.nombres %> <%= r.apellidos %>
+      <%- u.icon('user', 14) %> <%= r.nombres %> <%= r.apellidos %>
     </a>
   <% }); %>
   </div>

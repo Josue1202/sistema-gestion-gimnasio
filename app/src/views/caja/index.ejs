@@ -4,7 +4,9 @@
     <p class="muted" style="margin-top:4px;">Gestión de ingresos, egresos y cuadre de efectivo diario.</p>
   </div>
   <div class="actions">
-    <a class="btn" href="/caja/historial">📋 Ver Historial de Cajas Anteriores</a>
+    <a class="btn" href="/caja/historial" style="display:inline-flex; align-items:center; gap:6px;">
+      <%- u.icon('file', 15) %> Ver Historial de Cajas Anteriores
+    </a>
   </div>
 </div>
 
@@ -20,8 +22,8 @@
         <input type="number" step="0.01" min="0" name="monto_apertura" value="0.00" required autofocus
                style="font-size:20px; font-weight:700; padding:12px; text-align:center;">
       </div>
-      <button class="btn primary" type="submit" style="font-size:16px; padding:12px; margin-top:8px;">
-        ✓ Abrir Caja Ahora
+      <button class="btn primary" type="submit" style="font-size:16px; padding:12px; margin-top:8px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+        <%- u.icon('checkCircle', 18) %> Abrir Caja Ahora
       </button>
     </form>
   </div>
@@ -72,14 +74,16 @@
             <div>
               <label>Método utilizado</label>
               <select name="metodo_pago">
-                <option value="efectivo">💵 Efectivo de caja</option>
-                <option value="yape">🟣 Yape</option>
-                <option value="plin">🔵 Plin</option>
-                <option value="transferencia">🏦 Transferencia</option>
+                <option value="efectivo">Efectivo de caja</option>
+                <option value="yape">Yape</option>
+                <option value="plin">Plin</option>
+                <option value="transferencia">Transferencia bancaria</option>
               </select>
             </div>
           </div>
-          <button class="btn" type="submit" style="margin-top:4px;">- Guardar Egreso</button>
+          <button class="btn" type="submit" style="margin-top:4px; display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('minus', 14) %> Guardar Egreso
+          </button>
         </form>
       </div>
     </div>
@@ -99,8 +103,8 @@
             <label>Observaciones o notas de cierre</label>
             <input name="notas" placeholder="Opcional: motivo de faltante o sobrante...">
           </div>
-          <button class="btn primary" type="submit" style="background:#ef4444; border-color:#ef4444; font-size:15px; padding:11px;">
-            🔒 Cerrar Turno y Guardar Cuadre
+          <button class="btn primary" type="submit" style="background:#ef4444; border-color:#ef4444; font-size:15px; padding:11px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+            <%- u.icon('lock', 16) %> Cerrar Turno y Guardar Cuadre
           </button>
         </form>
       </div>
@@ -125,7 +129,7 @@
       <% pagos.forEach(function(p){ %>
         <tr>
           <td class="muted"><%= u.fechaHora(p.creado_en).split(' ')[1] || u.fechaHora(p.creado_en) %></td>
-          <td><span class="badge ok">✓ Ingreso</span></td>
+          <td><span class="badge ok" style="display:inline-flex; align-items:center; gap:4px;"><%- u.icon('checkCircle', 12) %> Ingreso</span></td>
           <td><strong><%= p.concepto %></strong><%= p.nombres ? ' · ' + p.apellidos + ', ' + p.nombres : '' %></td>
           <td><span style="font-weight:600; text-transform:uppercase;"><%= p.metodo_pago %></span></td>
           <td class="num" style="color:#10b981;">+ <%= u.soles(p.monto) %></td>
@@ -134,7 +138,7 @@
       <% egresos.forEach(function(x){ %>
         <tr>
           <td class="muted"><%= u.fechaHora(x.creado_en).split(' ')[1] || u.fechaHora(x.creado_en) %></td>
-          <td><span class="badge danger">- Egreso</span></td>
+          <td><span class="badge danger" style="display:inline-flex; align-items:center; gap:4px;"><%- u.icon('minus', 12) %> Egreso</span></td>
           <td><%= x.concepto %></td>
           <td><span style="text-transform:uppercase;"><%= x.metodo_pago %></span></td>
           <td class="num" style="color:#ef4444;">- <%= u.soles(x.monto) %></td>

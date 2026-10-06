@@ -1,6 +1,6 @@
 <h1>Mensajes y Recordatorios</h1>
 <p class="muted">
-  Envío directo desde el servidor por WhatsApp. Haz clic en <strong>🚀 Enviar Directo</strong> para mandar el mensaje al socio en 1 segundo sin abrir pestañas ni WhatsApp Web. Puedes verificar el estado de conexión en <a href="/whatsapp" style="font-weight:600;">Estado de WhatsApp</a>.
+  Envío directo desde el servidor por WhatsApp. Haz clic en <strong>Enviar Directo</strong> para mandar el mensaje al socio en 1 segundo sin abrir pestañas ni WhatsApp Web. Puedes verificar el estado de conexión en <a href="/whatsapp" style="font-weight:600;">Estado de WhatsApp</a>.
 </p>
 
 <% if (sinPlantilla.length) { %>
@@ -29,7 +29,9 @@
                   <input type="hidden" name="telefono" value="<%= it.telefono || '' %>">
                   <input type="hidden" name="plantilla_clave" value="<%= it.clave %>">
                   <input type="hidden" name="contenido" value="<%= it.contenido %>">
-                  <button class="btn sm wa" type="submit" style="font-weight:600;">🚀 Enviar Directo</button>
+                  <button class="btn sm wa" type="submit" style="font-weight:600; display:inline-flex; align-items:center; gap:5px;">
+                    <%- u.icon('whatsapp', 14) %> Enviar Directo
+                  </button>
                 </form>
                 <a class="muted" href="<%= it.link %>" target="_blank" rel="noopener" style="font-size:11px; text-decoration:underline;" title="Abrir en WhatsApp Web en una pestaña si el servidor no está vinculado">web</a>
               </div>

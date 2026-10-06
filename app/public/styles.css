@@ -109,6 +109,33 @@ a:hover {
   text-decoration: none;
 }
 
+/* Coolicons Vector Estilo Supabase */
+.coolicon {
+  display: inline-block;
+  vertical-align: -0.18em;
+  stroke: currentColor;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, stroke 0.15s ease;
+}
+.coolicon path, .coolicon circle, .coolicon rect, .coolicon line {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.btn .coolicon {
+  margin-right: 4px;
+}
+.nav a.item .coolicon {
+  margin-right: 4px;
+  stroke: var(--muted);
+}
+.nav a.item:hover .coolicon {
+  stroke: var(--text-bright);
+}
+.nav a.item.active .coolicon {
+  stroke: var(--primary);
+}
+
 /* ============================================================
    SUPABASE TOP GLOW BAR & BRAND ACCENTS
    ============================================================ */

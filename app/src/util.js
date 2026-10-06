@@ -168,9 +168,11 @@ function badgeEstado(estado) {
   return map[estado] || 'muted';
 }
 
+const { icon } = require('./icons');
+
 module.exports = {
   TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
-  postWebhook, sendEvolutionWhatsApp, badgeEstado,
+  postWebhook, sendEvolutionWhatsApp, badgeEstado, icon,
 };
 

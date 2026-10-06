@@ -12,8 +12,8 @@
     </div>
   </div>
   <div class="actions">
-    <a class="btn primary" href="/suscripciones/nueva?socio=<%= socio.id %>">💳 Renovar / Cobrar</a>
-    <a class="btn" href="/socios/<%= socio.id %>/editar">✏️ Editar Datos</a>
+    <a class="btn primary" href="/suscripciones/nueva?socio=<%= socio.id %>" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('card', 14) %> Renovar / Cobrar</a>
+    <a class="btn" href="/socios/<%= socio.id %>/editar" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('edit', 14) %> Editar Datos</a>
     <a class="btn" href="/socios">Volver al listado</a>
   </div>
 </div>
@@ -40,15 +40,15 @@
       <div style="font-size:18px; margin:8px 0 12px;">
         <% var est = estado.estado_membresia; %>
         <% if (est==='activo' && estado.dias_restantes != null && estado.dias_restantes <= 7) { %>
-          <span class="badge warn" style="font-size:14px; padding:6px 12px;">🟡 Vence en <%= estado.dias_restantes %> días</span>
+          <span class="badge warn" style="font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('alertCircle', 14) %> Vence en <%= estado.dias_restantes %> días</span>
         <% } else if (est==='activo') { %>
-          <span class="badge ok" style="font-size:14px; padding:6px 12px;">🟢 Activo (<%= estado.dias_restantes %> días restantes)</span>
+          <span class="badge ok" style="font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('checkCircle', 14) %> Activo (<%= estado.dias_restantes %> días restantes)</span>
         <% } else if (est==='vencido') { %>
-          <span class="badge danger" style="font-size:14px; padding:6px 12px;">🔴 Membresía Vencida</span>
+          <span class="badge danger" style="font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('closeCircle', 14) %> Membresía Vencida</span>
         <% } else if (est==='congelado') { %>
-          <span class="badge muted" style="font-size:14px; padding:6px 12px;">⚪ Congelado</span>
+          <span class="badge muted" style="font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('clock', 14) %> Congelado</span>
         <% } else { %>
-          <span class="badge muted" style="font-size:14px; padding:6px 12px;">⚪ Sin suscripción activa</span>
+          <span class="badge muted" style="font-size:14px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('alertCircle', 14) %> Sin suscripción activa</span>
         <% } %>
       </div>
 
@@ -61,13 +61,15 @@
       <div class="actions" style="margin-top:14px;">
         <a class="btn primary" href="/suscripciones/nueva?socio=<%= socio.id %>">Cobrar / Renovar Plan</a>
         <form method="post" action="/socios/<%= socio.id %>/asistencia" style="margin:0;">
-          <button class="btn" type="submit">⚡ Marcar asistencia ahora</button>
+          <button class="btn" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('zap', 14) %> Marcar asistencia ahora
+          </button>
         </form>
       </div>
 
       <% if (!cajaAbierta) { %>
-        <p class="muted" style="margin-top:10px; font-size:12px; color:var(--warn-ink);">
-          ⚠️ Aviso: La caja del día está cerrada. Los cobros no se registrarán en una caja abierta.
+        <p class="muted" style="margin-top:10px; font-size:12px; color:var(--warn-ink); display:flex; align-items:center; gap:6px;">
+          <%- u.icon('alert', 14) %> Aviso: La caja del día está cerrada. Los cobros no se registrarán en una caja abierta.
         </p>
       <% } %>
     </div>
@@ -75,14 +77,18 @@
     <!-- Enviar WhatsApp Rápido -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 class="mt0 mb0">📲 Mensajes rápidos por WhatsApp</h3>
-        <a href="/whatsapp" style="font-size:12px; font-weight:600;">⚙️ Estado WhatsApp</a>
+        <h3 class="mt0 mb0" style="display:flex; align-items:center; gap:6px;">
+          <%- u.icon('whatsapp', 16) %> Mensajes rápidos por WhatsApp
+        </h3>
+        <a href="/whatsapp" style="font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+          <%- u.icon('settings', 13) %> Estado WhatsApp
+        </a>
       </div>
       <% if (!socio.telefono) { %>
         <p class="muted mb0">El socio no tiene teléfono registrado para enviar WhatsApp.</p>
       <% } else { %>
         <p class="muted" style="font-size:12px; margin-bottom:12px;">
-          Haz clic en <strong>🚀 Enviar</strong> para mandar el mensaje directamente desde el servidor sin abrir pestañas.
+          Haz clic en <strong>Enviar</strong> para mandar el mensaje directamente desde el servidor sin abrir pestañas.
         </p>
         <div style="display:flex; flex-direction:column; gap:8px;">
           <% (plantillasDisponibles || []).forEach(function(p){ %>
@@ -94,8 +100,8 @@
               <div style="display:flex; align-items:center; gap:8px;">
                 <form method="post" action="/socios/<%= socio.id %>/enviar-whatsapp" style="margin:0;">
                   <input type="hidden" name="clave" value="<%= p.clave %>">
-                  <button type="submit" class="btn sm wa" style="font-weight:600; font-size:12px; padding:4px 10px;">
-                    🚀 Enviar
+                  <button type="submit" class="btn sm wa" style="font-weight:600; font-size:12px; padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
+                    <%- u.icon('send', 12) %> Enviar
                   </button>
                 </form>
                 <% if (p.link) { %>
@@ -146,8 +152,8 @@
         </td>
         <td class="muted"><%= u.fecha(x.creado_en) %><%= x.creado_por ? ' · ' + x.creado_por : '' %></td>
         <td class="right">
-          <a class="btn sm" href="/suscripciones/<%= x.id %>/ticket" title="Ver comprobante e imprimir ticket">
-            🖨️ Ver Ticket
+          <a class="btn sm" href="/suscripciones/<%= x.id %>/ticket" title="Ver comprobante e imprimir ticket" style="display:inline-flex; align-items:center; gap:5px;">
+            <%- u.icon('printer', 13) %> Ver Ticket
           </a>
         </td>
       </tr>
@@ -176,9 +182,13 @@
             <td><%= u.fechaHora(p.creado_en) %></td>
             <td>
               <% if (p.concepto && p.concepto.toLowerCase().includes('venta')) { %>
-                <span class="badge" style="background:rgba(249,115,22,0.15); color:var(--accent); font-size:10.5px; padding:2px 6px; margin-right:4px;">🥤 Mostrador</span>
+                <span class="badge" style="background:rgba(249,115,22,0.15); color:var(--accent); font-size:10.5px; padding:2px 6px; margin-right:4px; display:inline-flex; align-items:center; gap:3px;">
+                  <%- u.icon('coffee', 11) %> Mostrador
+                </span>
               <% } else { %>
-                <span class="badge ok" style="font-size:10.5px; padding:2px 6px; margin-right:4px;">💳 Plan</span>
+                <span class="badge ok" style="font-size:10.5px; padding:2px 6px; margin-right:4px; display:inline-flex; align-items:center; gap:3px;">
+                  <%- u.icon('card', 11) %> Plan
+                </span>
               <% } %>
               <%= p.concepto %>
             </td>

@@ -4,7 +4,9 @@
     <p class="muted" style="margin-top:4px;">Total registrados en el sistema: <strong><%= total %></strong> socios.</p>
   </div>
   <div class="actions">
-    <a class="btn primary" href="/socios/nuevo">+ Nuevo Socio</a>
+    <a class="btn primary" href="/socios/nuevo" style="display:inline-flex; align-items:center; gap:6px;">
+      <%- u.icon('userPlus', 16) %> Nuevo Socio
+    </a>
   </div>
 </div>
 
@@ -15,13 +17,15 @@
              style="min-width:280px; font-weight:500;">
       <select name="estado" style="max-width:200px;">
         <option value="">Todos los estados</option>
-        <option value="activo"        <%= estado==='activo'?'selected':'' %>>🟢 Activos</option>
-        <option value="por_vencer"    <%= estado==='por_vencer'?'selected':'' %>>🟡 Por vencer (7 días)</option>
-        <option value="vencido"       <%= estado==='vencido'?'selected':'' %>>🔴 Vencidos</option>
-        <option value="congelado"     <%= estado==='congelado'?'selected':'' %>>⚪ Congelados</option>
-        <option value="sin_suscripcion" <%= estado==='sin_suscripcion'?'selected':'' %>>⚪ Sin suscripción</option>
+        <option value="activo"        <%= estado==='activo'?'selected':'' %>>Activos</option>
+        <option value="por_vencer"    <%= estado==='por_vencer'?'selected':'' %>>Por vencer (7 días)</option>
+        <option value="vencido"       <%= estado==='vencido'?'selected':'' %>>Vencidos</option>
+        <option value="congelado"     <%= estado==='congelado'?'selected':'' %>>Congelados</option>
+        <option value="sin_suscripcion" <%= estado==='sin_suscripcion'?'selected':'' %>>Sin suscripción</option>
       </select>
-      <button class="btn" type="submit">🔍 Filtrar</button>
+      <button class="btn" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
+        <%- u.icon('search', 14) %> Filtrar
+      </button>
       <% if (q || estado) { %>
         <a class="btn" href="/socios">Limpiar</a>
       <% } %>

@@ -66,11 +66,11 @@
       <div>
         <label for="metodo_pago" style="font-weight:700;">Método de Pago *</label>
         <select name="metodo_pago" id="metodo_pago" required style="font-weight:600; padding:11px;">
-          <option value="efectivo">💵 Efectivo</option>
-          <option value="yape">🟣 Yape</option>
-          <option value="plin">🔵 Plin</option>
-          <option value="tarjeta">💳 Tarjeta (POS)</option>
-          <option value="transferencia">🏦 Transferencia Bancaria</option>
+          <option value="efectivo">Efectivo</option>
+          <option value="yape">Yape</option>
+          <option value="plin">Plin</option>
+          <option value="tarjeta">Tarjeta (POS)</option>
+          <option value="transferencia">Transferencia Bancaria</option>
           <option value="otro">Otro</option>
         </select>
       </div>
@@ -89,15 +89,16 @@
     </div>
 
     <% if (!cajaAbierta) { %>
-      <div class="flash error" style="margin:0;">
-        ⚠️ No hay caja abierta. El cobro se registrará en el historial, pero no quedará asignado a una caja diaria.
+      <div class="flash error" style="margin:0; display:flex; align-items:center; gap:8px;">
+        <%- u.icon('alertCircle', 16) %>
+        <span>No hay caja abierta. El cobro se registrará en el historial, pero no quedará asignado a una caja diaria.</span>
         <a href="/caja" target="_blank" style="margin-left:8px; font-weight:700;">Abrir caja</a>
       </div>
     <% } %>
 
     <div class="actions" style="margin-top:10px;">
-      <button class="btn primary" type="submit" style="font-size:15px; padding:11px 22px;">
-        ✓ Guardar Pago y Ver Ticket
+      <button class="btn primary" type="submit" style="font-size:15px; padding:11px 22px; display:inline-flex; align-items:center; gap:8px;">
+        <%- u.icon('checkCircle', 16) %> Guardar Pago y Ver Ticket
       </button>
       <a class="btn" href="/socios/<%= socio.id %>">Cancelar</a>
     </div>

@@ -14,18 +14,24 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h2 class="mt0 mb0">Estado del servicio</h2>
         <% if (estado === 'open') { %>
-          <span class="badge ok" style="font-size:14px; padding:6px 14px;">🟢 CONECTADO Y ACTIVO</span>
+          <span class="badge ok" style="font-size:14px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('checkCircle', 14) %> CONECTADO Y ACTIVO
+          </span>
         <% } else if (estado === 'connecting') { %>
-          <span class="badge warn" style="font-size:14px; padding:6px 14px;">🟡 GENERANDO CONEXIÓN...</span>
+          <span class="badge warn" style="font-size:14px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('alertCircle', 14) %> GENERANDO CONEXIÓN...
+          </span>
         <% } else { %>
-          <span class="badge danger" style="font-size:14px; padding:6px 14px;">🔴 DESCONECTADO (ESCANEAR QR)</span>
+          <span class="badge danger" style="font-size:14px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('closeCircle', 14) %> DESCONECTADO (ESCANEAR QR)
+          </span>
         <% } %>
       </div>
 
       <% if (estado === 'open') { %>
         <div style="background:var(--bubble-green); border:1px solid var(--bubble-green-border); border-radius:14px; padding:20px; margin-bottom:20px;">
           <h3 style="margin-top:0; color:#25d366; display:flex; align-items:center; gap:8px;">
-            <span>✓</span> WhatsApp está listo y vinculado
+            <%- u.icon('checkCircle', 18) %> WhatsApp está listo y vinculado
           </h3>
           <% if (info && info.ownerJid) { %>
             <p style="margin:4px 0 10px; font-weight:600;">
@@ -43,7 +49,9 @@
             <button class="btn danger" type="submit">Desvincular WhatsApp actual</button>
           </form>
           <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('Esto cerrará la sesión actual y creará un QR nuevo. ¿Continuar?');">
-            <button class="btn" type="submit">🔄 Reiniciar conexión de cero</button>
+            <button class="btn" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
+              <%- u.icon('refresh', 14) %> Reiniciar conexión de cero
+            </button>
           </form>
         </div>
 
@@ -61,7 +69,7 @@
                    alt="Código QR de WhatsApp"
                    style="width:240px; height:240px; display:<%= qr ? 'block' : 'none' %>;">
               <div id="qr-spinner" style="display:<%= qr ? 'none' : 'block' %>; padding:40px; text-align:center; color:#4a5568;">
-                <div style="font-size:28px; margin-bottom:10px;">⏳</div>
+                <div style="display:flex; justify-content:center; margin-bottom:10px;"><%- u.icon('clock', 28) %></div>
                 Generando nuevo código QR...
               </div>
             </div>
@@ -77,12 +85,12 @@
           </div>
 
           <div class="actions" style="justify-content:center; margin-top:18px;">
-            <button class="btn sm" type="button" onclick="recargarQRManual();">
-              🔄 Actualizar Código QR Ahora
+            <button class="btn sm" type="button" onclick="recargarQRManual();" style="display:inline-flex; align-items:center; gap:6px;">
+              <%- u.icon('refresh', 13) %> Actualizar Código QR Ahora
             </button>
             <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('¿El celular dice que no se pudo vincular? Esto creará una sesión 100% limpia. ¿Deseas reiniciar?');" style="margin:0;">
-              <button class="btn sm danger" type="submit">
-                ⚠️ Reiniciar sesión limpia
+              <button class="btn sm danger" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
+                <%- u.icon('alert', 13) %> Reiniciar sesión limpia
               </button>
             </form>
           </div>
@@ -103,11 +111,10 @@
         </div>
         <div>
           <label>Mensaje de prueba</label>
-          <textarea name="mensaje" rows="3" placeholder="Escribe un mensaje de prueba...">¡Hola! Este es un mensaje de prueba desde Zona Fitness 🏋️‍♂️</textarea>
+          <textarea name="mensaje" rows="3" placeholder="Escribe un mensaje de prueba...">¡Hola! Este es un mensaje de prueba desde Zona Fitness</textarea>
         </div>
-        <button class="btn primary" type="submit" <%= estado !== 'open' ? 'disabled' : '' %>>
-
-          Enviar mensaje de prueba
+        <button class="btn primary" type="submit" <%= estado !== 'open' ? 'disabled' : '' %> style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <%- u.icon('send', 14) %> Enviar mensaje de prueba
         </button>
         <% if (estado !== 'open') { %>
           <span class="muted" style="font-size:12px;">(Debes vincular el código QR primero para enviar)</span>
@@ -116,7 +123,9 @@
     </div>
 
     <div class="card" style="background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.25);">
-      <h3 class="mt0" style="color:#2563eb;">🤖 ¿Cómo funciona la automatización?</h3>
+      <h3 class="mt0" style="color:#2563eb; display:flex; align-items:center; gap:6px;">
+        <%- u.icon('zap', 18) %> ¿Cómo funciona la automatización?
+      </h3>
       <ul style="font-size:13px; color:var(--ink); line-height:1.7; padding-left:18px; margin-bottom:0;">
         <li><strong>Solo escaneas una vez:</strong> Al escanear este QR desde tu WhatsApp, el servidor del gimnasio queda enlazado permanentemente.</li>
         <li><strong>NO necesitas WhatsApp Web abierto:</strong> No hace falta tener abierto WhatsApp en la computadora ni ninguna pestaña en Chrome. Todo corre de forma invisible en el servidor.</li>
@@ -125,7 +134,9 @@
     </div>
 
     <div class="card">
-      <h3 class="mt0">💡 ¿Qué hacer si no vincula o dice error?</h3>
+      <h3 class="mt0" style="display:flex; align-items:center; gap:6px;">
+        <%- u.icon('info', 18) %> ¿Qué hacer si no vincula o dice error?
+      </h3>
       <ul style="font-size:13px; color:var(--muted); line-height:1.7; padding-left:18px; margin-bottom:0;">
         <li>Si tu celular dice <em>"No se pudo vincular"</em>, pulsa el botón rojo <strong>"Reiniciar sesión limpia"</strong> para renovar el código QR.</li>
         <li>Asegúrate de que el celular tenga conexión a internet estable.</li>

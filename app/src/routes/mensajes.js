@@ -79,7 +79,7 @@ router.post('/enviar-directo', async (req, res, next) => {
          VALUES ($1, $2, 'whatsapp', $3, $4, 'enviado', now(), 'manual')`,
         [socio_id || null, telefono, plantilla_clave || null, contenido || '']
       );
-      req.flash('ok', '📲 Mensaje enviado directamente por WhatsApp.');
+      req.flash('ok', 'Mensaje enviado directamente por WhatsApp.');
     } else {
       await db.query(
         `INSERT INTO mensajes_enviados (socio_id, telefono, canal, plantilla_clave, contenido, estado, error, enviado_en, referencia_tipo)

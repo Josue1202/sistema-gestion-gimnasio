@@ -8,40 +8,40 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233ECF8E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 6.5h-1a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2zm11 0h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zM8.5 12h7M2 10v4M22 10v4'/%3E%3C/svg%3E">
 </head>
 <body>
   <% const nav = [
-    ['/dashboard', 'Inicio', '📊'],
-    ['/asistencia', 'Terminal POS', '⚡'],
-    ['/socios', 'Socios', '👥'],
-    ['/caja', 'Caja', '💰'],
-    ['/productos', 'Productos', '🥤'],
-    ['/mensajes', 'Mensajes', '💬'],
-    ['/reportes', 'Reportes', '📈'],
-    ['/planes', 'Planes', '🏷️'],
-    ['/plantillas', 'Plantillas', '📝'],
-    ['/whatsapp', 'WhatsApp', '📲'],
+    ['/dashboard', 'Inicio', 'dashboard'],
+    ['/asistencia', 'Terminal POS', 'terminal'],
+    ['/socios', 'Socios', 'socios'],
+    ['/caja', 'Caja', 'caja'],
+    ['/productos', 'Productos', 'productos'],
+    ['/mensajes', 'Mensajes', 'mensajes'],
+    ['/reportes', 'Reportes', 'reportes'],
+    ['/planes', 'Planes', 'planes'],
+    ['/plantillas', 'Plantillas', 'plantillas'],
+    ['/whatsapp', 'WhatsApp', 'whatsapp'],
   ]; %>
   
   <header class="navbar-wrapper">
     <div class="supabase-top-bar"></div>
     <nav class="nav">
       <a href="/dashboard" class="brand">
-        <span class="brand-icon">🏋️</span>
+        <span class="brand-icon"><%- u.icon('gym', 22) %></span>
         <span class="brand-name"><%= gymName %></span>
         <span class="brand-badge-pro">PRO</span>
       </a>
 
       <!-- Botón móvil para menú -->
       <button class="mobile-toggle" id="mobile-menu-btn" aria-label="Abrir menú" onclick="document.querySelector('.nav-items').classList.toggle('open');">
-        ☰
+        <%- u.icon('dashboard', 18) %>
       </button>
 
       <div class="nav-items">
         <% nav.forEach(function(it){ %>
           <a class="item <%= currentPath.indexOf(it[0]) === 0 ? 'active' : '' %>" href="<%= it[0] %>">
-            <span class="nav-ico"><%= it[2] %></span>
+            <span class="nav-ico"><%- u.icon(it[2], 16) %></span>
             <span><%= it[1] %></span>
           </a>
         <% }); %>
@@ -59,7 +59,9 @@
         <span class="user-badge"><%= user ? user.nombre.slice(0, 2).toUpperCase() : 'AD' %></span>
         <span class="who"><%= user ? user.nombre : '' %></span>
         <form method="post" action="/logout" style="margin:0 0 0 8px;">
-          <button class="btn sm danger" type="submit" title="Cerrar sesión">Salir</button>
+          <button class="btn sm danger" type="submit" title="Cerrar sesión">
+            <%- u.icon('logout', 13) %> Salir
+          </button>
         </form>
       </div>
     </nav>
@@ -68,8 +70,8 @@
   <main class="wrap">
     <% flash.forEach(function(f){ %>
       <div class="flash <%= f.type %>">
-        <span class="flash-icon">
-          <% if (f.type === 'ok') { %>✓<% } else if (f.type === 'error') { %>✕<% } else { %>ℹ<% } %>
+        <span class="flash-icon" style="display:inline-flex; align-items:center;">
+          <% if (f.type === 'ok') { %><%- u.icon('checkCircle', 16) %><% } else if (f.type === 'error') { %><%- u.icon('closeCircle', 16) %><% } else { %><%- u.icon('alertCircle', 16) %><% } %>
         </span>
         <span><%= f.msg %></span>
       </div>
