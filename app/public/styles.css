@@ -252,6 +252,172 @@ a:hover {
   font-weight: 600;
 }
 
+/* ============================================================
+   NAVBAR COMBOS FLOTANTES (SUPABASE MEGA-MENU DROPDOWNS)
+   ============================================================ */
+
+.nav-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--btn-radius);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.nav-dropdown-trigger:hover,
+.nav-dropdown:hover .nav-dropdown-trigger {
+  color: var(--text-bright);
+  background: var(--surface-hover);
+  border-color: var(--border-subtle);
+}
+
+.nav-dropdown-trigger.active {
+  color: var(--text-bright);
+  background: #202020;
+  border-color: #333333;
+  font-weight: 600;
+}
+
+.nav-dropdown-chevron {
+  font-size: 8px;
+  color: var(--muted);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+  opacity: 0.7;
+}
+
+.nav-dropdown:hover .nav-dropdown-chevron,
+.nav-dropdown:focus-within .nav-dropdown-chevron {
+  transform: rotate(180deg);
+  color: var(--text-bright);
+  opacity: 1;
+}
+
+/* El Popover Flotante */
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 310px;
+  background: rgba(23, 23, 23, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.18s;
+  z-index: 1500;
+  pointer-events: none;
+}
+
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+/* Mostrar al pasar el puntero (hover) o al tener foco */
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Items dentro del Combo Flotante */
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--btn-radius);
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  border: 1px solid transparent;
+}
+
+.nav-dropdown-item:hover {
+  background: #202020;
+  border-color: #2e2e2e;
+  text-decoration: none;
+}
+
+.nav-dropdown-item.active {
+  background: #222222;
+  border-color: #333333;
+}
+
+.nav-dropdown-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #202020;
+  border: 1px solid #2e2e2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.nav-dropdown-item:hover .nav-dropdown-icon {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.nav-dropdown-item.active .nav-dropdown-icon {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(62, 207, 142, 0.1);
+}
+
+.nav-dropdown-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-dropdown-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright);
+  line-height: 1.25;
+}
+
+.nav-dropdown-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
 .nav-ico {
   font-size: 14px;
   display: inline-flex;
@@ -358,9 +524,25 @@ a:hover {
     padding: 12px 16px;
     gap: 6px;
     box-shadow: var(--shadow);
+    max-height: 80vh;
+    overflow-y: auto;
   }
   .nav-items.open { display: flex; }
   .nav a.item { width: 100%; padding: 8px 12px; }
+  .nav-dropdown { width: 100%; flex-direction: column; align-items: stretch; }
+  .nav-dropdown-trigger { width: 100%; justify-content: space-between; padding: 10px 12px; }
+  .nav-dropdown-menu {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    background: #141414;
+    padding: 4px 6px;
+    pointer-events: auto;
+    width: 100%;
+  }
   .wa-status-pill { display: none; }
 }
 
@@ -1258,47 +1440,57 @@ input::placeholder, textarea::placeholder {
    ============================================================ */
 
 .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+  display: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 999999 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
 }
 
 .modal-backdrop.open {
-  opacity: 1;
-  visibility: visible;
+  display: flex !important;
 }
 
 .modal-dialog {
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  width: 100%;
-  max-width: 520px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh;
-  transform: scale(0.96) translateY(10px);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+  background: var(--surface) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius-lg) !important;
+  width: 100% !important;
+  max-width: 540px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+  animation: modalPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  margin: auto !important;
 }
 
 .modal-dialog.lg {
-  max-width: 680px;
+  max-width: 680px !important;
 }
 
-.modal-backdrop.open .modal-dialog {
-  transform: scale(1) translateY(0);
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-header {

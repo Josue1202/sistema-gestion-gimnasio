@@ -39,13 +39,13 @@
 </div>
 
 <!-- Modal Flotante: Crear / Editar Plantilla -->
-<div id="modal-plantilla" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-plantilla');">
+<div id="modal-plantilla" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-plantilla');">
   <div class="modal-dialog lg">
     <div class="modal-header">
       <h3 class="modal-title">
         <%- u.icon('plantillas', 16) %> <span id="tpl-modal-title">Nueva Plantilla</span>
       </h3>
-      <button type="button" class="modal-close" onclick="cerrarModal('modal-plantilla');" aria-label="Cerrar">
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-plantilla');" aria-label="Cerrar">
         <%- u.icon('close', 16) %>
       </button>
     </div>
@@ -85,7 +85,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" onclick="cerrarModal('modal-plantilla');">Cancelar</button>
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-plantilla');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar Plantilla</button>
       </div>
     </form>
@@ -101,8 +101,7 @@
     document.getElementById('tpl-clave-wrap').style.display = 'block';
     document.getElementById('tpl-clave').required = true;
     document.getElementById('tpl-clave').readOnly = false;
-    document.getElementById('modal-plantilla').classList.add('open');
-    setTimeout(function(){ document.getElementById('tpl-clave').focus(); }, 60);
+    window.abrirModal('modal-plantilla');
   }
 
   function abrirModalPlantillaEditar(btn) {
@@ -117,19 +116,6 @@
     document.getElementById('tpl-asunto').value = btn.getAttribute('data-asunto') || '';
     document.getElementById('tpl-cuerpo').value = decodeURIComponent(btn.getAttribute('data-cuerpo') || '');
     document.getElementById('tpl-activo').checked = btn.getAttribute('data-activo') === '1';
-    document.getElementById('modal-plantilla').classList.add('open');
-    setTimeout(function(){ document.getElementById('tpl-desc').focus(); }, 60);
+    window.abrirModal('modal-plantilla');
   }
-
-  function cerrarModal(id) {
-    var m = document.getElementById(id);
-    if (m) m.classList.remove('open');
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.open');
-      if (open) open.classList.remove('open');
-    }
-  });
 </script>

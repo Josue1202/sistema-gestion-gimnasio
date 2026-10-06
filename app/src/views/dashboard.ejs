@@ -194,13 +194,13 @@
 <% } %>
 
 <!-- Modal Flotante: Registrar Socio desde Dashboard -->
-<div id="modal-socio-dash" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio-dash');">
+<div id="modal-socio-dash" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-socio-dash');">
   <div class="modal-dialog lg">
     <div class="modal-header">
       <h3 class="modal-title">
         <%- u.icon('userPlus', 16) %> Registrar Nuevo Socio
       </h3>
-      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio-dash');" aria-label="Cerrar">
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-socio-dash');" aria-label="Cerrar">
         <%- u.icon('close', 16) %>
       </button>
     </div>
@@ -276,7 +276,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" onclick="cerrarModal('modal-socio-dash');">Cancelar</button>
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-socio-dash');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar y Asignar Plan</button>
       </div>
     </form>
@@ -285,19 +285,6 @@
 
 <script>
   function abrirModalSocioDashboard() {
-    document.getElementById('modal-socio-dash').classList.add('open');
-    setTimeout(function() { document.getElementById('dash-socio-nombres').focus(); }, 60);
+    window.abrirModal('modal-socio-dash');
   }
-
-  function cerrarModal(id) {
-    var m = document.getElementById(id);
-    if (m) m.classList.remove('open');
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.open');
-      if (open) open.classList.remove('open');
-    }
-  });
 </script>

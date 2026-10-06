@@ -124,13 +124,13 @@
 <% } %>
 
 <!-- Modal Flotante: Crear / Editar Socio -->
-<div id="modal-socio" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio');">
+<div id="modal-socio" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-socio');">
   <div class="modal-dialog lg">
     <div class="modal-header">
       <h3 class="modal-title">
         <%- u.icon('userPlus', 16) %> <span id="socio-modal-title">Registrar Nuevo Socio</span>
       </h3>
-      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio');" aria-label="Cerrar">
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-socio');" aria-label="Cerrar">
         <%- u.icon('close', 16) %>
       </button>
     </div>
@@ -206,7 +206,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" onclick="cerrarModal('modal-socio');">Cancelar</button>
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-socio');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar Socio</button>
       </div>
     </form>
@@ -220,8 +220,7 @@
     f.action = '/socios';
     f.reset();
     document.getElementById('socio-mkt').checked = true;
-    document.getElementById('modal-socio').classList.add('open');
-    setTimeout(function(){ document.getElementById('socio-nombres').focus(); }, 60);
+    window.abrirModal('modal-socio');
   }
 
   function abrirModalSocioEditar(btn) {
@@ -240,19 +239,6 @@
     document.getElementById('socio-temer').value = btn.getAttribute('data-contacto-telefono') || '';
     document.getElementById('socio-notas').value = btn.getAttribute('data-notas') || '';
     document.getElementById('socio-mkt').checked = btn.getAttribute('data-marketing') === '1';
-    document.getElementById('modal-socio').classList.add('open');
-    setTimeout(function(){ document.getElementById('socio-nombres').focus(); }, 60);
+    window.abrirModal('modal-socio');
   }
-
-  function cerrarModal(id) {
-    var m = document.getElementById(id);
-    if (m) m.classList.remove('open');
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.open');
-      if (open) open.classList.remove('open');
-    }
-  });
 </script>

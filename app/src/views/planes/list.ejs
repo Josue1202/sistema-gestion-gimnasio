@@ -39,13 +39,13 @@
 </div>
 
 <!-- Modal Flotante: Crear / Editar Plan -->
-<div id="modal-plan" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-plan');">
+<div id="modal-plan" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-plan');">
   <div class="modal-dialog">
     <div class="modal-header">
       <h3 class="modal-title">
         <%- u.icon('planes', 16) %> <span id="plan-modal-title">Nuevo Plan</span>
       </h3>
-      <button type="button" class="modal-close" onclick="cerrarModal('modal-plan');" aria-label="Cerrar">
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-plan');" aria-label="Cerrar">
         <%- u.icon('close', 16) %>
       </button>
     </div>
@@ -71,7 +71,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" onclick="cerrarModal('modal-plan');">Cancelar</button>
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-plan');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar Plan</button>
       </div>
     </form>
@@ -84,8 +84,7 @@
     var f = document.getElementById('form-plan');
     f.action = '/planes';
     f.reset();
-    document.getElementById('modal-plan').classList.add('open');
-    setTimeout(function(){ document.getElementById('plan-nombre').focus(); }, 60);
+    window.abrirModal('modal-plan');
   }
 
   function abrirModalPlanEditar(btn) {
@@ -96,19 +95,6 @@
     document.getElementById('plan-desc').value = btn.getAttribute('data-descripcion') || '';
     document.getElementById('plan-precio').value = btn.getAttribute('data-precio') || '';
     document.getElementById('plan-dias').value = btn.getAttribute('data-dias') || '';
-    document.getElementById('modal-plan').classList.add('open');
-    setTimeout(function(){ document.getElementById('plan-nombre').focus(); }, 60);
+    window.abrirModal('modal-plan');
   }
-
-  function cerrarModal(id) {
-    var m = document.getElementById(id);
-    if (m) m.classList.remove('open');
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.open');
-      if (open) open.classList.remove('open');
-    }
-  });
 </script>

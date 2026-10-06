@@ -7,22 +7,109 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/public/styles.css">
+  <link rel="stylesheet" href="/public/styles.css?v=20261006_combos_v4">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233ECF8E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 6.5h-1a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2zm11 0h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zM8.5 12h7M2 10v4M22 10v4'/%3E%3C/svg%3E">
 </head>
 <body>
-  <% const nav = [
-    ['/dashboard', 'Inicio', 'dashboard'],
-    ['/asistencia', 'Terminal POS', 'terminal'],
-    ['/socios', 'Socios', 'socios'],
-    ['/caja', 'Caja', 'caja'],
-    ['/productos', 'Productos', 'productos'],
-    ['/mensajes', 'Mensajes', 'mensajes'],
-    ['/reportes', 'Reportes', 'reportes'],
-    ['/planes', 'Planes', 'planes'],
-    ['/plantillas', 'Plantillas', 'plantillas'],
-    ['/whatsapp', 'WhatsApp', 'whatsapp'],
-  ]; %>
+  <% 
+    const currentP = currentPath || '';
+    const navGroups = [
+      {
+        tipo: 'link',
+        url: '/dashboard',
+        label: 'Inicio',
+        icon: 'dashboard',
+        active: currentP === '/dashboard' || currentP === '/'
+      },
+      {
+        tipo: 'dropdown',
+        label: 'Operaciones',
+        icon: 'terminal',
+        active: currentP.startsWith('/asistencia') || currentP.startsWith('/caja') || currentP.startsWith('/socios'),
+        items: [
+          {
+            url: '/asistencia',
+            label: 'Terminal POS',
+            desc: 'Check-in de asistencia y ventas en 1-clic',
+            icon: 'terminal',
+            active: currentP.startsWith('/asistencia')
+          },
+          {
+            url: '/caja',
+            label: 'Caja del Día',
+            desc: 'Apertura de turno, gastos y cuadre final',
+            icon: 'caja',
+            active: currentP.startsWith('/caja')
+          },
+          {
+            url: '/socios',
+            label: 'Directorio de Socios',
+            desc: 'Gestión de clientes, fichas y membresías',
+            icon: 'socios',
+            active: currentP.startsWith('/socios')
+          }
+        ]
+      },
+      {
+        tipo: 'dropdown',
+        label: 'Catálogo & Finanzas',
+        icon: 'productos',
+        active: currentP.startsWith('/productos') || currentP.startsWith('/planes') || currentP.startsWith('/reportes'),
+        items: [
+          {
+            url: '/productos',
+            label: 'Inventario de Productos',
+            desc: 'Bebidas, suplementos y control de existencias',
+            icon: 'productos',
+            active: currentP.startsWith('/productos')
+          },
+          {
+            url: '/planes',
+            label: 'Planes & Tarifas',
+            desc: 'Membresías diarias, mensuales y precios',
+            icon: 'planes',
+            active: currentP.startsWith('/planes')
+          },
+          {
+            url: '/reportes',
+            label: 'Reportes & Métricas',
+            desc: 'Ingresos mensuales, medios de pago y retención',
+            icon: 'reportes',
+            active: currentP.startsWith('/reportes')
+          }
+        ]
+      },
+      {
+        tipo: 'dropdown',
+        label: 'Comunicación',
+        icon: 'whatsapp',
+        active: currentP.startsWith('/mensajes') || currentP.startsWith('/plantillas') || currentP.startsWith('/whatsapp'),
+        items: [
+          {
+            url: '/mensajes',
+            label: 'Mensajes & Recordatorios',
+            desc: 'Avisos directos de vencimiento por WhatsApp',
+            icon: 'mensajes',
+            active: currentP.startsWith('/mensajes')
+          },
+          {
+            url: '/plantillas',
+            label: 'Plantillas de Mensajes',
+            desc: 'Textos automáticos de bienvenida y cobranza',
+            icon: 'plantillas',
+            active: currentP.startsWith('/plantillas')
+          },
+          {
+            url: '/whatsapp',
+            label: 'Conexión WhatsApp',
+            desc: 'Sincronización QR del servidor y estado del canal',
+            icon: 'whatsapp',
+            active: currentP.startsWith('/whatsapp')
+          }
+        ]
+      }
+    ];
+  %>
   
   <header class="navbar-wrapper">
     <div class="supabase-top-bar"></div>
@@ -39,11 +126,34 @@
       </button>
 
       <div class="nav-items">
-        <% nav.forEach(function(it){ %>
-          <a class="item <%= currentPath.indexOf(it[0]) === 0 ? 'active' : '' %>" href="<%= it[0] %>">
-            <span class="nav-ico"><%- u.icon(it[2], 16) %></span>
-            <span><%= it[1] %></span>
-          </a>
+        <% navGroups.forEach(function(g){ %>
+          <% if (g.tipo === 'link') { %>
+            <a class="item <%= g.active ? 'active' : '' %>" href="<%= g.url %>">
+              <span class="nav-ico"><%- u.icon(g.icon, 15) %></span>
+              <span><%= g.label %></span>
+            </a>
+          <% } else { %>
+            <div class="nav-dropdown">
+              <button type="button" class="nav-dropdown-trigger <%= g.active ? 'active' : '' %>" aria-expanded="false">
+                <span class="nav-ico"><%- u.icon(g.icon, 15) %></span>
+                <span><%= g.label %></span>
+                <span class="nav-dropdown-chevron">▼</span>
+              </button>
+              <div class="nav-dropdown-menu">
+                <% g.items.forEach(function(it){ %>
+                  <a href="<%= it.url %>" class="nav-dropdown-item <%= it.active ? 'active' : '' %>">
+                    <div class="nav-dropdown-icon">
+                      <%- u.icon(it.icon, 16) %>
+                    </div>
+                    <div class="nav-dropdown-text">
+                      <span class="nav-dropdown-title"><%= it.label %></span>
+                      <span class="nav-dropdown-desc"><%= it.desc %></span>
+                    </div>
+                  </a>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
         <% }); %>
       </div>
 
@@ -80,6 +190,34 @@
   </main>
 
   <script>
+    // Sistema Global de Modales Flotantes Supabase
+    window.abrirModal = function(id) {
+      var m = typeof id === 'string' ? document.getElementById(id) : id;
+      if (m) {
+        m.style.setProperty('display', 'flex', 'important');
+        m.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        var inp = m.querySelector('input:not([type=hidden]), select, textarea');
+        if (inp) setTimeout(function(){ inp.focus(); }, 60);
+      }
+    };
+
+    window.cerrarModal = function(id) {
+      var m = typeof id === 'string' ? document.getElementById(id) : id;
+      if (m) {
+        m.style.setProperty('display', 'none', 'important');
+        m.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var open = document.querySelectorAll('.modal-backdrop.open, .modal-backdrop[style*="display: flex"]');
+        open.forEach(function(m) { window.cerrarModal(m); });
+      }
+    });
+
     // Monitor en segundo plano para el pill de WhatsApp en el navbar
     (function() {
       var pill = document.getElementById('nav-wa-pill');

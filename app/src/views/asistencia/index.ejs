@@ -912,8 +912,7 @@
   function abrirModalSocioTerminal() {
     var f = document.getElementById('form-socio-terminal');
     if (f) f.reset();
-    document.getElementById('modal-socio-terminal').classList.add('open');
-    setTimeout(function() { document.getElementById('term-socio-nombres').focus(); }, 60);
+    window.abrirModal('modal-socio-terminal');
   }
 
   function handleSocioTerminalSubmit(e) {
@@ -962,7 +961,7 @@
       btn.textContent = 'Guardar Socio';
       if (res.ok) {
         sonarExito();
-        cerrarModal('modal-socio-terminal');
+        window.cerrarModal('modal-socio-terminal');
         // Auto-seleccionar al socio recién creado en el mostrador del Terminal
         seleccionarSocioManualmente(res.id, res.nombres + ' ' + res.apellidos, res.dni, 'Sin plan', 'sin_suscripcion');
         // Mostrar alerta rápida
@@ -1002,28 +1001,16 @@
       alertBox.className = 'flash error';
     });
   }
-
-  function cerrarModal(id) {
-    var m = document.getElementById(id);
-    if (m) m.classList.remove('open');
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.open');
-      if (open) open.classList.remove('open');
-    }
-  });
 </script>
 
 <!-- Modal Flotante: Registrar Socio desde Terminal -->
-<div id="modal-socio-terminal" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio-terminal');">
+<div id="modal-socio-terminal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-socio-terminal');">
   <div class="modal-dialog lg">
     <div class="modal-header">
       <h3 class="modal-title">
         <%- u.icon('userPlus', 16) %> Registrar Nuevo Socio al Mostrador
       </h3>
-      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio-terminal');" aria-label="Cerrar">
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-socio-terminal');" aria-label="Cerrar">
         <%- u.icon('close', 16) %>
       </button>
     </div>
@@ -1100,7 +1087,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" onclick="cerrarModal('modal-socio-terminal');">Cancelar</button>
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-socio-terminal');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar Socio</button>
       </div>
     </form>

@@ -235,13 +235,13 @@
 </div>
 
 <!-- Modal Flotante: Editar Datos del Socio -->
-<div id="modal-socio-edit" class="modal-backdrop" onclick="if(event.target===this) cerrarModal('modal-socio-edit');">
+<div id="modal-socio-edit" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-socio-edit');">
   <div class="modal-dialog lg">
     <div class="modal-header">
       <h3 class="modal-title">
         <%- u.icon('edit', 16) %> Editar Datos del Socio
       </h3>
-      <button type="button" class="modal-close" onclick="cerrarModal('modal-socio-edit');" aria-label="Cerrar">
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-socio-edit');" aria-label="Cerrar">
         <%- u.icon('close', 16) %>
       </button>
     </div>
@@ -317,7 +317,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" onclick="cerrarModal('modal-socio-edit');">Cancelar</button>
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-socio-edit');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar Cambios</button>
       </div>
     </form>
@@ -326,19 +326,6 @@
 
 <script>
   function abrirModalSocioEditar() {
-    document.getElementById('modal-socio-edit').classList.add('open');
-    setTimeout(function(){ document.getElementById('ed-nombres').focus(); }, 60);
+    window.abrirModal('modal-socio-edit');
   }
-
-  function cerrarModal(id) {
-    var m = document.getElementById(id);
-    if (m) m.classList.remove('open');
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.open');
-      if (open) open.classList.remove('open');
-    }
-  });
 </script>
