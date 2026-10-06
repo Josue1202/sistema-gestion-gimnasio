@@ -9,6 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
+  <script>
+    (function() {
+      var savedTheme = localStorage.getItem('gym_theme') || 'giantucchi';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
 </head>
 <body>
   <% const nav = [
@@ -48,6 +54,12 @@
       </div>
 
       <span class="spacer"></span>
+
+      <!-- Conmutador de Tema Giantucchi / Supabase -->
+      <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" title="Alternar tema: Giantucchi / Supabase" onclick="toggleTheme();">
+        <span id="theme-toggle-icon">🌌</span>
+        <span id="theme-toggle-label">Giantucchi</span>
+      </button>
 
       <!-- Estado de WhatsApp en vivo -->
       <a href="/whatsapp" id="nav-wa-pill" class="wa-status-pill loading" title="Ver estado de conexión de WhatsApp">
@@ -104,6 +116,28 @@
       checkWa();
       setInterval(checkWa, 15000);
     })();
+
+    // Lógica interactiva para alternar temas (Giantucchi / Supabase)
+    function updateThemeBtn(theme) {
+      var icon = document.getElementById('theme-toggle-icon');
+      var label = document.getElementById('theme-toggle-label');
+      if (!icon || !label) return;
+      if (theme === 'supabase') {
+        icon.textContent = '⚡';
+        label.textContent = 'Supabase';
+      } else {
+        icon.textContent = '🌌';
+        label.textContent = 'Giantucchi';
+      }
+    }
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme') || 'giantucchi';
+      var next = current === 'giantucchi' ? 'supabase' : 'giantucchi';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('gym_theme', next);
+      updateThemeBtn(next);
+    }
+    updateThemeBtn(document.documentElement.getAttribute('data-theme') || 'giantucchi');
   </script>
 </body>
 </html>

@@ -279,6 +279,28 @@ a:hover {
   box-shadow: 0 0 8px var(--danger-ink);
 }
 
+/* Conmutador de Tema (Giantucchi / Supabase) */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-input);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+.theme-toggle-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-focus);
+  color: var(--text-bright);
+}
+
 /* Perfil de usuario Giantucchi */
 .user-profile {
   display: flex;
@@ -1207,3 +1229,132 @@ input::placeholder, textarea::placeholder {
   background: var(--surface-hover);
   border-color: var(--border-strong);
 }
+
+/* ============================================================
+   TEMA 2: SUPABASE MODERN DARK ([data-theme="supabase"])
+   Inspirado en la estética técnica y minimalista de supabase.com
+   ============================================================ */
+
+[data-theme="supabase"] {
+  --bg: #121212;
+  --surface: #1c1c1c;
+  --surface-2: #232323;
+  --surface-input: #1f1f1f;
+  --surface-hover: #2a2a2a;
+  
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-focus: #3ECF8E;
+
+  --text: #e0e0e0;
+  --text-bright: #ededed;
+  --muted: #a1a1a1;
+  --muted-dark: #666666;
+
+  /* Supabase Signature Emerald */
+  --primary: #3ECF8E;
+  --primary-hover: #30b77b;
+  --primary-ink: #050505;
+  --primary-glow: rgba(62, 207, 142, 0.35);
+  --accent: #3ECF8E;
+
+  --spectrum-bar: linear-gradient(90deg, #3ECF8E 0%, #30b77b 50%, #00a884 100%);
+  --shadow-cyan: 0 0 24px rgba(62, 207, 142, 0.25);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="supabase"] .giantucchi-badge-pro {
+  background: rgba(62, 207, 142, 0.15);
+  color: #3ECF8E;
+  border-color: rgba(62, 207, 142, 0.35);
+  box-shadow: 0 0 10px rgba(62, 207, 142, 0.2);
+}
+
+[data-theme="supabase"] .nav a.item.active {
+  color: #3ECF8E;
+  background: rgba(62, 207, 142, 0.12);
+  border-color: rgba(62, 207, 142, 0.35);
+  box-shadow: 0 0 14px rgba(62, 207, 142, 0.15);
+}
+
+[data-theme="supabase"] a {
+  color: #3ECF8E;
+}
+[data-theme="supabase"] a:hover {
+  color: #47d896;
+}
+
+[data-theme="supabase"] .btn.primary {
+  background: #3ECF8E;
+  color: #050505;
+  border: 1px solid #3ECF8E;
+  box-shadow: 0 4px 14px rgba(62, 207, 142, 0.35);
+}
+
+[data-theme="supabase"] .btn.primary:hover {
+  background: #30b77b;
+  border-color: #30b77b;
+  color: #000000;
+  box-shadow: 0 6px 20px rgba(62, 207, 142, 0.45);
+}
+
+[data-theme="supabase"] .btn:hover {
+  border-color: rgba(62, 207, 142, 0.5);
+}
+
+[data-theme="supabase"] input:focus, 
+[data-theme="supabase"] select:focus, 
+[data-theme="supabase"] textarea:focus {
+  border-color: #3ECF8E;
+  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.25);
+}
+
+[data-theme="supabase"] .bar {
+  background: #3ECF8E;
+}
+
+[data-theme="supabase"] .pos-cat-btn.active {
+  background: #3ECF8E;
+  color: #050505;
+  border-color: #3ECF8E;
+  box-shadow: 0 0 12px rgba(62, 207, 142, 0.35);
+}
+
+[data-theme="supabase"] .pos-prod-card:hover {
+  border-color: #3ECF8E;
+  box-shadow: 0 4px 16px rgba(62, 207, 142, 0.2);
+}
+
+[data-theme="supabase"] .pos-checkout-btn {
+  background: #3ECF8E;
+  color: #050505;
+  box-shadow: 0 4px 18px rgba(62, 207, 142, 0.35);
+}
+
+[data-theme="supabase"] .pos-checkout-btn:hover {
+  background: #30b77b;
+  box-shadow: 0 6px 24px rgba(62, 207, 142, 0.5);
+}
+
+[data-theme="supabase"] .pos-method-btn.active {
+  background: rgba(62, 207, 142, 0.15);
+  border-color: #3ECF8E;
+  color: #3ECF8E;
+  box-shadow: 0 0 10px rgba(62, 207, 142, 0.2);
+}
+
+[data-theme="supabase"] .checkin-input-wrap input {
+  border-color: #3ECF8E;
+  box-shadow: 0 0 20px rgba(62, 207, 142, 0.25);
+}
+
+[data-theme="supabase"] .checkin-input-wrap input:focus {
+  border-color: #47d896;
+  box-shadow: 0 0 28px rgba(62, 207, 142, 0.45);
+}
+
+[data-theme="supabase"] .auth-wrap {
+  background: radial-gradient(ellipse at 50% 0%, #1e2823 0%, #121212 75%);
+}
+
