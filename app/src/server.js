@@ -106,17 +106,34 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-// Aviso temprano si falta configuracion critica
-if (!process.env.DATABASE_URL) {
-  console.warn('[aviso] DATABASE_URL no esta definida.');
+async function start() {
+  if (!process.env.DATABASE_URL) {
+    console.warn('[aviso] DATABASE_URL no esta definida.');
+  }
+
+  try {
+    await pool.query('SELECT 1');
+    console.log('[db] conexion OK');
+
+    const chk = await pool.query("SELECT to_regclass('public.usuarios') AS tbl");
+    if (!chk.rows[0].tbl) {
+      console.log('[db] Inicializando tablas y datos base del gimnasio...');
+      const fs = require('fs');
+      const sqlPath = path.join(__dirname, 'init_db.sql');
+      if (fs.existsSync(sqlPath)) {
+        const sql = fs.readFileSync(sqlPath, 'utf8');
+        await pool.query(sql);
+        console.log('[db] Tablas, vistas y datos base creados exitosamente!');
+      }
+    }
+
+    const n = await needsSetup();
+    if (n) console.log('[setup] No hay contrasena de admin. Ve a /setup para crearla.');
+  } catch (e) {
+    console.error('[db] Error al inicializar:', e.message);
+  }
+
+  app.listen(PORT, () => console.log(`[app] escuchando en http://localhost:${PORT}`));
 }
 
-pool.query('SELECT 1')
-  .then(() => console.log('[db] conexion OK'))
-  .catch((e) => console.error('[db] no se pudo conectar:', e.message));
-
-needsSetup().then((n) => {
-  if (n) console.log('[setup] No hay contrasena de admin. Ve a /setup para crearla.');
-}).catch(() => {});
-
-app.listen(PORT, () => console.log(`[app] escuchando en http://localhost:${PORT}`));
+start();
