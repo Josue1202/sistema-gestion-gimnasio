@@ -29,8 +29,8 @@
       </div>
 
       <% if (estado === 'open') { %>
-        <div style="background:var(--bubble-green); border:1px solid var(--bubble-green-border); border-radius:14px; padding:20px; margin-bottom:20px;">
-          <h3 style="margin-top:0; color:#25d366; display:flex; align-items:center; gap:8px;">
+        <div style="background:var(--ok-bg); border:1px solid var(--ok-border); border-radius:var(--radius-lg); padding:18px; margin-bottom:20px;">
+          <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
             <%- u.icon('checkCircle', 18) %> WhatsApp está listo y vinculado
           </h3>
           <% if (info && info.ownerJid) { %>
@@ -122,11 +122,11 @@
       </form>
     </div>
 
-    <div class="card" style="background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.25);">
-      <h3 class="mt0" style="color:#2563eb; display:flex; align-items:center; gap:6px;">
+    <div class="card">
+      <h3 class="mt0" style="display:flex; align-items:center; gap:6px;">
         <%- u.icon('zap', 18) %> ¿Cómo funciona la automatización?
       </h3>
-      <ul style="font-size:13px; color:var(--ink); line-height:1.7; padding-left:18px; margin-bottom:0;">
+      <ul style="font-size:13px; color:var(--muted); line-height:1.7; padding-left:18px; margin-bottom:0;">
         <li><strong>Solo escaneas una vez:</strong> Al escanear este QR desde tu WhatsApp, el servidor del gimnasio queda enlazado permanentemente.</li>
         <li><strong>NO necesitas WhatsApp Web abierto:</strong> No hace falta tener abierto WhatsApp en la computadora ni ninguna pestaña en Chrome. Todo corre de forma invisible en el servidor.</li>
         <li><strong>Envío instantáneo:</strong> Cuando registras pagos, bienvenida o recordatorios, el sistema manda el mensaje directo al teléfono del cliente en 1 segundo.</li>

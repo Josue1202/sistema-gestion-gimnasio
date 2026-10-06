@@ -3,7 +3,7 @@
 %>
 <div class="toolbar">
   <div style="display:flex; align-items:center; gap:14px;">
-    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px;">
+    <div style="width:42px; height:42px; border-radius:var(--radius-sm); background:#222222; border:1px solid #333333; color:var(--text-bright); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;">
       <%= ini %>
     </div>
     <div>
@@ -35,7 +35,7 @@
   </div>
 
   <div>
-    <div class="card" style="border-left:4px solid var(--primary);">
+    <div class="card">
       <h2 class="mt0">Estado de Membresía</h2>
       <div style="font-size:18px; margin:8px 0 12px;">
         <% var est = estado.estado_membresia; %>

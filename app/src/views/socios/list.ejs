@@ -54,13 +54,11 @@
        var est = s.estado_membresia;
        if (est === 'activo' && s.dias_restantes != null && s.dias_restantes <= 7) est = 'por_vencer';
        var ini = (s.nombres.charAt(0) + (s.apellidos ? s.apellidos.charAt(0) : '')).toUpperCase();
-       var colors = ['#00a884', '#005c4b', '#53bdeb', '#25d366', '#a78bfa', '#f59e0b'];
-       var color = colors[(s.nombres.charCodeAt(0) + (s.apellidos ? s.apellidos.charCodeAt(0) : 0)) % colors.length];
     %>
       <tr>
         <td>
           <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:34px; height:34px; border-radius:50%; background:<%= color %>; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">
+            <div style="width:28px; height:28px; border-radius:var(--radius-sm); background:#222222; border:1px solid #333333; color:var(--text-bright); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:11px; flex-shrink:0;">
               <%= ini %>
             </div>
             <div>

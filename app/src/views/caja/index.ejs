@@ -11,7 +11,7 @@
 </div>
 
 <% if (!caja) { %>
-  <div class="card" style="max-width:480px; margin:24px auto; border-top:4px solid var(--primary); padding:28px;">
+  <div class="card" style="max-width:480px; margin:24px auto; padding:28px;">
     <h2 class="mt0" style="font-size:22px; text-align:center;">Abrir Caja del Día</h2>
     <p class="muted" style="text-align:center; margin-bottom:20px;">
       Ingresa el monto de efectivo base con el que inicia el turno en la caja física.
@@ -36,19 +36,19 @@
     </div>
     <div class="kpi">
       <div class="label">Ingresos en Efectivo</div>
-      <div class="value" style="color:#25d366;"><%= u.soles(caja.ingresos_efectivo) %></div>
+      <div class="value"><%= u.soles(caja.ingresos_efectivo) %></div>
     </div>
     <div class="kpi">
       <div class="label">Ingresos Yape / Plin / Tarjeta</div>
-      <div class="value" style="color:#53bdeb;"><%= u.soles(caja.ingresos_otros) %></div>
+      <div class="value"><%= u.soles(caja.ingresos_otros) %></div>
     </div>
     <div class="kpi">
       <div class="label">Egresos / Gastos</div>
-      <div class="value" style="color:#f15c6d;"><%= u.soles(caja.egresos_total) %></div>
+      <div class="value"><%= u.soles(caja.egresos_total) %></div>
     </div>
-    <div class="kpi" style="border:2px solid var(--primary); background:var(--bubble-green);">
-      <div class="label" style="color:#25d366;">Efectivo Físico Esperado</div>
-      <div class="value" style="color:#ffffff; font-size:28px;"><%= u.soles(caja.efectivo_esperado) %></div>
+    <div class="kpi">
+      <div class="label">Efectivo Físico Esperado</div>
+      <div class="value" style="color:var(--primary);"><%= u.soles(caja.efectivo_esperado) %></div>
     </div>
   </div>
 
@@ -89,7 +89,7 @@
     </div>
 
     <div>
-      <div class="card" style="border-top:3px solid #f15c6d;">
+      <div class="card">
         <h2 class="mt0">Cerrar Caja (Fin de Turno)</h2>
         <p class="muted" style="font-size:13px;">Cuenta el efectivo físico en caja e ingrésalo para calcular si hay descuadre.</p>
         <form method="post" action="/caja/cerrar" class="stack" onsubmit="return confirm('¿Seguro que deseas cerrar la caja del turno? Esta acción registrará el cuadre final.');">
@@ -103,7 +103,7 @@
             <label>Observaciones o notas de cierre</label>
             <input name="notas" placeholder="Opcional: motivo de faltante o sobrante...">
           </div>
-          <button class="btn primary" type="submit" style="background:#ef4444; border-color:#ef4444; font-size:15px; padding:11px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+          <button class="btn danger" type="submit" style="font-size:14px; padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
             <%- u.icon('lock', 16) %> Cerrar Turno y Guardar Cuadre
           </button>
         </form>
@@ -132,7 +132,7 @@
           <td><span class="badge ok" style="display:inline-flex; align-items:center; gap:4px;"><%- u.icon('checkCircle', 12) %> Ingreso</span></td>
           <td><strong><%= p.concepto %></strong><%= p.nombres ? ' · ' + p.apellidos + ', ' + p.nombres : '' %></td>
           <td><span style="font-weight:600; text-transform:uppercase;"><%= p.metodo_pago %></span></td>
-          <td class="num" style="color:#10b981;">+ <%= u.soles(p.monto) %></td>
+          <td class="num" style="color:var(--primary); font-weight:600;">+ <%= u.soles(p.monto) %></td>
         </tr>
       <% }); %>
       <% egresos.forEach(function(x){ %>
@@ -141,7 +141,7 @@
           <td><span class="badge danger" style="display:inline-flex; align-items:center; gap:4px;"><%- u.icon('minus', 12) %> Egreso</span></td>
           <td><%= x.concepto %></td>
           <td><span style="text-transform:uppercase;"><%= x.metodo_pago %></span></td>
-          <td class="num" style="color:#ef4444;">- <%= u.soles(x.monto) %></td>
+          <td class="num" style="color:var(--danger-ink); font-weight:600;">- <%= u.soles(x.monto) %></td>
         </tr>
       <% }); %>
       <% if (!pagos.length && !egresos.length) { %>
