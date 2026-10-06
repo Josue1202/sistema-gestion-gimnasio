@@ -11,7 +11,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
   <script>
     (function() {
-      var savedTheme = localStorage.getItem('gym_theme') || 'giantucchi';
+      var savedTheme = localStorage.getItem('gym_theme') || 'supabase';
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
@@ -55,10 +55,10 @@
 
       <span class="spacer"></span>
 
-      <!-- Conmutador de Tema Giantucchi / Supabase -->
-      <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" title="Alternar tema: Giantucchi / Supabase" onclick="toggleTheme();">
-        <span id="theme-toggle-icon">🌌</span>
-        <span id="theme-toggle-label">Giantucchi</span>
+      <!-- Conmutador de Tema Supabase / Giantucchi -->
+      <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" title="Alternar tema: Supabase / Giantucchi" onclick="toggleTheme();">
+        <span id="theme-toggle-icon">⚡</span>
+        <span id="theme-toggle-label">Supabase</span>
       </button>
 
       <!-- Estado de WhatsApp en vivo -->
@@ -131,13 +131,13 @@
       }
     }
     function toggleTheme() {
-      var current = document.documentElement.getAttribute('data-theme') || 'giantucchi';
-      var next = current === 'giantucchi' ? 'supabase' : 'giantucchi';
+      var current = document.documentElement.getAttribute('data-theme') || 'supabase';
+      var next = current === 'supabase' ? 'giantucchi' : 'supabase';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('gym_theme', next);
       updateThemeBtn(next);
     }
-    updateThemeBtn(document.documentElement.getAttribute('data-theme') || 'giantucchi');
+    updateThemeBtn(document.documentElement.getAttribute('data-theme') || 'supabase');
   </script>
 </body>
 </html>

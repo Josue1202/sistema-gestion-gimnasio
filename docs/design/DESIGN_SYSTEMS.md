@@ -2,8 +2,8 @@
 
 Este documento especifica los dos sistemas de diseño aprobados para la plataforma **Zona Fitness Pro**:
 
-1. **Giantucchi NextGen Dark** (Predeterminado - Obsidian & Spectrum)
-2. **Supabase Modern Dark** (Alternativa - Graphite & Emerald)
+1. **Supabase Modern Dark** (Predeterminado Oficial - Technical Graphite & Emerald #3ECF8E)
+2. **Giantucchi NextGen Dark** (Alternativa - Obsidian & Spectrum)
 
 ---
 

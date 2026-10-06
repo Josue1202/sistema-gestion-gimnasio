@@ -51,7 +51,7 @@
              var isWarn = uc.estado === 'por_vencer';
              var isDanger = uc.estado === 'vencido';
              var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
-             var statusColor = isOk ? '#25d366' : (isWarn ? '#fbbf24' : '#f15c6d');
+             var statusColor = isOk ? '#3ECF8E' : (isWarn ? '#fbbf24' : '#f15c6d');
         %>
           <div class="active-member-banner <%= bannerClass %>" id="banner-box">
             <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:<%= statusColor %>;" id="banner-status">
@@ -523,7 +523,7 @@
     var isDanger = d.estado === 'vencido';
 
     var statusText = isOk ? '🟢 ACCESO CONCEDIDO' : (isWarn ? '🟡 ACCESO CONCEDIDO (POR VENCER)' : '🔴 MEMBRESÍA VENCIDA');
-    var statusColor = isOk ? '#25d366' : (isWarn ? '#fbbf24' : '#f15c6d');
+    var statusColor = isOk ? '#3ECF8E' : (isWarn ? '#fbbf24' : '#f15c6d');
     var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
 
     box.style.display = 'block';

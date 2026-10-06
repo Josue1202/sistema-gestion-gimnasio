@@ -1,46 +1,55 @@
 /* ============================================================
-   ZONA FITNESS PRO - GIANTUCCHI NEXTGEN DESIGN SYSTEM
-   Official Giantucchi Ecosystem Spec: Dark Obsidian Edition
-   Spectrum Accent: #06b6d4, #3b82f6, #8b5cf6, #ec4899, #f97316
-   Canvas: #050505 | Card: #0a0a0f | Secondary: #101018 | Wells: #141420
+   ZONA FITNESS PRO - SUPABASE MODERN DARK DESIGN SYSTEM
+   Official Supabase Ecosystem Spec: Technical Graphite & Emerald
+   Emerald Accent: #3ECF8E | Glow: rgba(62, 207, 142, 0.35)
+   Canvas: #121212 | Card: #1c1c1c | Secondary: #232323 | Wells: #1f1f1f
    ============================================================ */
 
-:root {
-  /* Lienzo y Superficies Oficiales Giantucchi */
-  --bg: #050505;                 /* Pitch space black profundo */
-  --surface: #0a0a0f;            /* Superficie principal de tarjetas y paneles */
-  --surface-2: #101018;          /* Superficie secundaria / contenedores internos */
-  --surface-input: #141420;      /* Inputs, buscadores, píldoras y wells */
-  --surface-hover: #1c1c2e;      /* Estado hover interactivo */
+:root, [data-theme="supabase"] {
+  /* Lienzo y Superficies Oficiales Supabase Modern Dark */
+  --bg: #121212;                 /* Dark Graphite Técnico Supabase */
+  --surface: #1c1c1c;            /* Superficie principal de tarjetas y paneles */
+  --surface-2: #232323;          /* Superficie secundaria / contenedores internos */
+  --surface-input: #1f1f1f;      /* Inputs, buscadores, píldoras y wells */
+  --surface-hover: #2a2a2a;      /* Estado hover interactivo */
   
-  /* Bordes Traslúcidos Hairline */
-  --border: rgba(255, 255, 255, 0.08);       /* Borde base sutil de vidrio */
+  /* Bordes Técnicos Hairline */
+  --border: rgba(255, 255, 255, 0.08);       /* Borde base sutil */
   --border-subtle: rgba(255, 255, 255, 0.04);/* Divisores internos tenues */
   --border-strong: rgba(255, 255, 255, 0.16);/* Bordes de inputs e interactivos */
-  --border-focus: #06b6d4;                   /* Borde de foco cian Giantucchi */
+  --border-focus: #3ECF8E;                   /* Supabase Emerald Focus Ring */
 
-  /* Tipografía Giantucchi */
-  --text: #e2e8f0;               /* Texto principal de alto contraste suave */
-  --text-bright: #ffffff;        /* Encabezados y valores clave */
-  --muted: #94a3b8;              /* Subtítulos, timestamps e íconos inactivos */
-  --muted-dark: #64748b;         /* Texto secundario de menor jerarquía */
+  /* Tipografía Supabase Developer-Grade */
+  --text: #e0e0e0;               /* Texto principal */
+  --text-bright: #ededed;        /* Encabezados y valores clave */
+  --muted: #a1a1a1;              /* Subtítulos, timestamps e íconos inactivos */
+  --muted-dark: #666666;         /* Texto secundario de menor jerarquía */
 
-  /* Giantucchi Brand Accents (Espectro Cromático) */
-  --g-cyan: #06b6d4;
-  --g-blue: #3b82f6;
-  --g-violet: #8b5cf6;
-  --g-pink: #ec4899;
-  --g-orange: #f97316;
-  --g-emerald: #10b981;
-  --spectrum-gradient: linear-gradient(135deg, #06b6d4 0%, #3b82f6 20%, #8b5cf6 40%, #ec4899 60%, #f97316 80%, #eab308 100%);
-  --spectrum-bar: linear-gradient(90deg, #06b6d4 0%, #3b82f6 20%, #8b5cf6 40%, #ec4899 60%, #f97316 80%, #eab308 100%);
+  /* Supabase Signature Emerald (#3ECF8E) */
+  --primary: #3ECF8E;            /* Verde esmeralda oficial de Supabase */
+  --primary-hover: #30b77b;
+  --primary-ink: #050505;        /* Texto oscuro legible sobre el verde esmeralda */
+  --primary-glow: rgba(62, 207, 142, 0.35);
+  --accent: #3ECF8E;             /* Acento métricas y enlaces */
 
-  /* Botón Principal High-Contrast Giantucchi */
-  --primary: #ffffff;
-  --primary-hover: #f1f5f9;
-  --primary-ink: #050505;
-  --primary-glow: rgba(255, 255, 255, 0.22);
-  --accent: #22d3ee;             /* Cian de acento para métricas y enlaces */
+  /* Barra Superior Glow Esmeralda */
+  --spectrum-bar: linear-gradient(90deg, #3ECF8E 0%, #30b77b 50%, #10b981 100%);
+
+  /* Estados Adaptados al Modo Oscuro Supabase */
+  --ok-bg: rgba(62, 207, 142, 0.12);
+  --ok-ink: #3ECF8E;
+  --ok-border: rgba(62, 207, 142, 0.3);
+
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --warn-ink: #fbbf24;
+  --warn-border: rgba(251, 191, 36, 0.3);
+
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --danger-ink: #f87171;
+  --danger-border: rgba(248, 113, 113, 0.3);
+
+  --muted-bg: rgba(161, 161, 161, 0.12);
+  --muted-ink: #a1a1a1;
 
   /* WhatsApp Official Colors (Preservados para integración WA) */
   --wa-green: #25d366;
@@ -48,84 +57,70 @@
   --wa-dark: #005c4b;
   --wa-glow: rgba(37, 211, 102, 0.35);
 
-  /* Estados Adaptados al Modo Oscuro Giantucchi */
-  --ok-bg: rgba(16, 185, 129, 0.14);
-  --ok-ink: #34d399;
-  --ok-border: rgba(52, 211, 153, 0.3);
-
-  --warn-bg: rgba(245, 158, 11, 0.14);
-  --warn-ink: #fbbf24;
-  --warn-border: rgba(251, 191, 36, 0.3);
-
-  --danger-bg: rgba(239, 68, 68, 0.14);
-  --danger-ink: #f87171;
-  --danger-border: rgba(248, 113, 113, 0.3);
-
-  --muted-bg: rgba(148, 163, 184, 0.12);
-  --muted-ink: #94a3b8;
-
   /* Formas y Radios */
   --radius-full: 9999px;
-  --radius-lg: 16px;
-  --radius: 12px;
-  --radius-sm: 8px;
+  --radius-lg: 14px;
+  --radius: 10px;
+  --radius-sm: 6px;
 
-  /* Sombras Profundas y Resplandores */
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.5);
-  --shadow-cyan: 0 0 24px rgba(6, 182, 212, 0.25);
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Sombras y Resplandores */
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-emerald: 0 0 24px rgba(62, 207, 142, 0.25);
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
   color: var(--text);
   font: 14px/1.55 var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar estilizado Giantucchi */
+/* Scrollbar estilizado Supabase */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0f;
+  background: #171717;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c1c2e;
+  background: #2a2a2a;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2a44;
+  background: #3e3e3e;
 }
 
 a {
-  color: var(--g-cyan);
+  color: var(--primary);
   text-decoration: none;
   transition: all 0.15s ease;
 }
 a:hover {
-  color: #38bdf8;
+  color: var(--primary-hover);
   text-decoration: none;
 }
 
 /* ============================================================
-   GIANTUCCHI SPECTRUM ACCENTS
+   SUPABASE TOP GLOW BAR & BRAND ACCENTS
    ============================================================ */
 
-.giantucchi-spectrum-bar {
+.giantucchi-spectrum-bar, .supabase-top-bar {
   height: 2.5px;
   width: 100%;
   background: var(--spectrum-bar);
   display: block;
 }
 
-.giantucchi-spectrum-bar-fixed {
+.giantucchi-spectrum-bar-fixed, .supabase-top-bar-fixed {
   position: fixed;
   top: 0;
   left: 0;
@@ -135,7 +130,7 @@ a:hover {
   z-index: 1000;
 }
 
-.giantucchi-badge-pro {
+.giantucchi-badge-pro, .brand-badge-pro {
   display: inline-flex;
   align-items: center;
   font-size: 10px;
@@ -144,25 +139,25 @@ a:hover {
   text-transform: uppercase;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  background: rgba(6, 182, 212, 0.15);
-  color: #22d3ee;
-  border: 1px solid rgba(6, 182, 212, 0.35);
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+  background: rgba(62, 207, 142, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(62, 207, 142, 0.35);
+  box-shadow: 0 0 10px rgba(62, 207, 142, 0.2);
 }
 
 /* ============================================================
-   NAVBAR & HEADER (GLASSMORPHIC OBSIDIAN)
+   NAVBAR & HEADER (GLASSMORPHIC GRAPHITE)
    ============================================================ */
 
 .navbar-wrapper {
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(24, 24, 27, 0.88);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .nav {
@@ -190,7 +185,7 @@ a:hover {
 .nav .brand-icon {
   font-size: 22px;
   display: inline-block;
-  filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.5));
+  filter: drop-shadow(0 2px 8px rgba(62, 207, 142, 0.5));
 }
 
 .nav-items {
@@ -221,11 +216,11 @@ a:hover {
 }
 
 .nav a.item.active {
-  color: #22d3ee;
-  background: rgba(6, 182, 212, 0.12);
-  border: 1px solid rgba(6, 182, 212, 0.35);
+  color: var(--primary);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
   font-weight: 700;
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.15);
+  box-shadow: 0 0 14px rgba(62, 207, 142, 0.15);
 }
 
 .nav-ico {
@@ -233,6 +228,28 @@ a:hover {
 }
 
 .nav .spacer { flex: 1; }
+
+/* Conmutador de Tema */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-input);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+.theme-toggle-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+  color: var(--text-bright);
+}
 
 /* Status Pill WhatsApp */
 .wa-status-pill {
@@ -279,29 +296,7 @@ a:hover {
   box-shadow: 0 0 8px var(--danger-ink);
 }
 
-/* Conmutador de Tema (Giantucchi / Supabase) */
-.theme-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
-  border-radius: var(--radius-full);
-  font-size: 11.5px;
-  font-weight: 700;
-  border: 1px solid var(--border-strong);
-  background: var(--surface-input);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-right: 8px;
-}
-.theme-toggle-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-focus);
-  color: var(--text-bright);
-}
-
-/* Perfil de usuario Giantucchi */
+/* Perfil de usuario Supabase */
 .user-profile {
   display: flex;
   align-items: center;
@@ -314,14 +309,14 @@ a:hover {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #3ECF8E 0%, #059669 100%);
+  color: #050505;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 2px 8px rgba(62, 207, 142, 0.35);
 }
 
 .user-profile .who {
@@ -406,7 +401,7 @@ h3 {
 }
 
 /* ============================================================
-   TARJETAS & PANELES (GIANTUCCHI GLASS OBSIDIAN)
+   TARJETAS & PANELES (SUPABASE GRAPHITE CARDS)
    ============================================================ */
 
 .card {
@@ -426,7 +421,7 @@ h3 {
 .card h2:first-child, .card h3:first-child { margin-top: 0; }
 
 /* ============================================================
-   KPIS / MÉTRICAS (SPECTRUM BORDER HIGHLIGHTS)
+   KPIS / MÉTRICAS (SUPABASE DEVELOPER DASHBOARD)
    ============================================================ */
 
 .kpis {
@@ -448,8 +443,8 @@ h3 {
 
 .kpi:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7);
+  border-color: rgba(62, 207, 142, 0.35);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
 }
 
 .kpi::before {
@@ -462,13 +457,13 @@ h3 {
   background: var(--border);
 }
 
-/* Spectrum Hairlines por posición */
-.kpi:nth-child(1)::before { background: var(--g-cyan); }
+/* Hairlines de Estado */
+.kpi:nth-child(1)::before { background: var(--primary); }
 .kpi:nth-child(2)::before { background: #ef4444; }
-.kpi:nth-child(3)::before { background: #f59e0b; }
-.kpi:nth-child(4)::before { background: var(--g-blue); }
-.kpi:nth-child(5)::before { background: var(--g-violet); }
-.kpi:nth-child(6)::before { background: var(--g-emerald); }
+.kpi:nth-child(3)::before { background: #fbbf24; }
+.kpi:nth-child(4)::before { background: #3b82f6; }
+.kpi:nth-child(5)::before { background: #8b5cf6; }
+.kpi:nth-child(6)::before { background: #10b981; }
 
 .kpi .label {
   color: var(--muted);
@@ -487,7 +482,7 @@ h3 {
 }
 
 /* ============================================================
-   TABLAS MODERNAS OBSIDIAN
+   TABLAS MODERNAS GRAPHITE
    ============================================================ */
 
 .table-wrap {
@@ -535,7 +530,7 @@ td.num, th.num {
 }
 
 /* ============================================================
-   BADGES & PILLS NEON
+   BADGES & PILLS
    ============================================================ */
 
 .badge {
@@ -574,9 +569,9 @@ td.num, th.num {
 }
 
 .badge.cyan, .badge.info {
-  background: rgba(6, 182, 212, 0.14);
-  color: #22d3ee;
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  background: rgba(62, 207, 142, 0.12);
+  color: var(--primary);
+  border: 1px solid rgba(62, 207, 142, 0.3);
 }
 
 /* ============================================================
@@ -616,8 +611,8 @@ textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--g-cyan);
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.25);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.25);
 }
 
 input::placeholder, textarea::placeholder {
@@ -631,7 +626,7 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ============================================================
-   BOTONES (GIANTUCCHI SIGNATURE HIGH-CONTRAST & PILLS)
+   BOTONES (SUPABASE SIGNATURE EMERALD & GRAPHITE)
    ============================================================ */
 
 .btn {
@@ -656,25 +651,25 @@ input::placeholder, textarea::placeholder {
 
 .btn:hover {
   background: var(--surface-hover);
-  border-color: rgba(6, 182, 212, 0.5);
+  border-color: rgba(62, 207, 142, 0.4);
   color: var(--text-bright);
   transform: translateY(-1px);
 }
 
-/* Primary CTA Giantucchi Signature: Solid White High-Contrast */
+/* Primary CTA Supabase: Signature Emerald Button */
 .btn.primary {
-  background: #ffffff;
-  color: #050505;
-  border: 1px solid #ffffff;
-  font-weight: 800;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
+  background: var(--primary);
+  color: var(--primary-ink);
+  border: 1px solid var(--primary);
+  font-weight: 700;
+  box-shadow: 0 4px 14px var(--primary-glow);
 }
 
 .btn.primary:hover {
-  background: #f1f5f9;
-  border-color: #f1f5f9;
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
   color: #000000;
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 20px rgba(62, 207, 142, 0.45);
   transform: translateY(-1px);
 }
 
@@ -797,14 +792,14 @@ input::placeholder, textarea::placeholder {
 
 .bar {
   height: 100%;
-  background: var(--g-cyan);
+  background: var(--primary);
   border-radius: var(--radius-full);
   min-width: 3px;
   transition: width 0.3s ease;
 }
 
 /* ============================================================
-   PÁGINAS DE ACCESO / LOGIN (GIANTUCCHI OBSIDIAN HERO)
+   PÁGINAS DE ACCESO / LOGIN (SUPABASE GRAPHITE HERO)
    ============================================================ */
 
 .auth-wrap {
@@ -812,7 +807,7 @@ input::placeholder, textarea::placeholder {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: radial-gradient(ellipse at 50% 0%, #16162a 0%, #050505 75%);
+  background: radial-gradient(ellipse at 50% 0%, #173226 0%, #121212 75%);
 }
 
 .auth-card {
@@ -839,7 +834,7 @@ input::placeholder, textarea::placeholder {
     margin: 0 !important;
     padding: 0 !important;
   }
-  .navbar-wrapper, .giantucchi-spectrum-bar, .no-print, .flash, .toolbar, .actions, button {
+  .navbar-wrapper, .giantucchi-spectrum-bar, .supabase-top-bar, .no-print, .flash, .toolbar, .actions, button {
     display: none !important;
   }
   .wrap, .terminal-container {
@@ -936,16 +931,16 @@ input::placeholder, textarea::placeholder {
   letter-spacing: 0.03em;
   padding: 14px 20px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--g-cyan);
+  border: 2px solid var(--primary);
   background: var(--surface-input);
   color: var(--text-bright);
-  box-shadow: var(--shadow-cyan);
+  box-shadow: var(--shadow-emerald);
   transition: all 0.2s ease;
 }
 
 .checkin-input-wrap input:focus {
-  border-color: #22d3ee;
-  box-shadow: 0 0 28px rgba(6, 182, 212, 0.45);
+  border-color: #47d896;
+  box-shadow: 0 0 28px rgba(62, 207, 142, 0.45);
   outline: none;
 }
 
@@ -957,7 +952,7 @@ input::placeholder, textarea::placeholder {
   padding: 16px 18px;
   margin-top: 14px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 16px rgba(62, 207, 142, 0.2);
 }
 
 .active-member-banner.warn {
@@ -990,7 +985,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .pos-search-input:focus {
-  border-color: var(--g-cyan);
+  border-color: var(--primary);
   outline: none;
 }
 
@@ -1017,15 +1012,15 @@ input::placeholder, textarea::placeholder {
 
 .pos-cat-btn:hover {
   color: var(--text-bright);
-  border-color: var(--g-cyan);
+  border-color: var(--primary);
 }
 
 .pos-cat-btn.active {
-  background: var(--g-cyan);
-  color: #050505;
-  border-color: var(--g-cyan);
+  background: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary);
   font-weight: 800;
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 12px rgba(62, 207, 142, 0.35);
 }
 
 .pos-products-grid {
@@ -1055,8 +1050,8 @@ input::placeholder, textarea::placeholder {
 .pos-prod-card:hover {
   transform: translateY(-2px);
   background: var(--surface-hover);
-  border-color: var(--g-cyan);
-  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(62, 207, 142, 0.2);
 }
 
 .pos-prod-card:active {
@@ -1143,7 +1138,7 @@ input::placeholder, textarea::placeholder {
 
 .pos-qty-btn:hover {
   background: var(--surface-hover);
-  border-color: var(--g-cyan);
+  border-color: var(--primary);
   color: var(--text-bright);
 }
 
@@ -1168,21 +1163,21 @@ input::placeholder, textarea::placeholder {
 }
 
 .pos-method-btn:hover {
-  border-color: var(--g-cyan);
+  border-color: var(--primary);
   color: var(--text-bright);
 }
 
 .pos-method-btn.active {
-  background: rgba(6, 182, 212, 0.15);
-  border-color: var(--g-cyan);
-  color: #22d3ee;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+  background: var(--ok-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 10px rgba(62, 207, 142, 0.2);
 }
 
 .pos-checkout-btn {
   width: 100%;
-  background: #ffffff;
-  color: #050505;
+  background: var(--primary);
+  color: var(--primary-ink);
   border: none;
   border-radius: var(--radius-full);
   padding: 13px 18px;
@@ -1194,14 +1189,14 @@ input::placeholder, textarea::placeholder {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 18px var(--primary-glow);
   transition: all 0.18s ease;
 }
 
 .pos-checkout-btn:hover {
-  background: #f1f5f9;
+  background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 24px rgba(62, 207, 142, 0.45);
 }
 
 .pos-checkout-btn:disabled {
@@ -1231,130 +1226,79 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ============================================================
-   TEMA 2: SUPABASE MODERN DARK ([data-theme="supabase"])
-   Inspirado en la estética técnica y minimalista de supabase.com
+   TEMA ALTERNATIVO: GIANTUCCHI NEXTGEN DARK ([data-theme="giantucchi"])
    ============================================================ */
 
-[data-theme="supabase"] {
-  --bg: #121212;
-  --surface: #1c1c1c;
-  --surface-2: #232323;
-  --surface-input: #1f1f1f;
-  --surface-hover: #2a2a2a;
+[data-theme="giantucchi"] {
+  --bg: #050505;
+  --surface: #0a0a0f;
+  --surface-2: #101018;
+  --surface-input: #141420;
+  --surface-hover: #1c1c2e;
   
   --border: rgba(255, 255, 255, 0.08);
   --border-subtle: rgba(255, 255, 255, 0.04);
   --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: #3ECF8E;
+  --border-focus: #06b6d4;
 
-  --text: #e0e0e0;
-  --text-bright: #ededed;
-  --muted: #a1a1a1;
-  --muted-dark: #666666;
+  --text: #e2e8f0;
+  --text-bright: #ffffff;
+  --muted: #94a3b8;
+  --muted-dark: #64748b;
 
-  /* Supabase Signature Emerald */
-  --primary: #3ECF8E;
-  --primary-hover: #30b77b;
+  --primary: #ffffff;
+  --primary-hover: #f1f5f9;
   --primary-ink: #050505;
-  --primary-glow: rgba(62, 207, 142, 0.35);
-  --accent: #3ECF8E;
+  --primary-glow: rgba(255, 255, 255, 0.22);
+  --accent: #22d3ee;
 
-  --spectrum-bar: linear-gradient(90deg, #3ECF8E 0%, #30b77b 50%, #00a884 100%);
-  --shadow-cyan: 0 0 24px rgba(62, 207, 142, 0.25);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --spectrum-bar: linear-gradient(90deg, #06b6d4 0%, #3b82f6 20%, #8b5cf6 40%, #ec4899 60%, #f97316 80%, #eab308 100%);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme="supabase"] .giantucchi-badge-pro {
-  background: rgba(62, 207, 142, 0.15);
-  color: #3ECF8E;
-  border-color: rgba(62, 207, 142, 0.35);
-  box-shadow: 0 0 10px rgba(62, 207, 142, 0.2);
+[data-theme="giantucchi"] body {
+  background-image: none;
 }
 
-[data-theme="supabase"] .nav a.item.active {
-  color: #3ECF8E;
-  background: rgba(62, 207, 142, 0.12);
-  border-color: rgba(62, 207, 142, 0.35);
-  box-shadow: 0 0 14px rgba(62, 207, 142, 0.15);
+[data-theme="giantucchi"] .giantucchi-badge-pro {
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border-color: rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
 }
 
-[data-theme="supabase"] a {
-  color: #3ECF8E;
-}
-[data-theme="supabase"] a:hover {
-  color: #47d896;
+[data-theme="giantucchi"] .nav a.item.active {
+  color: #22d3ee;
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.15);
 }
 
-[data-theme="supabase"] .btn.primary {
-  background: #3ECF8E;
+[data-theme="giantucchi"] .btn.primary {
+  background: #ffffff;
   color: #050505;
-  border: 1px solid #3ECF8E;
-  box-shadow: 0 4px 14px rgba(62, 207, 142, 0.35);
+  border: 1px solid #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
 }
 
-[data-theme="supabase"] .btn.primary:hover {
-  background: #30b77b;
-  border-color: #30b77b;
+[data-theme="giantucchi"] .btn.primary:hover {
+  background: #f1f5f9;
+  border-color: #f1f5f9;
   color: #000000;
-  box-shadow: 0 6px 20px rgba(62, 207, 142, 0.45);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
 }
 
-[data-theme="supabase"] .btn:hover {
-  border-color: rgba(62, 207, 142, 0.5);
-}
-
-[data-theme="supabase"] input:focus, 
-[data-theme="supabase"] select:focus, 
-[data-theme="supabase"] textarea:focus {
-  border-color: #3ECF8E;
-  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.25);
-}
-
-[data-theme="supabase"] .bar {
-  background: #3ECF8E;
-}
-
-[data-theme="supabase"] .pos-cat-btn.active {
-  background: #3ECF8E;
+[data-theme="giantucchi"] .pos-checkout-btn {
+  background: #ffffff;
   color: #050505;
-  border-color: #3ECF8E;
-  box-shadow: 0 0 12px rgba(62, 207, 142, 0.35);
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
 }
 
-[data-theme="supabase"] .pos-prod-card:hover {
-  border-color: #3ECF8E;
-  box-shadow: 0 4px 16px rgba(62, 207, 142, 0.2);
+[data-theme="giantucchi"] .pos-checkout-btn:hover {
+  background: #f1f5f9;
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.4);
 }
 
-[data-theme="supabase"] .pos-checkout-btn {
-  background: #3ECF8E;
-  color: #050505;
-  box-shadow: 0 4px 18px rgba(62, 207, 142, 0.35);
+[data-theme="giantucchi"] .auth-wrap {
+  background: radial-gradient(ellipse at 50% 0%, #16162a 0%, #050505 75%);
 }
-
-[data-theme="supabase"] .pos-checkout-btn:hover {
-  background: #30b77b;
-  box-shadow: 0 6px 24px rgba(62, 207, 142, 0.5);
-}
-
-[data-theme="supabase"] .pos-method-btn.active {
-  background: rgba(62, 207, 142, 0.15);
-  border-color: #3ECF8E;
-  color: #3ECF8E;
-  box-shadow: 0 0 10px rgba(62, 207, 142, 0.2);
-}
-
-[data-theme="supabase"] .checkin-input-wrap input {
-  border-color: #3ECF8E;
-  box-shadow: 0 0 20px rgba(62, 207, 142, 0.25);
-}
-
-[data-theme="supabase"] .checkin-input-wrap input:focus {
-  border-color: #47d896;
-  box-shadow: 0 0 28px rgba(62, 207, 142, 0.45);
-}
-
-[data-theme="supabase"] .auth-wrap {
-  background: radial-gradient(ellipse at 50% 0%, #1e2823 0%, #121212 75%);
-}
-
