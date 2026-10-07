@@ -73,7 +73,19 @@ const cron = require('./cron');
 app.get('/health', (req, res) => res.type('text').send('ok'));
 
 async function initDatabase() {
-  // Tablas del gimnasio
+  // 1. Asegurar base de datos n8n
+  try {
+    const chkDb = await pool.query("SELECT 1 FROM pg_database WHERE datname = 'n8n'");
+    if (chkDb.rows.length === 0) {
+      console.log('[db] Creando base de datos n8n...');
+      await pool.query('CREATE DATABASE n8n');
+      console.log('[db] Base de datos n8n creada exitosamente!');
+    }
+  } catch (err) {
+    console.error('[db] Error asegurando base de datos n8n:', err.message);
+  }
+
+  // 2. Tablas del gimnasio
   const chk = await pool.query("SELECT to_regclass('public.usuarios') AS tbl");
   if (!chk.rows[0].tbl) {
     console.log('[db] Inicializando tablas y datos base del gimnasio...');
