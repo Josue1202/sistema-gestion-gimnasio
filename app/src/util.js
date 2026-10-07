@@ -102,14 +102,69 @@ function dateToISO(d) {
   }).format(date);
 }
 
-/** Envio directo via Evolution API como respaldo si n8n no responde */
-async function sendEvolutionWhatsApp(numero, texto) {
+/** Envio directo via Meta WhatsApp Cloud API (Oficial - 0% ban) */
+async function sendMetaWhatsApp(numero, texto, options = {}) {
+  const token = process.env.META_WA_TOKEN;
+  const phoneId = process.env.META_WA_PHONE_NUMBER_ID;
+  if (!token || !phoneId) {
+    return { ok: false, provider: 'meta', error: 'Falta configurar credenciales de Meta Cloud API (META_WA_TOKEN o PHONE_NUMBER_ID)' };
+  }
+  const tel = normalizarTelefono(numero);
+  if (!tel) return { ok: false, provider: 'meta', error: 'Número de teléfono inválido' };
+
+  try {
+    let payload;
+    if (options.template) {
+      payload = {
+        messaging_product: 'whatsapp',
+        to: tel,
+        type: 'template',
+        template: {
+          name: options.template,
+          language: { code: options.lang || 'en_US' },
+          components: options.components || []
+        }
+      };
+    } else {
+      payload = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: tel,
+        type: 'text',
+        text: { preview_url: false, body: texto }
+      };
+    }
+
+    const res = await fetch(`https://graph.facebook.com/v22.0/${phoneId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(10000)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const errMsg = data?.error?.message || `Error HTTP ${res.status} en Meta`;
+      return { ok: false, provider: 'meta', status: res.status, error: errMsg, data };
+    }
+    return { ok: true, provider: 'meta', status: res.status, data };
+  } catch (err) {
+    console.warn('[meta-cloud-api] error envio:', err.message);
+    return { ok: false, provider: 'meta', error: 'Error contactando Meta Cloud API: ' + err.message };
+  }
+}
+
+/** Envio directo via Evolution API (Baileys) */
+async function sendEvolutionDirect(numero, texto) {
   const base = (process.env.EVOLUTION_API_URL || 'http://evolution-api:8080').replace(/\/$/, '');
   const key = process.env.EVOLUTION_API_KEY;
   const instance = process.env.EVOLUTION_INSTANCE || 'gym';
-  if (!base || !key) return { ok: false, error: 'Falta configurar Evolution API' };
+  if (!base || !key) return { ok: false, provider: 'evolution', error: 'Falta configurar Evolution API' };
   const tel = normalizarTelefono(numero);
-  if (!tel) return { ok: false, error: 'Número de teléfono inválido' };
+  if (!tel) return { ok: false, provider: 'evolution', error: 'Número de teléfono inválido' };
 
   try {
     // Verificación rápida del estado de conexión de la instancia (fail-fast en 1.5s)
@@ -124,13 +179,12 @@ async function sendEvolutionWhatsApp(numero, texto) {
         if (st && st !== 'open') {
           return {
             ok: false,
-            error: 'WhatsApp no está vinculado o está desconectado. Ve a la pestaña "WhatsApp" y escanea el código QR.',
+            provider: 'evolution',
+            error: 'WhatsApp no está vinculado en Evolution. Escanea el código QR en la pestaña "WhatsApp".',
           };
         }
       }
-    } catch (_) {
-      // Si la verificacion ligera falla, continuar al intento de envio
-    }
+    } catch (_) {}
 
     const res = await fetch(`${base}/message/sendText/${instance}`, {
       method: 'POST',
@@ -147,16 +201,51 @@ async function sendEvolutionWhatsApp(numero, texto) {
       const friendly = (rawMsg === 'Connection Closed' || rawMsg === 'Unauthorized' || res.status === 401 || res.status === 500)
         ? 'WhatsApp no está vinculado o está desconectado. Escanea el código QR en la pestaña "WhatsApp" para activar el envío automático.'
         : rawMsg;
-      return { ok: false, status: res.status, error: friendly, data };
+      return { ok: false, provider: 'evolution', status: res.status, error: friendly, data };
     }
-    return { ok: true, status: res.status, data };
+    return { ok: true, provider: 'evolution', status: res.status, data };
   } catch (err) {
     console.warn('[evolution-api] envio directo fallo:', err.message);
     const msg = (err.name === 'TimeoutError' || String(err.message).toLowerCase().includes('timeout') || String(err.message).toLowerCase().includes('abort'))
       ? 'WhatsApp no está vinculado o no responde a tiempo. Por favor verifica en la pestaña "WhatsApp" que el código QR esté escaneado.'
       : 'No se pudo contactar al servidor de WhatsApp: ' + err.message;
-    return { ok: false, error: msg };
+    return { ok: false, provider: 'evolution', error: msg };
   }
+}
+
+/**
+ * Envio unificado de WhatsApp con enrutamiento inteligente y tolerancia a fallos.
+ * Prioridad por defecto: Meta Cloud API -> si falla o no está configurado -> Evolution API.
+ */
+async function sendWhatsAppMessage(numero, texto, options = {}) {
+  const metaConfigured = Boolean(process.env.META_WA_TOKEN && process.env.META_WA_PHONE_NUMBER_ID);
+  const preferred = options.provider || process.env.WHATSAPP_DEFAULT_PROVIDER || (metaConfigured ? 'meta' : 'evolution');
+
+  if (preferred === 'meta') {
+    const rMeta = await sendMetaWhatsApp(numero, texto, options);
+    if (rMeta.ok) return rMeta;
+    // Si Meta falla y Evolution esta configurado, fallback automatico
+    if (options.fallback !== false && process.env.EVOLUTION_API_KEY) {
+      console.log(`[whatsapp] Fallback de Meta a Evolution para ${numero} (${rMeta.error})`);
+      const rEvo = await sendEvolutionDirect(numero, texto);
+      if (rEvo.ok) return rEvo;
+    }
+    return rMeta;
+  }
+
+  // Si prefiere evolution
+  const rEvo = await sendEvolutionDirect(numero, texto);
+  if (rEvo.ok) return rEvo;
+  if (options.fallback !== false && metaConfigured) {
+    console.log(`[whatsapp] Fallback de Evolution a Meta para ${numero} (${rEvo.error})`);
+    return sendMetaWhatsApp(numero, texto, options);
+  }
+  return rEvo;
+}
+
+/** Wrapper para retrocompatibilidad con todas las llamadas del sistema */
+async function sendEvolutionWhatsApp(numero, texto, options) {
+  return sendWhatsAppMessage(numero, texto, options);
 }
 
 /** Badge segun estado de membresia */
@@ -173,6 +262,7 @@ const { icon } = require('./icons');
 module.exports = {
   TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
-  postWebhook, sendEvolutionWhatsApp, badgeEstado, icon,
+  postWebhook, sendMetaWhatsApp, sendEvolutionDirect,
+  sendWhatsAppMessage, sendEvolutionWhatsApp, badgeEstado, icon,
 };
 

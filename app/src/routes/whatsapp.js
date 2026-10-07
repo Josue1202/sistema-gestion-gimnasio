@@ -1,6 +1,6 @@
 'use strict';
 const express = require('express');
-const { sendEvolutionWhatsApp, normalizarTelefono } = require('../util');
+const { sendMetaWhatsApp, sendEvolutionDirect, sendWhatsAppMessage, sendEvolutionWhatsApp, normalizarTelefono } = require('../util');
 
 const router = express.Router();
 
@@ -63,14 +63,12 @@ async function obtenerDetallesInstancia() {
 async function obtenerQR() {
   const { instance } = getEvoConfig();
   try {
-    // 1. Intentar conectar
     let res = await fetchEvo(`/instance/connect/${instance}`);
     if (res.ok) {
       const data = await res.json();
       return data.base64 || data.qrcode?.base64 || data.code || null;
     }
 
-    // 2. Si la instancia no existe, crearla
     if (res.status === 404) {
       const createRes = await fetchEvo('/instance/create', {
         method: 'POST',
@@ -92,6 +90,52 @@ async function obtenerQR() {
   }
 }
 
+// Consultar estado de Meta Cloud API
+async function obtenerMetaInfo() {
+  const token = process.env.META_WA_TOKEN;
+  const phoneId = process.env.META_WA_PHONE_NUMBER_ID;
+  const wabaId = process.env.META_WA_WABA_ID;
+  if (!token || !phoneId) {
+    return { configured: false };
+  }
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v22.0/${phoneId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        configured: true,
+        ok: true,
+        phoneId,
+        wabaId,
+        displayPhone: data.display_phone_number || null,
+        verifiedName: data.verified_name || null,
+        qualityRating: data.quality_rating || 'GREEN',
+        platformType: data.platform_type || 'CLOUD_API',
+      };
+    }
+    const errData = await res.json().catch(() => ({}));
+    return {
+      configured: true,
+      ok: false,
+      phoneId,
+      wabaId,
+      error: errData?.error?.message || `HTTP ${res.status}`,
+    };
+  } catch (e) {
+    return {
+      configured: true,
+      ok: false,
+      phoneId,
+      wabaId,
+      error: e.message,
+    };
+  }
+}
+
 // ---------- Vistas y endpoints ----------
 
 router.get('/', async (req, res, next) => {
@@ -99,6 +143,7 @@ router.get('/', async (req, res, next) => {
     const { instance } = getEvoConfig();
     const estado = await obtenerEstado();
     const info = await obtenerDetallesInstancia();
+    const metaInfo = await obtenerMetaInfo();
     let qr = null;
 
     if (estado !== 'open') {
@@ -111,6 +156,8 @@ router.get('/', async (req, res, next) => {
       instance,
       info,
       qr,
+      metaInfo,
+      defaultProvider: process.env.WHATSAPP_DEFAULT_PROVIDER || 'meta',
     });
   } catch (e) { next(e); }
 });
@@ -121,6 +168,15 @@ router.get('/estado', async (req, res) => {
     res.json({ ok: true, estado });
   } catch (e) {
     res.json({ ok: false, estado: 'offline', error: e.message });
+  }
+});
+
+router.get('/meta-estado', async (req, res) => {
+  try {
+    const metaInfo = await obtenerMetaInfo();
+    res.json(metaInfo);
+  } catch (e) {
+    res.json({ configured: false, error: e.message });
   }
 });
 
@@ -146,7 +202,6 @@ router.post('/conectar', async (req, res) => {
   }
 });
 
-// Reiniciar instancia de cero (elimina sesiones corruptas previas)
 router.post('/reiniciar', async (req, res) => {
   const { instance } = getEvoConfig();
   try {
@@ -185,18 +240,28 @@ router.post('/desconectar', async (req, res) => {
 
 router.post('/probar', async (req, res) => {
   try {
-    const { telefono, mensaje } = req.body;
+    const { telefono, mensaje, canal } = req.body;
     const num = normalizarTelefono(telefono);
     if (!num) {
       req.flash('error', 'Número de teléfono inválido.');
       return res.redirect('/whatsapp');
     }
     const texto = (mensaje || '').trim() || 'Prueba de envío desde el Sistema de Gimnasio 🏋️';
-    const r = await sendEvolutionWhatsApp(num, texto);
-    if (r.ok) {
-      req.flash('ok', `Mensaje de prueba enviado exitosamente a ${num}.`);
+    
+    let r;
+    if (canal === 'meta') {
+      r = await sendMetaWhatsApp(num, texto);
+    } else if (canal === 'evolution') {
+      r = await sendEvolutionDirect(num, texto);
     } else {
-      req.flash('error', `Falló el envío (${r.error || r.status}). Verifica que WhatsApp esté vinculado.`);
+      r = await sendWhatsAppMessage(num, texto);
+    }
+
+    if (r.ok) {
+      const canalNombre = r.provider === 'meta' ? 'Meta Cloud API (Oficial)' : 'Evolution API (Baileys)';
+      req.flash('ok', `Mensaje de prueba enviado exitosamente a ${num} vía ${canalNombre}.`);
+    } else {
+      req.flash('error', `Falló el envío (${r.error || r.status}). Revisa la configuración del canal seleccionado.`);
     }
     res.redirect('/whatsapp');
   } catch (e) {

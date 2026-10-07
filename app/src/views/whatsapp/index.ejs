@@ -1,96 +1,150 @@
 <div class="toolbar">
   <div>
-    <h1 class="mb0">Conexión de WhatsApp</h1>
-    <p class="muted" style="margin-top:4px;">Canal de comunicación para confirmaciones de pago, vencimientos y avisos automáticos.</p>
+    <h1 class="mb0">Canales de WhatsApp</h1>
+    <p class="muted" style="margin-top:4px;">Gestiona la mensajería oficial en la nube de Meta y la pasarela de WhatsApp Web.</p>
   </div>
   <div class="actions">
     <a class="btn" href="/mensajes">Ir a Mensajería</a>
   </div>
 </div>
 
-<div class="row" style="margin-top:16px;">
-  <div style="flex:1.2;">
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 class="mt0 mb0">Estado del servicio</h2>
-        <% if (estado === 'open') { %>
-          <span class="badge ok" style="font-size:14px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
-            <%- u.icon('checkCircle', 14) %> CONECTADO Y ACTIVO
+<div class="row" style="margin-top:16px; gap:20px; align-items:flex-start;">
+  <!-- Columna izquierda: Canales disponibles -->
+  <div style="flex:1.2; display:flex; flex-direction:column; gap:16px;">
+    
+    <!-- CANAL 1: Meta Cloud API Oficial -->
+    <div class="card" style="border-left: 4px solid var(--primary, #059669);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h2 class="mt0 mb0" style="font-size:17px; display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('checkCircle', 18) %> Canal 1: Meta Cloud API (Oficial)
+          </h2>
+        </div>
+        <% if (metaInfo && metaInfo.ok) { %>
+          <span class="badge ok" style="font-size:12px; padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('checkCircle', 12) %> ACTIVO Y OPERATIVO (0% BAN)
           </span>
-        <% } else if (estado === 'connecting') { %>
-          <span class="badge warn" style="font-size:14px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
-            <%- u.icon('alertCircle', 14) %> GENERANDO CONEXIÓN...
+        <% } else if (metaInfo && metaInfo.configured) { %>
+          <span class="badge warn" style="font-size:12px; padding:4px 10px;">
+            <%- u.icon('alertCircle', 12) %> REVISAR TOKEN DE META
           </span>
         <% } else { %>
-          <span class="badge danger" style="font-size:14px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
-            <%- u.icon('closeCircle', 14) %> DESCONECTADO (ESCANEAR QR)
+          <span class="badge muted" style="font-size:12px; padding:4px 10px;">NO CONFIGURADO</span>
+        <% } %>
+      </div>
+
+      <% if (metaInfo && metaInfo.ok) { %>
+        <div style="background:var(--ok-bg, #ecfdf5); border:1px solid var(--ok-border, #a7f3d0); border-radius:var(--radius-lg, 8px); padding:14px; margin-bottom:12px;">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; font-size:13px;">
+            <div>
+              <span class="muted" style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Número Emisor:</span>
+              <strong style="color:var(--text, #111827);"><%= metaInfo.displayPhone || 'Conectado' %></strong>
+            </div>
+            <div>
+              <span class="muted" style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Calidad de Cuenta:</span>
+              <span style="color:#059669; font-weight:700;"><%= metaInfo.qualityRating || 'ÓPTIMA (GREEN)' %></span>
+            </div>
+            <div>
+              <span class="muted" style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Plataforma:</span>
+              <strong>Meta Graph Cloud API</strong>
+            </div>
+          </div>
+          <p class="muted" style="margin:10px 0 0; font-size:12.5px; line-height:1.5;">
+            🛡️ <strong>Ventaja corporativa:</strong> Conexión directa a los servidores oficiales de Meta. Cero riesgo de baneo, mensajes prioritarios y entrega inmediata para cobros y recordatorios.
+          </p>
+        </div>
+      <% } else if (metaInfo && metaInfo.configured) { %>
+        <div style="background:var(--warn-bg, #fffbeb); border:1px solid var(--warn-border, #fde68a); border-radius:8px; padding:12px; margin-bottom:12px; font-size:13px;">
+          <strong style="color:#b45309;">Aviso de Meta API:</strong> <%= metaInfo.error || 'Token temporal expirado o no válido.' %>
+        </div>
+      <% } else { %>
+        <p class="muted" style="font-size:13px; margin-bottom:8px;">
+          Configura tus credenciales de Meta Developer en las variables de entorno para activar el canal oficial con 0% riesgo de baneo.
+        </p>
+      <% } %>
+    </div>
+
+    <!-- CANAL 2: Evolution API (WhatsApp Web / QR) -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <h2 class="mt0 mb0" style="font-size:17px; display:inline-flex; align-items:center; gap:6px;">
+          <%- u.icon('whatsapp', 18) %> Canal 2: Evolution API (WhatsApp Web / QR)
+        </h2>
+        <% if (estado === 'open') { %>
+          <span class="badge ok" style="font-size:12px; padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('checkCircle', 12) %> QR VINCULADO
+          </span>
+        <% } else if (estado === 'connecting') { %>
+          <span class="badge warn" style="font-size:12px; padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('alertCircle', 12) %> CONECTANDO...
+          </span>
+        <% } else { %>
+          <span class="badge danger" style="font-size:12px; padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
+            <%- u.icon('closeCircle', 12) %> DESCONECTADO (ESCANEAR QR)
           </span>
         <% } %>
       </div>
 
       <% if (estado === 'open') { %>
-        <div style="background:var(--ok-bg); border:1px solid var(--ok-border); border-radius:var(--radius-lg); padding:18px; margin-bottom:20px;">
-          <h3 style="margin-top:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
-            <%- u.icon('checkCircle', 18) %> WhatsApp está listo y vinculado
-          </h3>
+        <div style="background:var(--surface-2); border-radius:var(--radius-lg); padding:14px; margin-bottom:14px;">
           <% if (info && info.ownerJid) { %>
-            <p style="margin:4px 0 10px; font-weight:600;">
+            <p style="margin:0 0 6px; font-weight:600; font-size:13.5px;">
               Número vinculado: +<%= info.ownerJid.split('@')[0] %>
               <% if (info.profileName) { %> (<%= info.profileName %>)<% } %>
             </p>
           <% } %>
-          <p class="muted" style="margin-bottom:0; font-size:13.5px;">
-            Los mensajes de confirmación de pago, avisos de vencimiento (3 días y hoy) y saludos de cumpleaños se están procesando automáticamente.
+          <p class="muted" style="margin:0; font-size:12.5px;">
+            El teléfono físico del gimnasio está conectado como sesión activa de WhatsApp Web en el servidor.
           </p>
         </div>
 
         <div class="actions">
           <form method="post" action="/whatsapp/desconectar" onsubmit="return confirm('¿Seguro que deseas desvincular este número de WhatsApp?');">
-            <button class="btn danger" type="submit">Desvincular WhatsApp actual</button>
+            <button class="btn danger sm" type="submit">Desvincular WhatsApp</button>
           </form>
           <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('Esto cerrará la sesión actual y creará un QR nuevo. ¿Continuar?');">
-            <button class="btn" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
-              <%- u.icon('refresh', 14) %> Reiniciar conexión de cero
+            <button class="btn sm" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
+              <%- u.icon('refresh', 13) %> Reiniciar sesión QR
             </button>
           </form>
         </div>
 
       <% } else { %>
-        <div style="text-align:center; padding:10px 0;">
-          <div style="display:inline-block; text-align:left; background:var(--surface-2); padding:14px 20px; border-radius:10px; margin-bottom:20px; font-size:13.5px; line-height:1.7;">
-            1. Abre <strong>WhatsApp</strong> en el teléfono del gimnasio.<br>
-            2. Toca <strong>Menú (⋮)</strong> o <strong>Configuración</strong> > <strong>Dispositivos vinculados</strong>.<br>
-            3. Toca <strong>Vincular un dispositivo</strong> y apunta tu cámara al código QR de abajo.
+        <div style="text-align:center; padding:6px 0;">
+          <div style="display:inline-block; text-align:left; background:var(--surface-2); padding:10px 16px; border-radius:8px; margin-bottom:14px; font-size:12.5px; line-height:1.6;">
+            1. Abre <strong>WhatsApp</strong> en el teléfono celular del gimnasio.<br>
+            2. Toca <strong>Dispositivos vinculados</strong> > <strong>Vincular un dispositivo</strong>.<br>
+            3. Escanea el código QR que se muestra abajo.
           </div>
 
-          <div id="qr-container" style="min-height:270px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <div id="qr-box" style="background:#fff; padding:16px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.2); display:inline-block;">
+          <div id="qr-container" style="min-height:240px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div id="qr-box" style="background:#fff; padding:12px; border-radius:10px; box-shadow:0 3px 15px rgba(0,0,0,0.15); display:inline-block;">
               <img id="qr-img" src="<%= qr ? (qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr) : '' %>"
                    alt="Código QR de WhatsApp"
-                   style="width:240px; height:240px; display:<%= qr ? 'block' : 'none' %>;">
-              <div id="qr-spinner" style="display:<%= qr ? 'none' : 'block' %>; padding:40px; text-align:center; color:#4a5568;">
-                <div style="display:flex; justify-content:center; margin-bottom:10px;"><%- u.icon('clock', 28) %></div>
-                Generando nuevo código QR...
+                   style="width:200px; height:200px; display:<%= qr ? 'block' : 'none' %>;">
+              <div id="qr-spinner" style="display:<%= qr ? 'none' : 'block' %>; padding:35px 20px; text-align:center; color:#4a5568;">
+                <div style="display:flex; justify-content:center; margin-bottom:8px;"><%- u.icon('clock', 24) %></div>
+                Generando código QR...
               </div>
             </div>
             
-            <div style="width:240px; margin-top:12px;">
-              <div class="bar-track" style="height:4px;">
+            <div style="width:200px; margin-top:10px;">
+              <div class="bar-track" style="height:3px;">
                 <div id="qr-timer-bar" class="bar" style="width:100%; transition: width 1s linear;"></div>
               </div>
-              <p class="muted" style="font-size:12px; margin-top:6px;">
-                Actualización automática en <span id="countdown">15</span>s
+              <p class="muted" style="font-size:11px; margin-top:4px;">
+                Actualiza en <span id="countdown">15</span>s
               </p>
             </div>
           </div>
 
-          <div class="actions" style="justify-content:center; margin-top:18px;">
-            <button class="btn sm" type="button" onclick="recargarQRManual();" style="display:inline-flex; align-items:center; gap:6px;">
-              <%- u.icon('refresh', 13) %> Actualizar Código QR Ahora
+          <div class="actions" style="justify-content:center; margin-top:14px;">
+            <button class="btn sm" type="button" onclick="recargarQRManual();" style="display:inline-flex; align-items:center; gap:5px;">
+              <%- u.icon('refresh', 12) %> Actualizar QR
             </button>
-            <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('¿El celular dice que no se pudo vincular? Esto creará una sesión 100% limpia. ¿Deseas reiniciar?');" style="margin:0;">
-              <button class="btn sm danger" type="submit" style="display:inline-flex; align-items:center; gap:6px;">
-                <%- u.icon('alert', 13) %> Reiniciar sesión limpia
+            <form method="post" action="/whatsapp/reiniciar" onsubmit="return confirm('Esto creará una sesión limpia. ¿Deseas reiniciar?');" style="margin:0;">
+              <button class="btn sm danger" type="submit" style="display:inline-flex; align-items:center; gap:5px;">
+                <%- u.icon('alert', 12) %> Reiniciar sesión
               </button>
             </form>
           </div>
@@ -99,49 +153,63 @@
     </div>
   </div>
 
-  <div style="flex:1;">
+  <!-- Columna derecha: Probador y Documentación -->
+  <div style="flex:1; display:flex; flex-direction:column; gap:16px;">
     <div class="card">
-      <h2 class="mt0">Probar envío de WhatsApp</h2>
-      <p class="muted" style="font-size:13px;">Envía un mensaje de prueba a tu número personal para verificar que los mensajes lleguen correctamente.</p>
+      <h2 class="mt0" style="font-size:17px;">Probar envío de WhatsApp</h2>
+      <p class="muted" style="font-size:13px; margin-bottom:14px;">Prueba el despacho en vivo a tu celular seleccionando el canal preferido.</p>
       
       <form method="post" action="/whatsapp/probar" class="stack">
         <div>
+          <label>Canal de Envío</label>
+          <select name="canal" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border); background:var(--surface);">
+            <option value="meta" <%= (metaInfo && metaInfo.ok) ? 'selected' : '' %>>
+              Meta Cloud API (Oficial - Recomendado 0% Ban)
+            </option>
+            <option value="evolution" <%= (!metaInfo || !metaInfo.ok) && estado === 'open' ? 'selected' : '' %>>
+              Evolution API (WhatsApp Web / QR)
+            </option>
+            <option value="auto">
+              Automático (Intenta Meta -> Respaldo en Evolution)
+            </option>
+          </select>
+        </div>
+        <div>
           <label>Número de WhatsApp (con código de país o 9 dígitos de Perú)</label>
-          <input type="text" name="telefono" placeholder="Ej: 987654321 o 51987654321" required>
+          <input type="text" name="telefono" placeholder="Ej: 902539354 o 51902539354" value="51902539354" required>
         </div>
         <div>
           <label>Mensaje de prueba</label>
-          <textarea name="mensaje" rows="3" placeholder="Escribe un mensaje de prueba...">¡Hola! Este es un mensaje de prueba desde Zona Fitness</textarea>
+          <textarea name="mensaje" rows="3" placeholder="Escribe un mensaje de prueba...">¡Hola! Este es un mensaje de prueba oficial desde Zona Fitness Pro 🏋️‍♂️</textarea>
         </div>
-        <button class="btn primary" type="submit" <%= estado !== 'open' ? 'disabled' : '' %> style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <% const canSend = (metaInfo && metaInfo.ok) || estado === 'open'; %>
+        <button class="btn primary" type="submit" <%= !canSend ? 'disabled' : '' %> style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <%- u.icon('send', 14) %> Enviar mensaje de prueba
         </button>
-        <% if (estado !== 'open') { %>
-          <span class="muted" style="font-size:12px;">(Debes vincular el código QR primero para enviar)</span>
+        <% if (!canSend) { %>
+          <span class="muted" style="font-size:12px; text-align:center;">(Configura el Token de Meta o vincula el código QR para enviar)</span>
         <% } %>
       </form>
     </div>
 
     <div class="card">
-      <h3 class="mt0" style="display:flex; align-items:center; gap:6px;">
-        <%- u.icon('zap', 18) %> ¿Cómo funciona la automatización?
+      <h3 class="mt0" style="font-size:15px; display:flex; align-items:center; gap:6px;">
+        <%- u.icon('zap', 16) %> Resumen de Canales para Clientes
       </h3>
-      <ul style="font-size:13px; color:var(--muted); line-height:1.7; padding-left:18px; margin-bottom:0;">
-        <li><strong>Solo escaneas una vez:</strong> Al escanear este QR desde tu WhatsApp, el servidor del gimnasio queda enlazado permanentemente.</li>
-        <li><strong>NO necesitas WhatsApp Web abierto:</strong> No hace falta tener abierto WhatsApp en la computadora ni ninguna pestaña en Chrome. Todo corre de forma invisible en el servidor.</li>
-        <li><strong>Envío instantáneo:</strong> Cuando registras pagos, bienvenida o recordatorios, el sistema manda el mensaje directo al teléfono del cliente en 1 segundo.</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h3 class="mt0" style="display:flex; align-items:center; gap:6px;">
-        <%- u.icon('info', 18) %> ¿Qué hacer si no vincula o dice error?
-      </h3>
-      <ul style="font-size:13px; color:var(--muted); line-height:1.7; padding-left:18px; margin-bottom:0;">
-        <li>Si tu celular dice <em>"No se pudo vincular"</em>, pulsa el botón rojo <strong>"Reiniciar sesión limpia"</strong> para renovar el código QR.</li>
-        <li>Asegúrate de que el celular tenga conexión a internet estable.</li>
-        <li>Si ya tienes el límite de 4 dispositivos vinculados en tu WhatsApp, desvincula uno antiguo desde tu teléfono.</li>
-      </ul>
+      <div style="font-size:12.5px; color:var(--muted); line-height:1.6; display:flex; flex-direction:column; gap:8px;">
+        <div>
+          <strong style="color:var(--text, #111827);">1. Meta Cloud API (Corporativo):</strong>
+          <br>0% riesgo de baneo. Se envía desde la nube oficial de Meta. Es el método recomendado para gimnasios medianos y grandes.
+        </div>
+        <div>
+          <strong style="color:var(--text, #111827);">2. Evolution API (QR Directo):</strong>
+          <br>Vincula el WhatsApp normal o Business del gimnasio escaneando un código QR en 5 segundos.
+        </div>
+        <div>
+          <strong style="color:var(--text, #111827);">3. WhatsApp Web (1 Clic manual):</strong>
+          <br>En la lista de socios o caja, el botón "web" abre la conversación con el texto pre-redactado para dar Enter.
+        </div>
+      </div>
     </div>
   </div>
 </div>
