@@ -1,13 +1,12 @@
 name: gym-system
 
 # ------------------------------------------------------------------
-#  Variante de PRODUCCION para Coolify (Hetzner).
-#  Diferencias con docker-compose.yml (local):
-#   - Sin "ports:" publicados: el ingreso lo maneja el proxy de Coolify (Traefik + HTTPS).
-#   - n8n y la app en modo HTTPS detras de proxy.
-#   - Postgres y Adminer NO se exponen a internet.
-#  Las variables se cargan desde la pestana "Environment Variables" de Coolify
-#  (ver .env.production.example).
+#  Variante de PRODUCCION para Coolify (Servidor local / VPS).
+#  Stack optimizado y ligero:
+#   - App Web Express con motor nativo de Cron / Tareas en Node.js
+#   - Evolution API (WhatsApp Baileys)
+#   - Postgres 16 (Bases: gym y evolution)
+#   * n8n retirado: 0 consumo extra de RAM, todo en código Node.js.
 # ------------------------------------------------------------------
 
 services:
@@ -39,51 +38,15 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       SESSION_SECRET: ${SESSION_SECRET}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      N8N_WEBHOOK_URL: http://n8n:5678/webhook
       EVOLUTION_API_URL: http://evolution-api:8080
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-gym}
+      GYM_OWNER_PHONE: ${GYM_OWNER_PHONE:-}
 
     ports:
       - "8084:3000"
     expose:
       - "3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  n8n:
-    image: n8nio/n8n:latest
-    restart: unless-stopped
-    user: "root"
-    environment:
-      N8N_HOST: ${N8N_HOST}
-      N8N_PORT: 5678
-      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
-      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL:-http://100.117.103.36:5679/}
-      WEBHOOK_URL: ${WEBHOOK_URL:-http://n8n:5678/}
-      N8N_PROXY_HOPS: "1"
-      GENERIC_TIMEZONE: ${TZ:-America/Lima}
-      TZ: ${TZ:-America/Lima}
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
-      DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_USER: ${POSTGRES_USER}
-      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
-      N8N_DIAGNOSTICS_ENABLED: "false"
-      N8N_SECURE_COOKIE: "false"
-      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
-      EVOLUTION_API_URL: http://evolution-api:8080
-      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
-      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-gym}
-      GYM_OWNER_PHONE: ${GYM_OWNER_PHONE:-}
-    ports:
-      - "5679:5678"
-    expose:
-      - "5678"
-    volumes:
-      - n8n_data:/home/node/.n8n
     depends_on:
       postgres:
         condition: service_healthy
@@ -122,5 +85,4 @@ services:
 
 volumes:
   pg_data:
-  n8n_data:
   evolution_instances:

@@ -104,4 +104,31 @@ router.post('/registrar', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+const cron = require('../cron');
+
+router.post('/ejecutar-cron', async (req, res, next) => {
+  try {
+    const { tipo } = req.body;
+    let resultado = null;
+
+    if (tipo === 'vencimiento') {
+      resultado = await cron.enviarRecordatoriosVencimiento();
+      req.flash('ok', `Recordatorios ejecutados: ${resultado.enviados || 0} enviados de ${resultado.total || 0} pendientes.`);
+    } else if (tipo === 'cumpleanos') {
+      resultado = await cron.enviarCumpleanos();
+      req.flash('ok', `Saludos de cumpleaños: ${resultado.enviados || 0} enviados de ${resultado.total || 0} pendientes.`);
+    } else if (tipo === 'reactivacion') {
+      resultado = await cron.enviarTeExtranamos();
+      req.flash('ok', `Reactivación "Te extrañamos": ${resultado.enviados || 0} enviados.`);
+    } else if (tipo === 'vencidas') {
+      resultado = await cron.marcarVencidas();
+      req.flash('ok', `Suscripciones actualizadas: ${resultado.actualizadas || 0} marcadas como vencidas.`);
+    } else {
+      req.flash('error', 'Tipo de tarea no válido.');
+    }
+
+    res.redirect('/mensajes');
+  } catch (e) { next(e); }
+});
+
 module.exports = router;

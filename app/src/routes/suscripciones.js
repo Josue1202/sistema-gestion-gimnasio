@@ -1,7 +1,8 @@
 'use strict';
 const express = require('express');
 const db = require('../db');
-const { hoyISO, addDias, dateToISO, postWebhook, sendEvolutionWhatsApp, waLink, fecha, fechaHora, soles } = require('../util');
+const { hoyISO, addDias, dateToISO, sendEvolutionWhatsApp, waLink, fecha, fechaHora, soles } = require('../util');
+const { notificarPagoConfirmado } = require('../cron');
 
 const router = express.Router();
 
@@ -70,9 +71,8 @@ router.post('/', async (req, res, next) => {
         [socio.id, result.sub.id, 'manual', req.session.user.nombre]);
     }
 
-    // Aviso a n8n (best-effort)
-    postWebhook('pago', {
-      evento: 'pago_registrado',
+    // Notificación automática nativa por WhatsApp
+    notificarPagoConfirmado({
       socio_id: socio.id,
       nombres: socio.nombres,
       apellidos: socio.apellidos,
@@ -82,7 +82,7 @@ router.post('/', async (req, res, next) => {
       metodo_pago: metodo,
       fecha_fin: fin,
       fecha_fin_txt: fecha(fin),
-    });
+    }).catch((err) => console.warn('[suscripciones] error en notificarPagoConfirmado:', err.message));
 
     req.flash('ok', `Pago registrado: ${plan.nombre} (${soles(precio)}). Vence ${fecha(fin)}.`);
     res.redirect('/suscripciones/' + result.sub.id + '/ticket?nuevo=1');

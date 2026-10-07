@@ -3,6 +3,27 @@
   Envío directo desde el servidor por WhatsApp. Haz clic en <strong>Enviar Directo</strong> para mandar el mensaje al socio en 1 segundo sin abrir pestañas ni WhatsApp Web. Puedes verificar el estado de conexión en <a href="/whatsapp" style="font-weight:600;">Estado de WhatsApp</a>.
 </p>
 
+<div class="actions" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+  <form method="post" action="/mensajes/ejecutar-cron" style="margin:0;">
+    <input type="hidden" name="tipo" value="vencimiento">
+    <button type="submit" class="btn primary sm" style="display:inline-flex; align-items:center; gap:6px;">
+      <%- u.icon('whatsapp', 14) %> Enviar Recordatorios Pendientes Ahora
+    </button>
+  </form>
+  <form method="post" action="/mensajes/ejecutar-cron" style="margin:0;">
+    <input type="hidden" name="tipo" value="cumpleanos">
+    <button type="submit" class="btn sm" style="display:inline-flex; align-items:center; gap:6px;">
+      🎂 Saludar Cumpleañeros
+    </button>
+  </form>
+  <form method="post" action="/mensajes/ejecutar-cron" style="margin:0;">
+    <input type="hidden" name="tipo" value="vencidas">
+    <button type="submit" class="btn sm" style="display:inline-flex; align-items:center; gap:6px;">
+      🔄 Actualizar Membresías Vencidas
+    </button>
+  </form>
+</div>
+
 <% if (sinPlantilla.length) { %>
   <div class="flash info">Faltan plantillas: <%= sinPlantilla.join(', ') %>. Crealas en <a href="/plantillas">Plantillas</a>.</div>
 <% } %>

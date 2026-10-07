@@ -2,11 +2,10 @@ name: gym-system
 
 # ------------------------------------------------------------------
 #  Stack base:
-#    postgres        -> base de datos (gym) + bases separadas para n8n y evolution
-#    n8n             -> automatizaciones y mensajes programados
+#    postgres        -> base de datos (gym) + evolution
 #    evolution-api   -> canal de WhatsApp (WhatsApp Web)
 #    adminer         -> visor web de la base de datos (opcional, liviano)
-#    app             -> la aplicacion web (Next.js) -> se activa cuando exista ./app
+#    app             -> aplicacion web Express + motor de cron nativo en Node.js
 # ------------------------------------------------------------------
 
 services:
@@ -29,45 +28,7 @@ services:
       timeout: 5s
       retries: 10
 
-  n8n:
-    image: n8nio/n8n:latest
-    restart: unless-stopped
-    environment:
-      N8N_HOST: ${N8N_HOST:-localhost}
-      N8N_PORT: 5678
-      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
-      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678/}
-      GENERIC_TIMEZONE: ${TZ:-America/Lima}
-      TZ: ${TZ:-America/Lima}
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
-      DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_USER: ${POSTGRES_USER}
-      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
-      N8N_DIAGNOSTICS_ENABLED: "false"
-      N8N_BASIC_AUTH_ACTIVE: "true"
-      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
-      # Permite leer variables de entorno desde expresiones de los workflows
-      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
-      # Usadas por los workflows importados (n8n/workflows/)
-      EVOLUTION_API_URL: http://evolution-api:8080
-      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
-      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-gym}
-      GYM_OWNER_PHONE: ${GYM_OWNER_PHONE:-}
-    ports:
-      - "${N8N_PORT:-5678}:5678"
-    volumes:
-      - n8n_data:/home/node/.n8n
-    depends_on:
-      postgres:
-        condition: service_healthy
-
   evolution-api:
-    # Imagen oficial actual del proyecto Evolution API.
-    # Tags: https://hub.docker.com/r/evoapicloud/evolution-api/tags
     image: evoapicloud/evolution-api:latest
     restart: unless-stopped
     environment:
@@ -77,7 +38,6 @@ services:
       DEL_INSTANCE: "false"
       LANGUAGE: es
       TZ: ${TZ:-America/Lima}
-      # Base de datos
       DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
       DATABASE_CONNECTION_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/evolution
@@ -87,10 +47,8 @@ services:
       DATABASE_SAVE_MESSAGE_UPDATE: "true"
       DATABASE_SAVE_DATA_CONTACTS: "true"
       DATABASE_SAVE_DATA_CHATS: "true"
-      # Cache local (sin Redis, para mantener el stack simple)
       CACHE_REDIS_ENABLED: "false"
       CACHE_LOCAL_ENABLED: "true"
-      # Webhook global -> n8n (opcional; tambien se puede configurar por instancia)
       WEBHOOK_GLOBAL_ENABLED: "false"
     ports:
       - "${EVOLUTION_PORT:-8080}:8080"
@@ -122,9 +80,10 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       SESSION_SECRET: ${SESSION_SECRET}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      N8N_WEBHOOK_URL: http://n8n:5678/webhook
       EVOLUTION_API_URL: http://evolution-api:8080
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-gym}
+      GYM_OWNER_PHONE: ${GYM_OWNER_PHONE:-}
 
     ports:
       - "${APP_PORT:-3000}:3000"
@@ -137,5 +96,4 @@ services:
 
 volumes:
   pg_data:
-  n8n_data:
   evolution_instances:
