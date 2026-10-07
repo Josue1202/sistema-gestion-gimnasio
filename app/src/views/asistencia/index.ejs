@@ -49,37 +49,60 @@
       <div id="checkin-result" style="<%= ultimoCheckin ? '' : 'display:none;' %> margin-top:14px;">
         <% if (ultimoCheckin) {
              var uc = ultimoCheckin;
-             var isOk = uc.estado === 'activo';
+             var isPermitido = uc.acceso_permitido !== false && uc.estado !== 'vencido' && uc.estado !== 'sin_suscripcion';
              var isWarn = uc.estado === 'por_vencer';
-             var isDanger = uc.estado === 'vencido';
-             var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
-             var statusColor = isOk ? '#3ECF8E' : (isWarn ? '#fbbf24' : '#f15c6d');
+             var bannerClass = isPermitido ? (isWarn ? 'warn' : '') : 'danger';
+             var statusColor = isPermitido ? (isWarn ? '#fbbf24' : '#3ECF8E') : '#f15c6d';
+             var ini = (uc.nombre ? uc.nombre.split(' ').map(function(n){return n[0];}).slice(0,2).join('') : 'S').toUpperCase();
         %>
-          <div class="active-member-banner <%= bannerClass %>" id="banner-box">
-            <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:<%= statusColor %>; display:flex; align-items:center; gap:6px;" id="banner-status">
-              <% if (isOk) { %>
-                <%- u.icon('checkCircle', 16) %> ACCESO CONCEDIDO
-              <% } else if (isWarn) { %>
-                <%- u.icon('alertCircle', 16) %> ACCESO CONCEDIDO (POR VENCER)
+          <div class="active-member-banner <%= bannerClass %>" id="banner-box" style="display:flex; gap:16px; align-items:flex-start; padding:16px;">
+            <!-- Foto del socio -->
+            <div style="position:relative; width:88px; height:88px; border-radius:12px; background:#18181b; border:3px solid <%= statusColor %>; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <% if (uc.foto_url) { %>
+                <img id="banner-avatar-img" src="<%= uc.foto_url %>" alt="Foto" style="width:100%; height:100%; object-fit:cover;">
               <% } else { %>
-                <%- u.icon('closeCircle', 16) %> MEMBRESÍA VENCIDA
+                <img id="banner-avatar-img" src="" alt="Foto" style="width:100%; height:100%; object-fit:cover; display:none;">
+                <div id="banner-avatar-ini" style="font-size:26px; font-weight:800; color:var(--text-bright); text-align:center;">
+                  <%= ini %>
+                </div>
               <% } %>
             </div>
-            <div style="font-size:19px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;" id="banner-name">
-              <%= uc.nombre %>
-            </div>
-            <div class="muted" style="font-size:13px;" id="banner-detail">
-              DNI: <strong id="banner-dni"><%= uc.dni %></strong> · Plan: <strong id="banner-plan"><%= uc.plan %></strong>
-              <% if (uc.fecha_fin) { %> · Vence: <strong id="banner-fecha"><%= uc.fecha_fin %></strong><% } %>
-              <% if (uc.dias_restantes != null) { %> (<span id="banner-dias"><%= uc.dias_restantes %></span> días restantes)<% } %>
-            </div>
-            <div class="actions" style="margin-top:10px;" id="banner-actions">
-              <% if (isWarn || isDanger || uc.estado === 'sin_suscripcion') { %>
-                <button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal('<%= uc.socio_id %>', '<%= uc.nombre %>', '<%= uc.dni %>');" style="display:inline-flex; align-items:center; gap:6px;">
-                  <%- u.icon('card', 14) %> Cobrar / Renovar en 1 Clic
+
+            <!-- Contenido Informativo y Estado -->
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:<%= statusColor %>; display:flex; align-items:center; gap:6px;" id="banner-status">
+                <% if (isPermitido && !isWarn) { %>
+                  <%- u.icon('checkCircle', 16) %> ACCESO CONCEDIDO
+                <% } else if (isPermitido && isWarn) { %>
+                  <%- u.icon('alertCircle', 16) %> ACCESO CONCEDIDO (POR VENCER)
+                <% } else { %>
+                  <%- u.icon('closeCircle', 16) %> ACCESO DENEGADO — <%= uc.estado === 'vencido' ? 'MEMBRESÍA VENCIDA' : 'SIN MEMBRESÍA ACTIVA' %>
+                <% } %>
+              </div>
+              <div style="font-size:20px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;" id="banner-name">
+                <%= uc.nombre %>
+              </div>
+              <div class="muted" style="font-size:13px;" id="banner-detail">
+                DNI: <strong id="banner-dni"><%= uc.dni %></strong> · Plan: <strong id="banner-plan"><%= uc.plan %></strong>
+                <% if (uc.fecha_fin) { %> · Venció/Vence: <strong id="banner-fecha"><%= uc.fecha_fin %></strong><% } %>
+                <% if (uc.dias_restantes != null) { %> (<span id="banner-dias"><%= uc.dias_restantes %></span> días restantes)<% } %>
+              </div>
+              <% if (!isPermitido) { %>
+                <div style="font-size:12px; color:#fca5a5; margin-top:4px; font-weight:600;" id="banner-alerta-denegado">
+                  ⛔ <%= uc.mensaje || 'Acceso restringido. Para habilitar el ingreso al gimnasio, cobra la renovación de su plan.' %>
+                </div>
+              <% } %>
+              <div class="actions" style="margin-top:10px;" id="banner-actions">
+                <% if (!isPermitido || isWarn) { %>
+                  <button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal('<%= uc.socio_id %>', '<%= uc.nombre %>', '<%= uc.dni %>');" style="display:inline-flex; align-items:center; gap:6px; font-weight:700;">
+                    <%- u.icon('card', 14) %> Cobrar / Renovar en 1 Clic
+                  </button>
+                <% } %>
+                <button type="button" class="btn sm" onclick="abrirModalFotoTerminal('<%= uc.socio_id %>', '<%= uc.nombre %>');" style="display:inline-flex; align-items:center; gap:4px;">
+                  <%- u.icon('camera', 13) %> <%= uc.foto_url ? 'Cambiar Foto' : 'Tomar Foto' %>
                 </button>
-              <% } %>
-              <a class="btn sm" href="/socios/<%= uc.socio_id %>" target="_blank">Ver Ficha</a>
+                <a class="btn sm" href="/socios/<%= uc.socio_id %>" target="_blank">Ver Ficha</a>
+              </div>
             </div>
           </div>
         <% } %>
@@ -506,21 +529,20 @@
         return;
       }
 
-      // Check-in exitoso
-      if (data.estado === 'activo' || data.estado === 'por_vencer') {
+      // Validar si tiene acceso concedido
+      if (data.acceso_permitido) {
         sonarExito();
+        // Solo registrar en feed de asistencia en tiempo real si el acceso fue concedido
+        agregarItemFeedAsistencia(data);
       } else {
         sonarAlerta();
       }
 
-      // Actualizar Banner
+      // Actualizar Banner de Check-in con Foto y Alerta Visual
       actualizarBannerCheckin(data);
 
-      // Vincular automáticamente al socio como cliente activo en POS
+      // Vincular al socio como cliente activo en mostrador POS
       seleccionarSocioManualmente(data.socio_id, data.nombre, data.dni, data.plan, data.estado);
-
-      // Agregar al feed de asistencias en tiempo real
-      agregarItemFeedAsistencia(data);
 
       // Limpiar input y re-enfocar para el siguiente socio
       input.value = '';
@@ -540,6 +562,7 @@
     alertCircle: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 8.4502V12.4502M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21ZM12.0498 15.4502V15.5502L11.9502 15.5498V15.4502H12.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     closeCircle: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 9L11.9999 11.9999M11.9999 11.9999L14.9999 14.9999M11.9999 11.9999L9 14.9999M11.9999 11.9999L14.9999 9M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     card: '<svg class="coolicon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11V15.8002C3 16.9203 3 17.4801 3.21799 17.9079C3.40973 18.2842 3.71547 18.5905 4.0918 18.7822C4.5192 19 5.07899 19 6.19691 19H17.8031C18.921 19 19.48 19 19.9074 18.7822C20.2837 18.5905 20.5905 18.2842 20.7822 17.9079C21 17.4805 21 16.9215 21 15.8036V11M3 11V9M3 11H21M3 9V8.2002C3 7.08009 3 6.51962 3.21799 6.0918C3.40973 5.71547 3.71547 5.40973 4.0918 5.21799C4.51962 5 5.08009 5 6.2002 5H17.8002C18.9203 5 19.4796 5 19.9074 5.21799C20.2837 5.40973 20.5905 5.71547 20.7822 6.0918C21 6.5192 21 7.07899 21 8.19691V9M3 9H21M7 15H11M21 11V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    camera: '<svg class="coolicon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="2"/></svg>',
     cart: '<svg class="coolicon" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17C15.8954 17 15 17.8954 15 19C15 20.1046 15.8954 21 17 21C18.1046 21 19 20.1046 19 19C19 17.8954 18.1046 17 17 17ZM17 17H9.29395C8.83288 17 8.60193 17 8.41211 16.918C8.24466 16.8456 8.09938 16.7291 7.99354 16.5805C7.8749 16.414 7.82719 16.1913 7.73274 15.7505L5.27148 4.26465C5.17484 3.81363 5.12587 3.58838 5.00586 3.41992C4.90002 3.27135 4.75477 3.15441 4.58732 3.08205C4.39746 3 4.16779 3 3.70653 3H3M6 6H18.8732C19.595 6 19.9555 6 20.1978 6.15036C20.41 6.28206 20.5653 6.48862 20.633 6.729C20.7104 7.00343 20.611 7.34996 20.411 8.04346L19.0264 12.8435C18.9068 13.2581 18.8469 13.465 18.7256 13.6189C18.6185 13.7547 18.4772 13.861 18.317 13.9263C18.1361 14 17.9211 14 17.4921 14H7.73047M8 21C6.89543 21 6 20.1046 6 19C6 17.8954 6.89543 17 8 17C9.10457 17 10 17.8954 10 19C10 20.1046 9.10457 21 8 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     user: '<svg class="coolicon" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 21C19 17.134 15.866 14 12 14C8.13401 14 5 17.134 5 21M12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7C16 9.20914 14.2091 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     zap: '<svg class="coolicon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -548,33 +571,48 @@
 
   function actualizarBannerCheckin(d) {
     var box = document.getElementById('checkin-result');
-    var isOk = d.estado === 'activo';
+    var isPermitido = d.acceso_permitido !== false && d.estado !== 'vencido' && d.estado !== 'sin_suscripcion';
     var isWarn = d.estado === 'por_vencer';
-    var isDanger = d.estado === 'vencido';
+    var statusColor = isPermitido ? (isWarn ? '#fbbf24' : '#3ECF8E') : '#f15c6d';
+    var bannerClass = isPermitido ? (isWarn ? 'warn' : '') : 'danger';
+    var statusText = isPermitido
+      ? (isWarn ? 'ACCESO CONCEDIDO (POR VENCER)' : 'ACCESO CONCEDIDO')
+      : ('ACCESO DENEGADO — ' + (d.estado === 'vencido' ? 'MEMBRESÍA VENCIDA' : 'SIN MEMBRESÍA ACTIVA'));
+    var statusIcon = isPermitido ? (isWarn ? SVG_ICONS.alertCircle : SVG_ICONS.checkCircle) : SVG_ICONS.closeCircle;
 
-    var statusHtml = isOk
-      ? '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.checkCircle + ' ACCESO CONCEDIDO</span>'
-      : (isWarn
-          ? '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.alertCircle + ' ACCESO CONCEDIDO (POR VENCER)</span>'
-          : '<span style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.closeCircle + ' MEMBRESÍA VENCIDA</span>');
-    var statusColor = isOk ? '#3ECF8E' : (isWarn ? '#fbbf24' : '#f15c6d');
-    var bannerClass = isOk ? '' : (isWarn ? 'warn' : 'danger');
+    var ini = (d.nombre ? d.nombre.split(' ').map(function(n){return n[0];}).slice(0,2).join('') : 'S').toUpperCase();
+    var avatarHtml = d.foto_url
+      ? '<img src="' + d.foto_url + '" alt="Foto" style="width:100%; height:100%; object-fit:cover;">'
+      : '<div style="font-size:26px; font-weight:800; color:var(--text-bright); text-align:center;">' + ini + '</div>';
 
     box.style.display = 'block';
     box.innerHTML =
-      '<div class="active-member-banner ' + bannerClass + '">' +
-        '<div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:' + statusColor + ';">' + statusHtml + '</div>' +
-        '<div style="font-size:19px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;">' + d.nombre + '</div>' +
-        '<div class="muted" style="font-size:13px;">' +
-          'DNI: <strong>' + (d.dni || '—') + '</strong> · Plan: <strong>' + (d.plan || 'Sin plan') + '</strong>' +
-          (d.fecha_fin ? ' · Vence: <strong>' + d.fecha_fin + '</strong>' : '') +
-          (d.dias_restantes != null ? ' (' + d.dias_restantes + ' días restantes)' : '') +
+      '<div class="active-member-banner ' + bannerClass + '" style="display:flex; gap:16px; align-items:flex-start; padding:16px;">' +
+        '<div style="position:relative; width:88px; height:88px; border-radius:12px; background:#18181b; border:3px solid ' + statusColor + '; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">' +
+          avatarHtml +
         '</div>' +
-        '<div class="actions" style="margin-top:10px;">' +
-          (isWarn || isDanger || d.estado === 'sin_suscripcion'
-            ? '<button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal(\'' + d.socio_id + '\', \'' + d.nombre.replace(/'/g, "\\'") + '\', \'' + (d.dni || '') + '\')" style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.card + ' Cobrar / Renovar en 1 Clic</button>'
+        '<div style="flex:1; min-width:0;">' +
+          '<div style="font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:' + statusColor + '; display:flex; align-items:center; gap:6px;">' +
+            statusIcon + ' ' + statusText +
+          '</div>' +
+          '<div style="font-size:20px; font-weight:800; color:var(--text-bright); margin:4px 0 2px;">' + d.nombre + '</div>' +
+          '<div class="muted" style="font-size:13px;">' +
+            'DNI: <strong>' + (d.dni || '—') + '</strong> · Plan: <strong>' + (d.plan || 'Sin plan') + '</strong>' +
+            (d.fecha_fin ? ' · Vence/Venció: <strong>' + d.fecha_fin + '</strong>' : '') +
+            (d.dias_restantes != null ? ' (' + d.dias_restantes + ' días restantes)' : '') +
+          '</div>' +
+          (!isPermitido
+            ? '<div style="font-size:12px; color:#fca5a5; margin-top:4px; font-weight:600;">⛔ ' + (d.mensaje || 'Acceso restringido. Para habilitar el ingreso al gimnasio, cobra la renovación de su plan.') + '</div>'
             : '') +
-          '<a class="btn sm" href="/socios/' + d.socio_id + '" target="_blank">Ver Ficha</a>' +
+          '<div class="actions" style="margin-top:10px;">' +
+            (!isPermitido || isWarn
+              ? '<button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal(\'' + d.socio_id + '\', \'' + d.nombre.replace(/'/g, "\\'") + '\', \'' + (d.dni || '') + '\')" style="display:inline-flex; align-items:center; gap:6px; font-weight:700;">' + SVG_ICONS.card + ' Cobrar / Renovar en 1 Clic</button>'
+              : '') +
+            '<button type="button" class="btn sm" onclick="abrirModalFotoTerminal(\'' + d.socio_id + '\', \'' + d.nombre.replace(/'/g, "\\'") + '\')" style="display:inline-flex; align-items:center; gap:4px;">' +
+              SVG_ICONS.camera + ' ' + (d.foto_url ? 'Cambiar Foto' : 'Tomar Foto') +
+            '</button>' +
+            '<a class="btn sm" href="/socios/' + d.socio_id + '" target="_blank">Ver Ficha</a>' +
+          '</div>' +
         '</div>' +
       '</div>';
   }
@@ -1000,6 +1038,8 @@
       alertBox.style.display = 'block';
       alertBox.className = 'flash error';
     });
+  }
+
   function abrirModalRenovarTerminal(socioId, nombre, dni) {
     document.getElementById('renovar-socio-id').value = socioId;
     document.getElementById('renovar-socio-nombre').textContent = nombre;
@@ -1068,6 +1108,126 @@
       alertBox.textContent = 'Error: ' + err.message;
       alertBox.style.display = 'block';
       alertBox.className = 'flash error';
+    });
+  }
+
+  // ---------- MANEJO RÁPIDO DE FOTOS EN TERMINAL POS ----------
+  var webcamTerminalStream = null;
+  var currentTerminalSocioId = null;
+
+  function abrirModalFotoTerminal(socioId, nombre) {
+    currentTerminalSocioId = socioId;
+    var nombreEl = document.getElementById('term-foto-socio-nombre');
+    if (nombreEl) nombreEl.textContent = nombre || 'Socio';
+    var alertaEl = document.getElementById('term-foto-alerta');
+    if (alertaEl) alertaEl.style.display = 'none';
+    window.abrirModal('modal-foto-terminal');
+  }
+
+  function cerrarModalFotoTerminal() {
+    detenerCamaraTerminal();
+    window.cerrarModal('modal-foto-terminal');
+  }
+
+  function iniciarCamaraTerminal() {
+    var box = document.getElementById('webcam-term-box');
+    var video = document.getElementById('webcam-term-video');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Tu navegador no admite cámara web o requiere HTTPS.');
+      return;
+    }
+
+    box.style.display = 'block';
+    navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: 'user' }
+    })
+    .then(function(stream) {
+      webcamTerminalStream = stream;
+      video.srcObject = stream;
+    })
+    .catch(function(err) {
+      alert('Error accediendo a cámara: ' + err.message);
+      box.style.display = 'none';
+    });
+  }
+
+  function detenerCamaraTerminal() {
+    var box = document.getElementById('webcam-term-box');
+    if (webcamTerminalStream) {
+      webcamTerminalStream.getTracks().forEach(function(t) { t.stop(); });
+      webcamTerminalStream = null;
+    }
+    if (box) box.style.display = 'none';
+  }
+
+  function capturarFotoTerminal() {
+    var video = document.getElementById('webcam-term-video');
+    var canvas = document.getElementById('webcam-term-canvas');
+    if (!video || !webcamTerminalStream) return;
+
+    var w = video.videoWidth || 480;
+    var h = video.videoHeight || 480;
+    canvas.width = 400;
+    canvas.height = 400;
+
+    var ctx = canvas.getContext('2d');
+    var minDim = Math.min(w, h);
+    var sx = (w - minDim) / 2;
+    var sy = (h - minDim) / 2;
+    ctx.drawImage(video, sx, sy, minDim, minDim, 0, 0, 400, 400);
+
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    detenerCamaraTerminal();
+    guardarFotoTerminalServidor(dataUrl);
+  }
+
+  function handleFotoTerminalFile(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+      guardarFotoTerminalServidor(evt.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function guardarFotoTerminalServidor(base64Data) {
+    var alerta = document.getElementById('term-foto-alerta');
+    if (alerta) alerta.style.display = 'none';
+
+    fetch('/socios/' + currentTerminalSocioId + '/foto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ foto_base64: base64Data })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.ok && res.foto_url) {
+        sonarExito();
+        var imgBanner = document.getElementById('banner-avatar-img');
+        var iniBanner = document.getElementById('banner-avatar-ini');
+        if (imgBanner) {
+          imgBanner.src = res.foto_url;
+          imgBanner.style.display = 'block';
+        }
+        if (iniBanner) iniBanner.style.display = 'none';
+        cerrarModalFotoTerminal();
+      } else {
+        sonarAlerta();
+        if (alerta) {
+          alerta.textContent = res.error || 'Error guardando foto.';
+          alerta.style.display = 'block';
+        }
+      }
+    })
+    .catch(function(err) {
+      sonarAlerta();
+      if (alerta) {
+        alerta.textContent = 'Error: ' + err.message;
+        alerta.style.display = 'block';
+      }
     });
   }
 </script>
@@ -1243,5 +1403,49 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ========================================================
+     MODAL RÁPIDO: TOMAR O CAMBIAR FOTO EN TERMINAL RECEPCIÓN
+     ======================================================== -->
+<div id="modal-foto-terminal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) cerrarModalFotoTerminal();">
+  <div class="modal-card" style="max-width:440px;" onclick="event.stopPropagation();">
+    <div class="modal-header">
+      <h3 style="display:flex; align-items:center; gap:8px; margin:0;">
+        <%- u.icon('camera', 18) %> Foto de <span id="term-foto-socio-nombre">Socio</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModalFotoTerminal();" aria-label="Cerrar">
+        <%- u.icon('close', 14) %>
+      </button>
+    </div>
+    <div class="modal-body stack" style="margin:0;">
+      <div id="term-foto-alerta" style="display:none;" class="flash error"></div>
+
+      <div style="display:flex; gap:8px; justify-content:center; margin-bottom:12px;">
+        <input type="file" id="term-foto-file-input" accept="image/*" style="display:none;" onchange="handleFotoTerminalFile(event);">
+        <button type="button" class="btn sm" onclick="document.getElementById('term-foto-file-input').click();" style="display:inline-flex; align-items:center; gap:6px;">
+          <%- u.icon('file', 14) %> Subir Archivo
+        </button>
+        <button type="button" class="btn sm primary" onclick="iniciarCamaraTerminal();" style="display:inline-flex; align-items:center; gap:6px;">
+          <%- u.icon('camera', 14) %> Iniciar Cámara Web
+        </button>
+      </div>
+
+      <!-- Visor de la cámara web -->
+      <div id="webcam-term-box" style="display:none; background:#09090b; padding:10px; border-radius:8px; border:1px solid #3f3f46;">
+        <video id="webcam-term-video" autoplay playsinline style="width:100%; height:240px; object-fit:cover; border-radius:6px; background:#000;"></video>
+        <canvas id="webcam-term-canvas" style="display:none;"></canvas>
+        <div style="display:flex; justify-content:space-between; gap:8px; margin-top:8px;">
+          <button type="button" class="btn primary sm" onclick="capturarFotoTerminal();" style="flex:1;">
+            📸 Capturar y Guardar
+          </button>
+          <button type="button" class="btn sm" onclick="detenerCamaraTerminal();">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:12px;">
+      <button type="button" class="btn" onclick="cerrarModalFotoTerminal();">Cerrar</button>
+    </div>
   </div>
 </div>

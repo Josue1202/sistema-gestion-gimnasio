@@ -54,6 +54,8 @@ services:
       - "8084:3000"
     expose:
       - "3000"
+    volumes:
+      - app_uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -131,3 +133,4 @@ volumes:
   pg_data:
   n8n_data:
   evolution_instances:
+  app_uploads:

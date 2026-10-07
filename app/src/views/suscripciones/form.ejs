@@ -140,7 +140,7 @@
       var opt = sel.options[sel.selectedIndex];
       if (!opt || !opt.value) return;
       var dias = parseInt(opt.getAttribute('data-dias'), 10) || 30;
-      if (inicio.value) fin.value = addDias(inicio.value, dias);
+      if (inicio.value) fin.value = addDias(inicio.value, Math.max(0, dias - 1));
       if (!precio.value) precio.placeholder = opt.getAttribute('data-precio');
     }
 

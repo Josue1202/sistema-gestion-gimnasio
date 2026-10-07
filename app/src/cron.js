@@ -45,7 +45,7 @@ async function marcarVencidas() {
     console.log('[cron:marcarVencidas] Verificando suscripciones vencidas...');
     const res = await pool.query(
       `UPDATE suscripciones 
-       SET estado = 'vencida' 
+       SET estado = 'vencida', actualizado_en = now()
        WHERE estado = 'activa' AND fecha_fin < CURRENT_DATE 
        RETURNING id`
     );

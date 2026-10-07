@@ -1,7 +1,63 @@
 <h1><%= modo === 'nuevo' ? 'Nuevo socio' : 'Editar socio' %></h1>
 
 <div class="card">
-  <form method="post" action="<%= modo === 'nuevo' ? '/socios' : '/socios/' + socio.id %>" class="stack">
+  <form method="post" action="<%= modo === 'nuevo' ? '/socios' : '/socios/' + socio.id %>" class="stack" id="form-socio-completo">
+    <input type="hidden" name="foto_base64" id="socio-foto-base64">
+    <input type="hidden" name="foto_url" id="socio-foto-url" value="<%= socio.foto_url || '' %>">
+
+    <!-- Sección: Fotografía del Socio -->
+    <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; margin-bottom:12px;">
+      <label style="font-weight:700; display:block; margin-bottom:8px; color:var(--text-bright);">
+        Fotografía del Socio / Reconocimiento en Recepción
+      </label>
+      <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap;">
+        <!-- Visor / Vista Previa -->
+        <div style="position:relative; width:96px; height:96px; border-radius:12px; background:#18181b; border:2px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <% if (socio.foto_url) { %>
+            <img id="socio-foto-preview" src="<%= socio.foto_url %>" alt="Foto" style="width:100%; height:100%; object-fit:cover;">
+          <% } else { %>
+            <img id="socio-foto-preview" src="" alt="Foto" style="width:100%; height:100%; object-fit:cover; display:none;">
+            <div id="socio-foto-placeholder" style="color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px;">
+              <%- u.icon('camera', 28) %>
+              <span>Sin foto</span>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Botones de Acción de Foto -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="file" id="socio-file-input" accept="image/*" style="display:none;" onchange="handleFotoFileSelect(event);">
+            <button type="button" class="btn sm" onclick="document.getElementById('socio-file-input').click();" style="display:inline-flex; align-items:center; gap:6px;">
+              <%- u.icon('file', 14) %> Subir Archivo
+            </button>
+            <button type="button" class="btn sm primary" onclick="iniciarCamaraSocio();" style="display:inline-flex; align-items:center; gap:6px;">
+              <%- u.icon('camera', 14) %> Tomar con Cámara Web
+            </button>
+            <button type="button" class="btn sm" id="btn-quitar-foto" onclick="quitarFotoSocio();" style="<%= socio.foto_url ? '' : 'display:none;' %> display:inline-flex; align-items:center; gap:4px;">
+              <%- u.icon('close', 12) %> Quitar
+            </button>
+          </div>
+          <span class="muted" style="font-size:11.5px;">
+            Soporta JPG, PNG o captura instantánea con la cámara de recepción para identificar al socio en el control de acceso.
+          </span>
+        </div>
+      </div>
+
+      <!-- Contenedor en vivo de la cámara web (oculto por defecto) -->
+      <div id="webcam-box" style="display:none; margin-top:14px; background:#09090b; padding:12px; border-radius:8px; border:1px solid #3f3f46; max-width:380px;">
+        <video id="webcam-video" autoplay playsinline style="width:100%; height:240px; object-fit:cover; border-radius:6px; background:#000;"></video>
+        <canvas id="webcam-canvas" style="display:none;"></canvas>
+        <div style="display:flex; justify-content:space-between; margin-top:8px; gap:8px;">
+          <button type="button" class="btn primary sm" onclick="capturarFotoSocio();" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <%- u.icon('camera', 14) %> Capturar Foto
+          </button>
+          <button type="button" class="btn sm" onclick="detenerCamaraSocio();">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos Personales -->
     <div class="grid2">
       <div><label>Nombres *</label><input name="nombres" value="<%= socio.nombres || '' %>" required autofocus></div>
       <div><label>Apellidos *</label><input name="apellidos" value="<%= socio.apellidos || '' %>" required></div>
@@ -39,3 +95,104 @@
     </div>
   </form>
 </div>
+
+<script>
+  var webcamStream = null;
+
+  function handleFotoFileSelect(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+      aplicarFotoPreview(evt.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function aplicarFotoPreview(dataUrl) {
+    var img = document.getElementById('socio-foto-preview');
+    var placeholder = document.getElementById('socio-foto-placeholder');
+    var btnQuitar = document.getElementById('btn-quitar-foto');
+    var base64Inp = document.getElementById('socio-foto-base64');
+
+    img.src = dataUrl;
+    img.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+    if (btnQuitar) btnQuitar.style.display = 'inline-flex';
+    if (base64Inp) base64Inp.value = dataUrl;
+  }
+
+  function quitarFotoSocio() {
+    var img = document.getElementById('socio-foto-preview');
+    var placeholder = document.getElementById('socio-foto-placeholder');
+    var btnQuitar = document.getElementById('btn-quitar-foto');
+    var base64Inp = document.getElementById('socio-foto-base64');
+    var urlInp = document.getElementById('socio-foto-url');
+
+    img.src = '';
+    img.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'flex';
+    if (btnQuitar) btnQuitar.style.display = 'none';
+    if (base64Inp) base64Inp.value = '';
+    if (urlInp) urlInp.value = '';
+    detenerCamaraSocio();
+  }
+
+  function iniciarCamaraSocio() {
+    var box = document.getElementById('webcam-box');
+    var video = document.getElementById('webcam-video');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Tu navegador no tiene soporte para cámara web o requiere HTTPS.');
+      return;
+    }
+
+    box.style.display = 'block';
+    navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: 'user' }
+    })
+    .then(function(stream) {
+      webcamStream = stream;
+      video.srcObject = stream;
+    })
+    .catch(function(err) {
+      alert('No se pudo acceder a la cámara: ' + err.message);
+      box.style.display = 'none';
+    });
+  }
+
+  function detenerCamaraSocio() {
+    var box = document.getElementById('webcam-box');
+    if (webcamStream) {
+      webcamStream.getTracks().forEach(function(t) { t.stop(); });
+      webcamStream = null;
+    }
+    if (box) box.style.display = 'none';
+  }
+
+  function capturarFotoSocio() {
+    var video = document.getElementById('webcam-video');
+    var canvas = document.getElementById('webcam-canvas');
+
+    if (!video || !webcamStream) return;
+
+    var w = video.videoWidth || 480;
+    var h = video.videoHeight || 480;
+    canvas.width = 400;
+    canvas.height = 400;
+
+    var ctx = canvas.getContext('2d');
+    // Centrar y recortar cuadrado
+    var minDim = Math.min(w, h);
+    var sx = (w - minDim) / 2;
+    var sy = (h - minDim) / 2;
+    ctx.drawImage(video, sx, sy, minDim, minDim, 0, 0, 400, 400);
+
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    aplicarFotoPreview(dataUrl);
+    detenerCamaraSocio();
+  }
+
+  window.addEventListener('beforeunload', detenerCamaraSocio);
+</script>

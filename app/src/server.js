@@ -31,8 +31,8 @@ app.use((req, res, next) => {
 });
 
 // Parsers y estaticos
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use('/public', express.static(path.join(__dirname, '..', 'public'), { maxAge: '1h' }));
 
 // Sesion
@@ -96,6 +96,47 @@ async function initDatabase() {
       await pool.query(sql);
       console.log('[db] Tablas, vistas y datos base creados exitosamente!');
     }
+  }
+
+  // 3. Asegurar vista v_socios_estado con foto_url y cierre de membresías vencidas
+  try {
+    await pool.query(`
+      CREATE OR REPLACE VIEW v_socios_estado AS
+      SELECT
+        s.id,
+        s.nombres,
+        s.apellidos,
+        s.dni,
+        s.telefono,
+        s.email,
+        s.fecha_nacimiento,
+        s.acepta_marketing,
+        s.fecha_registro,
+        v.suscripcion_id,
+        v.plan_nombre,
+        v.fecha_inicio,
+        v.fecha_fin,
+        v.dias_restantes,
+        CASE
+          WHEN v.suscripcion_id IS NULL           THEN 'sin_suscripcion'
+          WHEN v.suscripcion_estado = 'congelada' THEN 'congelado'
+          WHEN v.fecha_fin >= CURRENT_DATE        THEN 'activo'
+          ELSE 'vencido'
+        END AS estado_membresia,
+        s.foto_url
+      FROM socios s
+      LEFT JOIN v_socio_suscripcion_vigente v ON v.socio_id = s.id
+      WHERE s.activo = true;
+    `);
+
+    // Cerrar automáticamente en BD las suscripciones cuya fecha ya pasó
+    await pool.query(
+      `UPDATE suscripciones 
+       SET estado = 'vencida', actualizado_en = now()
+       WHERE estado = 'activa' AND fecha_fin < CURRENT_DATE`
+    );
+  } catch (err) {
+    console.warn('[db] Advertencia en migración v_socios_estado / marcar vencidas:', err.message);
   }
 }
 

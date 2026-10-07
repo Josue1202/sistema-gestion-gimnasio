@@ -27,3 +27,8 @@ app/.turbo/
 Thumbs.db
 
 cookies.txt
+
+# Uploads de fotos de socios
+app/public/uploads/*
+!app/public/uploads/.gitkeep
+!app/public/uploads/socios/.gitkeep

@@ -58,9 +58,13 @@
       <tr>
         <td>
           <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:28px; height:28px; border-radius:var(--radius-sm); background:#222222; border:1px solid #333333; color:var(--text-bright); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:11px; flex-shrink:0;">
-              <%= ini %>
-            </div>
+            <% if (s.foto_url) { %>
+              <img src="<%= s.foto_url %>" alt="<%= s.nombres %>" style="width:32px; height:32px; border-radius:var(--radius-sm); object-fit:cover; border:1px solid #333333; flex-shrink:0;">
+            <% } else { %>
+              <div style="width:32px; height:32px; border-radius:var(--radius-sm); background:#222222; border:1px solid #333333; color:var(--text-bright); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:11px; flex-shrink:0;">
+                <%= ini %>
+              </div>
+            <% } %>
             <div>
               <a href="/socios/<%= s.id %>" style="font-weight:700; font-size:14px; color:var(--text-bright);">
                 <%= s.apellidos %>, <%= s.nombres %>

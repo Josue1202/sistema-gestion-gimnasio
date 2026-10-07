@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('../db');
 const {
   hoyISO, addDias, dateToISO, fecha, fechaHora, soles,
+  calcularFechaFin, calcularInicioRenovacion,
   normalizarTelefono, procesarPagoPasarela
 } = require('../util');
 const { notificarPagoConfirmado } = require('../cron');
@@ -192,20 +193,14 @@ router.post('/api/checkout/procesar', async (req, res) => {
 
       // B. Determinar vigencia de la suscripción (acumular si ya tiene activa)
       const subActual = (await c.query(
-        `SELECT * FROM suscripciones 
+        `SELECT fecha_fin FROM suscripciones 
          WHERE socio_id = $1 AND estado = 'activa' 
          ORDER BY fecha_fin DESC LIMIT 1`,
         [socio.id]
       )).rows[0];
 
-      let inicio = hoyISO();
-      if (subActual && subActual.fecha_fin) {
-        const finActual = dateToISO(subActual.fecha_fin);
-        if (finActual >= hoyISO()) {
-          inicio = addDias(finActual, 1);
-        }
-      }
-      const fin = addDias(inicio, plan.duracion_dias);
+      const inicio = calcularInicioRenovacion(subActual?.fecha_fin);
+      const fin = calcularFechaFin(inicio, plan.duracion_dias);
 
       // C. Registrar Suscripción
       const nuevaSub = (await c.query(

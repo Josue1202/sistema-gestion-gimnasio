@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const db = require('../db');
-const { hoyISO, addDias, dateToISO, postWebhook, sendEvolutionWhatsApp, waLink, fecha, fechaHora, soles } = require('../util');
+const { hoyISO, addDias, dateToISO, postWebhook, sendEvolutionWhatsApp, waLink, fecha, fechaHora, soles, calcularFechaFin, calcularInicioRenovacion } = require('../util');
 const { notificarPagoConfirmado } = require('../cron');
 
 const router = express.Router();
@@ -19,11 +19,7 @@ router.get('/nueva', async (req, res, next) => {
       db.one("SELECT id FROM cajas WHERE estado = 'abierta' LIMIT 1"),
     ]);
     // Sugerencia de inicio: si sigue vigente, arranca al dia siguiente del vencimiento; si no, hoy.
-    let inicio = hoyISO();
-    if (actual && actual.fecha_fin) {
-      const fin = dateToISO(actual.fecha_fin);
-      if (fin >= hoyISO()) inicio = addDias(fin, 1);
-    }
+    const inicio = calcularInicioRenovacion(actual?.fecha_fin);
     res.render('suscripciones/form', {
       title: 'Renovar · ' + socio.nombres,
       socio, planes, actual, inicio,
@@ -43,7 +39,7 @@ router.post('/', async (req, res, next) => {
     if (!plan) { req.flash('error', 'Selecciona un plan valido.'); return res.redirect('/suscripciones/nueva?socio=' + socio.id); }
 
     const inicio = b.fecha_inicio || hoyISO();
-    const fin = b.fecha_fin || addDias(inicio, plan.duracion_dias);
+    const fin = b.fecha_fin || calcularFechaFin(inicio, plan.duracion_dias);
     const precio = (b.precio_pagado === '' || b.precio_pagado == null) ? Number(plan.precio) : Number(b.precio_pagado);
     if (!(precio >= 0)) { req.flash('error', 'Monto invalido.'); return res.redirect('/suscripciones/nueva?socio=' + socio.id); }
     const metodo = b.metodo_pago || 'efectivo';

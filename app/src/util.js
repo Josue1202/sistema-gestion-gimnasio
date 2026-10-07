@@ -1,6 +1,10 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const TZ = process.env.TZ || 'America/Lima';
+const UPLOADS_SOCIOS_DIR = path.join(__dirname, '..', 'public', 'uploads', 'socios');
 
 /** S/ 1,234.50 */
 function soles(n) {
@@ -40,6 +44,64 @@ function addDias(iso, dias) {
   const dt = new Date(Date.UTC(y, m - 1, d));
   dt.setUTCDate(dt.getUTCDate() + Number(dias));
   return dt.toISOString().slice(0, 10);
+}
+
+/**
+ * Calcula la fecha de vencimiento dada una fecha de inicio y duración en días.
+ * Ambas fechas son inclusivas en el acceso del gimnasio:
+ * - Un plan de 1 día (pase diario) que inicia hoy, vence hoy.
+ * - Un plan de 15 días que inicia el 01/10, vence el 15/10 (15 días de entreno).
+ * - Un plan de 30 días que inicia el 01/10, vence el 30/10 (30 días de entreno).
+ */
+function calcularFechaFin(inicioISO, duracionDias) {
+  const dias = Math.max(1, parseInt(duracionDias, 10) || 1);
+  return addDias(inicioISO, dias - 1);
+}
+
+/**
+ * Calcula la fecha de inicio para una renovación:
+ * - Si el socio renueva con una membresía activa vigente (vence hoy o en el futuro):
+ *   la nueva membresía arranca al día siguiente del vencimiento actual (acumula días sin perder nada).
+ * - Si el socio ya venció o no tiene suscripción activa:
+ *   la nueva membresía arranca HOY.
+ */
+function calcularInicioRenovacion(fechaFinActualISO) {
+  const hoy = hoyISO();
+  if (fechaFinActualISO) {
+    const fin = dateToISO(fechaFinActualISO);
+    if (fin >= hoy) {
+      return addDias(fin, 1);
+    }
+  }
+  return hoy;
+}
+
+/**
+ * Guarda foto de socio en base64 (capturada por cámara web o subida por formulario).
+ * Guarda en app/public/uploads/socios/ y devuelve la ruta web: '/public/uploads/socios/socio_...jpg'.
+ */
+async function guardarFotoSocioBase64(socioId, base64Data) {
+  if (!base64Data || typeof base64Data !== 'string') return null;
+
+  const matches = base64Data.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+  if (!matches) {
+    // Si ya es una ruta relativa o URL existente, mantenerla
+    if (base64Data.startsWith('/public/uploads/') || base64Data.startsWith('http')) {
+      return base64Data;
+    }
+    return null;
+  }
+
+  const ext = matches[1].toLowerCase() === 'png' ? 'png' : 'jpg';
+  const buffer = Buffer.from(matches[2], 'base64');
+
+  await fs.promises.mkdir(UPLOADS_SOCIOS_DIR, { recursive: true });
+
+  const filename = `socio_${socioId || 'temp'}_${Date.now()}.${ext}`;
+  const filepath = path.join(UPLOADS_SOCIOS_DIR, filename);
+  await fs.promises.writeFile(filepath, buffer);
+
+  return `/public/uploads/socios/${filename}`;
 }
 
 /** Solo digitos. Antepone 51 si parece numero peruano de 9 digitos. */
@@ -483,6 +545,7 @@ const { icon } = require('./icons');
 
 module.exports = {
   TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
+  calcularFechaFin, calcularInicioRenovacion, guardarFotoSocioBase64,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
   postWebhook, sendMetaWhatsApp, sendEvolutionDirect,
   sendWhatsAppMessage, sendEvolutionWhatsApp, badgeEstado, icon,

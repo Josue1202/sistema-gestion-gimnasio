@@ -2,7 +2,7 @@
 const express = require('express');
 const db = require('../db');
 const { plantillasMap, varsDe } = require('../mensajeria');
-const { renderPlantilla, waLink, hoyISO, normalizarTelefono, sendEvolutionWhatsApp } = require('../util');
+const { renderPlantilla, waLink, hoyISO, normalizarTelefono, sendEvolutionWhatsApp, guardarFotoSocioBase64 } = require('../util');
 
 const router = express.Router();
 
@@ -19,6 +19,7 @@ function limpiarSocio(b) {
     contacto_emergencia_nombre: s(b.contacto_emergencia_nombre),
     contacto_emergencia_telefono: tel(b.contacto_emergencia_telefono),
     notas: s(b.notas),
+    foto_url: s(b.foto_url),
     acepta_marketing: b.acepta_marketing === 'on' || b.acepta_marketing === 'true',
   };
 }
@@ -68,17 +69,31 @@ router.post('/', async (req, res, next) => {
       req.flash('error', 'Nombres y apellidos son obligatorios.');
       return res.redirect('/socios/nuevo');
     }
+
+    let fotoUrl = d.foto_url || null;
+    if (req.body.foto_base64) {
+      fotoUrl = await guardarFotoSocioBase64(null, req.body.foto_base64);
+    }
+
     const row = await db.one(
       `INSERT INTO socios (nombres, apellidos, dni, telefono, email, fecha_nacimiento, genero, direccion,
-        contacto_emergencia_nombre, contacto_emergencia_telefono, notas, acepta_marketing)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+        contacto_emergencia_nombre, contacto_emergencia_telefono, notas, foto_url, acepta_marketing)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
       [d.nombres, d.apellidos, d.dni, d.telefono, d.email, d.fecha_nacimiento, d.genero, d.direccion,
-       d.contacto_emergencia_nombre, d.contacto_emergencia_telefono, d.notas, d.acepta_marketing]);
+       d.contacto_emergencia_nombre, d.contacto_emergencia_telefono, d.notas, fotoUrl, d.acepta_marketing]);
     
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      return res.json({ ok: true, id: row.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni });
+      return res.json({
+        ok: true,
+        id: row.id,
+        nombres: d.nombres,
+        apellidos: d.apellidos,
+        dni: d.dni,
+        telefono: d.telefono,
+        foto_url: row.foto_url
+      });
     }
-    req.flash('ok', 'Socio registrado.');
+    req.flash('ok', 'Socio registrado exitosamente.');
     res.redirect('/socios/' + row.id + '?nuevo=1');
   } catch (e) {
     if (e.code === '23505') {
@@ -147,18 +162,59 @@ router.get('/:id/editar', async (req, res, next) => {
 router.post('/:id', async (req, res, next) => {
   try {
     const d = limpiarSocio(req.body);
-    if (!d.nombres || !d.apellidos) { req.flash('error', 'Nombres y apellidos son obligatorios.'); return res.redirect('/socios/' + req.params.id + '/editar'); }
+    if (!d.nombres || !d.apellidos) {
+      req.flash('error', 'Nombres y apellidos son obligatorios.');
+      return res.redirect('/socios/' + req.params.id + '/editar');
+    }
+
+    let fotoUrl = d.foto_url;
+    if (req.body.foto_base64) {
+      const nueva = await guardarFotoSocioBase64(req.params.id, req.body.foto_base64);
+      if (nueva) fotoUrl = nueva;
+    }
+
     await db.query(
       `UPDATE socios SET nombres=$1, apellidos=$2, dni=$3, telefono=$4, email=$5, fecha_nacimiento=$6,
         genero=$7, direccion=$8, contacto_emergencia_nombre=$9, contacto_emergencia_telefono=$10,
-        notas=$11, acepta_marketing=$12 WHERE id=$13`,
+        notas=$11, foto_url=COALESCE($12, foto_url), acepta_marketing=$13, actualizado_en=now() WHERE id=$14`,
       [d.nombres, d.apellidos, d.dni, d.telefono, d.email, d.fecha_nacimiento, d.genero, d.direccion,
-       d.contacto_emergencia_nombre, d.contacto_emergencia_telefono, d.notas, d.acepta_marketing, req.params.id]);
-    req.flash('ok', 'Datos actualizados.');
+       d.contacto_emergencia_nombre, d.contacto_emergencia_telefono, d.notas, fotoUrl, d.acepta_marketing, req.params.id]);
+    req.flash('ok', 'Datos actualizados exitosamente.');
     res.redirect('/socios/' + req.params.id);
   } catch (e) {
-    if (e.code === '23505') { req.flash('error', 'Ya existe un socio con ese DNI.'); return res.redirect('/socios/' + req.params.id + '/editar'); }
+    if (e.code === '23505') {
+      req.flash('error', 'Ya existe un socio con ese DNI.');
+      return res.redirect('/socios/' + req.params.id + '/editar');
+    }
     next(e);
+  }
+});
+
+// ---------- Subir / Actualizar Foto rápida (Webcam o archivo) ----------
+router.post('/:id/foto', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { foto_base64, foto_url, eliminar } = req.body;
+
+    if (eliminar === true || eliminar === 'true') {
+      await db.query('UPDATE socios SET foto_url = NULL, actualizado_en = now() WHERE id = $1', [id]);
+      return res.json({ ok: true, foto_url: null, mensaje: 'Foto eliminada.' });
+    }
+
+    let finalUrl = foto_url || null;
+    if (foto_base64) {
+      finalUrl = await guardarFotoSocioBase64(id, foto_base64);
+    }
+
+    if (!finalUrl) {
+      return res.status(400).json({ ok: false, error: 'No se recibió una imagen válida.' });
+    }
+
+    await db.query('UPDATE socios SET foto_url = $1, actualizado_en = now() WHERE id = $2', [finalUrl, id]);
+    res.json({ ok: true, foto_url: finalUrl, mensaje: 'Foto guardada exitosamente.' });
+  } catch (e) {
+    console.error('[socios:foto] error:', e);
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 
@@ -175,11 +231,18 @@ router.post('/:id/baja', async (req, res, next) => {
 router.post('/:id/asistencia', async (req, res, next) => {
   try {
     const sub = await db.one(
-      `SELECT id FROM suscripciones WHERE socio_id = $1 AND estado = 'activa' AND fecha_fin >= CURRENT_DATE
+      `SELECT id FROM suscripciones 
+       WHERE socio_id = $1 AND estado = 'activa' AND fecha_fin >= CURRENT_DATE
        ORDER BY fecha_fin DESC LIMIT 1`, [req.params.id]);
+
+    if (!sub) {
+      req.flash('error', 'Acceso denegado: el socio tiene su membresía vencida o no cuenta con suscripción activa. Cobra la renovación para permitir el ingreso.');
+      return res.redirect('/socios/' + req.params.id);
+    }
+
     await db.query('INSERT INTO asistencias (socio_id, suscripcion_id, metodo, registrado_por) VALUES ($1,$2,$3,$4)',
-      [req.params.id, sub ? sub.id : null, 'manual', req.session.user.nombre]);
-    req.flash(sub ? 'ok' : 'info', sub ? 'Asistencia registrada.' : 'Asistencia registrada (sin suscripcion vigente).');
+      [req.params.id, sub.id, 'manual', req.session.user.nombre]);
+    req.flash('ok', 'Asistencia concedida y registrada exitosamente.');
     res.redirect('/socios/' + req.params.id);
   } catch (e) { next(e); }
 });

@@ -2,9 +2,18 @@
   var ini = (socio.nombres.charAt(0) + (socio.apellidos ? socio.apellidos.charAt(0) : '')).toUpperCase();
 %>
 <div class="toolbar">
-  <div style="display:flex; align-items:center; gap:14px;">
-    <div style="width:42px; height:42px; border-radius:var(--radius-sm); background:#222222; border:1px solid #333333; color:var(--text-bright); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;">
-      <%= ini %>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="position:relative; width:72px; height:72px; border-radius:14px; background:#18181b; border:2px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <% if (socio.foto_url) { %>
+        <img id="detail-socio-foto" src="<%= socio.foto_url %>" alt="<%= socio.nombres %>" style="width:100%; height:100%; object-fit:cover;">
+      <% } else { %>
+        <div id="detail-socio-placeholder" style="color:var(--text-bright); font-weight:800; font-size:22px;">
+          <%= ini %>
+        </div>
+      <% } %>
+      <button type="button" onclick="abrirModalFotoRapida('<%= socio.id %>', '<%= socio.nombres %>');" title="Cambiar / Tomar Foto" style="position:absolute; bottom:0; right:0; width:26px; height:26px; background:rgba(0,0,0,0.75); border:none; border-radius:6px 0 0 0; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+        <%- u.icon('camera', 13) %>
+      </button>
     </div>
     <div>
       <h1 class="mb0" style="font-size:24px;"><%= socio.apellidos %>, <%= socio.nombres %></h1>
@@ -13,6 +22,7 @@
   </div>
   <div class="actions">
     <a class="btn primary" href="/suscripciones/nueva?socio=<%= socio.id %>" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('card', 14) %> Renovar / Cobrar</a>
+    <button class="btn" type="button" onclick="abrirModalFotoRapida('<%= socio.id %>', '<%= socio.nombres %>');" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('camera', 14) %> Foto</button>
     <button class="btn" type="button" onclick="abrirModalSocioEditar();" style="display:inline-flex; align-items:center; gap:6px;"><%- u.icon('edit', 14) %> Editar Datos</button>
     <a class="btn" href="/socios">Volver al listado</a>
   </div>
@@ -324,8 +334,196 @@
   </div>
 </div>
 
+<!-- ========================================================
+     MODAL RÁPIDO: TOMAR / SUBIR FOTO DEL SOCIO
+     ======================================================== -->
+<div id="modal-foto-rapida" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) cerrarModalFoto();">
+  <div class="modal-card" style="max-width:440px;" onclick="event.stopPropagation();">
+    <div class="modal-header">
+      <h3 style="display:flex; align-items:center; gap:8px; margin:0;">
+        <%- u.icon('camera', 18) %> Foto de <%= socio.nombres %>
+      </h3>
+      <button type="button" class="modal-close" onclick="cerrarModalFoto();" aria-label="Cerrar">
+        <%- u.icon('close', 14) %>
+      </button>
+    </div>
+    <div class="modal-body stack" style="margin:0;">
+      <div id="foto-rapida-alerta" style="display:none;" class="flash error"></div>
+
+      <!-- Preview y opciones -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="width:160px; height:160px; border-radius:16px; background:#18181b; border:2px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <img id="foto-rapida-img" src="<%= socio.foto_url || '' %>" style="width:100%; height:100%; object-fit:cover; <%= socio.foto_url ? '' : 'display:none;' %>">
+          <div id="foto-rapida-empty" style="color:var(--muted); font-size:12px; display:<%= socio.foto_url ? 'none' : 'flex' %>; flex-direction:column; align-items:center; gap:6px;">
+            <%- u.icon('camera', 36) %>
+            <span>Sin fotografía</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <input type="file" id="foto-rapida-file" accept="image/*" style="display:none;" onchange="handleFotoRapidaFile(event);">
+          <button type="button" class="btn sm" onclick="document.getElementById('foto-rapida-file').click();" style="display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('file', 14) %> Subir Archivo
+          </button>
+          <button type="button" class="btn sm primary" onclick="iniciarCamaraRapida();" style="display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('camera', 14) %> Tomar con Cámara Web
+          </button>
+          <% if (socio.foto_url) { %>
+            <button type="button" class="btn sm" onclick="eliminarFotoDirecto();" style="display:inline-flex; align-items:center; gap:4px; color:var(--danger);">
+              <%- u.icon('close', 12) %> Eliminar
+            </button>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Visor de la cámara en vivo -->
+      <div id="webcam-rapida-box" style="display:none; background:#09090b; padding:10px; border-radius:8px; border:1px solid #3f3f46; margin-top:8px;">
+        <video id="webcam-rapida-video" autoplay playsinline style="width:100%; height:220px; object-fit:cover; border-radius:6px; background:#000;"></video>
+        <canvas id="webcam-rapida-canvas" style="display:none;"></canvas>
+        <div style="display:flex; justify-content:space-between; gap:8px; margin-top:8px;">
+          <button type="button" class="btn primary sm" onclick="capturarFotoRapida();" style="flex:1;">
+            📸 Capturar y Guardar
+          </button>
+          <button type="button" class="btn sm" onclick="detenerCamaraRapida();">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:12px;">
+      <button type="button" class="btn" onclick="cerrarModalFoto();">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
   function abrirModalSocioEditar() {
     window.abrirModal('modal-socio-edit');
+  }
+
+  var webcamRapidaStream = null;
+  var currentSocioId = '<%= socio.id %>';
+
+  function abrirModalFotoRapida(socioId, nombre) {
+    document.getElementById('foto-rapida-alerta').style.display = 'none';
+    window.abrirModal('modal-foto-rapida');
+  }
+
+  function cerrarModalFoto() {
+    detenerCamaraRapida();
+    window.cerrarModal('modal-foto-rapida');
+  }
+
+  function iniciarCamaraRapida() {
+    var box = document.getElementById('webcam-rapida-box');
+    var video = document.getElementById('webcam-rapida-video');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Tu navegador no admite cámara web o requiere HTTPS.');
+      return;
+    }
+
+    box.style.display = 'block';
+    navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: 'user' }
+    })
+    .then(function(stream) {
+      webcamRapidaStream = stream;
+      video.srcObject = stream;
+    })
+    .catch(function(err) {
+      alert('Error accediendo a cámara: ' + err.message);
+      box.style.display = 'none';
+    });
+  }
+
+  function detenerCamaraRapida() {
+    var box = document.getElementById('webcam-rapida-box');
+    if (webcamRapidaStream) {
+      webcamRapidaStream.getTracks().forEach(function(t) { t.stop(); });
+      webcamRapidaStream = null;
+    }
+    if (box) box.style.display = 'none';
+  }
+
+  function capturarFotoRapida() {
+    var video = document.getElementById('webcam-rapida-video');
+    var canvas = document.getElementById('webcam-rapida-canvas');
+    if (!video || !webcamRapidaStream) return;
+
+    var w = video.videoWidth || 480;
+    var h = video.videoHeight || 480;
+    canvas.width = 400;
+    canvas.height = 400;
+
+    var ctx = canvas.getContext('2d');
+    var minDim = Math.min(w, h);
+    var sx = (w - minDim) / 2;
+    var sy = (h - minDim) / 2;
+    ctx.drawImage(video, sx, sy, minDim, minDim, 0, 0, 400, 400);
+
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    detenerCamaraRapida();
+    guardarFotoServidor(dataUrl);
+  }
+
+  function handleFotoRapidaFile(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+      guardarFotoServidor(evt.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function guardarFotoServidor(base64Data) {
+    var alerta = document.getElementById('foto-rapida-alerta');
+    alerta.style.display = 'none';
+
+    fetch('/socios/' + currentSocioId + '/foto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ foto_base64: base64Data })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.ok && res.foto_url) {
+        document.getElementById('foto-rapida-img').src = res.foto_url;
+        document.getElementById('foto-rapida-img').style.display = 'block';
+        document.getElementById('foto-rapida-empty').style.display = 'none';
+
+        var headerFoto = document.getElementById('detail-socio-foto');
+        var headerPlaceholder = document.getElementById('detail-socio-placeholder');
+        if (headerFoto) {
+          headerFoto.src = res.foto_url;
+          headerFoto.style.display = 'block';
+        } else if (headerPlaceholder) {
+          headerPlaceholder.outerHTML = '<img id="detail-socio-foto" src="' + res.foto_url + '" style="width:100%; height:100%; object-fit:cover;">';
+        }
+        cerrarModalFoto();
+      } else {
+        alerta.textContent = res.error || 'Error al guardar foto.';
+        alerta.style.display = 'block';
+      }
+    })
+    .catch(function(err) {
+      alerta.textContent = 'Error: ' + err.message;
+      alerta.style.display = 'block';
+    });
+  }
+
+  function eliminarFotoDirecto() {
+    if (!confirm('¿Deseas eliminar la foto de este socio?')) return;
+    fetch('/socios/' + currentSocioId + '/foto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ eliminar: true })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.ok) {
+        location.reload();
+      }
+    });
   }
 </script>
