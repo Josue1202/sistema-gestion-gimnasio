@@ -479,6 +479,8 @@ async function procesarPagoPasarela(datos = {}) {
   return { ok: false, error: 'Método de pago no soportado. Selecciona Yape o Tarjeta.' };
 }
 
+const { icon } = require('./icons');
+
 module.exports = {
   TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
