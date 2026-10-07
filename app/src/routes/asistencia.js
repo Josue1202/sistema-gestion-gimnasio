@@ -1,7 +1,8 @@
 'use strict';
 const express = require('express');
 const db = require('../db');
-const { fecha } = require('../util');
+const { fecha, hoyISO, addDias, dateToISO, soles } = require('../util');
+const { notificarPagoConfirmado } = require('../cron');
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get('/', async (req, res, next) => {
          ORDER BY apellidos, nombres LIMIT 15`, ['%' + q + '%']);
     }
 
-    const [hoy, productos, ventasHoy, caja] = await Promise.all([
+    const [hoy, productos, ventasHoy, caja, planes] = await Promise.all([
       db.rows(
         `SELECT a.fecha, a.metodo, s.id AS socio_id, s.nombres, s.apellidos, s.dni,
                 p.nombre AS plan_nombre, su.fecha_fin, su.estado AS estado_sub
@@ -49,6 +50,8 @@ router.get('/', async (req, res, next) => {
          ORDER BY pg.creado_en DESC LIMIT 20`, [tz]),
 
       db.one("SELECT * FROM v_resumen_caja WHERE estado = 'abierta' LIMIT 1"),
+
+      db.rows("SELECT id, nombre, precio, duracion_dias FROM planes WHERE activo = true ORDER BY duracion_dias ASC"),
     ]);
 
     const ultimoCheckin = req.session.ultimoCheckin || null;
@@ -62,6 +65,7 @@ router.get('/', async (req, res, next) => {
       productos,
       ventasHoy,
       caja,
+      planes,
       ultimoCheckin,
     });
   } catch (e) { next(e); }
@@ -160,6 +164,117 @@ router.post('/marcar', async (req, res, next) => {
     req.session.ultimoCheckin = resultado;
     res.redirect('/asistencia');
   } catch (e) { next(e); }
+});
+
+// Renovación y cobro express en mostrador POS sin salir de la pantalla
+router.post('/renovar-express', async (req, res, next) => {
+  try {
+    const { socio_id, plan_id, metodo_pago, referencia, monto_manual } = req.body;
+    if (!socio_id) {
+      return res.status(400).json({ ok: false, error: 'Socio no especificado.' });
+    }
+    if (!plan_id) {
+      return res.status(400).json({ ok: false, error: 'Selecciona un plan de membresía.' });
+    }
+
+    const [socio, plan] = await Promise.all([
+      db.one('SELECT id, nombres, apellidos, dni, telefono FROM socios WHERE id = $1', [socio_id]),
+      db.one('SELECT id, nombre, precio, duracion_dias FROM planes WHERE id = $1 AND activo = true', [plan_id]),
+    ]);
+
+    if (!socio) return res.status(404).json({ ok: false, error: 'Socio no encontrado.' });
+    if (!plan) return res.status(404).json({ ok: false, error: 'Plan no disponible.' });
+
+    const metodo = metodo_pago || 'efectivo';
+    const monto = (monto_manual !== '' && monto_manual != null) ? Number(monto_manual) : Number(plan.precio);
+
+    const resultado = await db.withTx(async (c) => {
+      // 1. Determinar fecha de inicio acumulando si aún está activo
+      const subActual = (await c.query(
+        `SELECT fecha_fin FROM suscripciones 
+         WHERE socio_id = $1 AND estado = 'activa' 
+         ORDER BY fecha_fin DESC LIMIT 1`,
+        [socio.id]
+      )).rows[0];
+
+      let inicio = hoyISO();
+      if (subActual && subActual.fecha_fin) {
+        const finActual = dateToISO(subActual.fecha_fin);
+        if (finActual >= hoyISO()) {
+          inicio = addDias(finActual, 1);
+        }
+      }
+      const fin = addDias(inicio, plan.duracion_dias);
+
+      // 2. Registrar suscripción
+      const nuevaSub = (await c.query(
+        `INSERT INTO suscripciones (socio_id, plan_id, fecha_inicio, fecha_fin, precio_pagado, estado, creado_por, notas)
+         VALUES ($1, $2, $3, $4, $5, 'activa', $6, $7) RETURNING *`,
+        [
+          socio.id, plan.id, inicio, fin, monto,
+          req.session.user.nombre,
+          `Renovación mostrador POS (${metodo.toUpperCase()})`,
+        ]
+      )).rows[0];
+
+      // 3. Registrar ingreso en caja abierta
+      const caja = (await c.query("SELECT id FROM cajas WHERE estado = 'abierta' LIMIT 1")).rows[0];
+      const nuevoPago = (await c.query(
+        `INSERT INTO pagos (socio_id, suscripcion_id, caja_id, concepto, monto, metodo_pago, referencia, registrado_por)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        [
+          socio.id, nuevaSub.id, caja ? caja.id : null,
+          `Plan ${plan.nombre}`,
+          monto, metodo, referencia || null,
+          req.session.user.nombre,
+        ]
+      )).rows[0];
+
+      // 4. Marcar asistencia de inmediato (check-in de ingreso)
+      await c.query(
+        `INSERT INTO asistencias (socio_id, suscripcion_id, metodo, registrado_por)
+         VALUES ($1, $2, 'renovacion_pos', $3)`,
+        [socio.id, nuevaSub.id, req.session.user.nombre]
+      );
+
+      return { sub: nuevaSub, pago: nuevoPago };
+    });
+
+    // 5. Notificación automática oficial por WhatsApp
+    if (socio.telefono) {
+      notificarPagoConfirmado({
+        socio_id: socio.id,
+        nombres: socio.nombres,
+        apellidos: socio.apellidos,
+        telefono: socio.telefono,
+        plan: plan.nombre,
+        monto,
+        metodo_pago: metodo.toUpperCase(),
+        fecha_fin: resultado.sub.fecha_fin,
+        fecha_fin_txt: fecha(resultado.sub.fecha_fin),
+      }).catch((e) => console.warn('[asistencia:notificar] Error enviando WhatsApp:', e.message));
+    }
+
+    const hoy = new Date();
+    const finDate = new Date(resultado.sub.fecha_fin);
+    const diasRestantes = Math.ceil((finDate - hoy) / (1000 * 60 * 60 * 24));
+
+    return res.json({
+      ok: true,
+      mensaje: `¡Membresía ${plan.nombre} renovada con éxito! Acceso concedido.`,
+      socio_id: socio.id,
+      nombre: `${socio.nombres} ${socio.apellidos}`,
+      dni: socio.dni || 'Sin DNI',
+      estado: 'activo',
+      plan: plan.nombre,
+      fecha_fin: fecha(resultado.sub.fecha_fin),
+      dias_restantes: diasRestantes,
+      hora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+    });
+  } catch (err) {
+    console.error('[asistencia:renovar-express] Error:', err);
+    res.status(500).json({ ok: false, error: err.message || 'Error al procesar renovación.' });
+  }
 });
 
 // Compatibilidad con ruta anterior POST /

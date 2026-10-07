@@ -75,9 +75,9 @@
             </div>
             <div class="actions" style="margin-top:10px;" id="banner-actions">
               <% if (isWarn || isDanger || uc.estado === 'sin_suscripcion') { %>
-                <a class="btn primary sm" href="/suscripciones/nueva?socio=<%= uc.socio_id %>" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">
-                  <%- u.icon('card', 14) %> Cobrar / Renovar Plan
-                </a>
+                <button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal('<%= uc.socio_id %>', '<%= uc.nombre %>', '<%= uc.dni %>');" style="display:inline-flex; align-items:center; gap:6px;">
+                  <%- u.icon('card', 14) %> Cobrar / Renovar en 1 Clic
+                </button>
               <% } %>
               <a class="btn sm" href="/socios/<%= uc.socio_id %>" target="_blank">Ver Ficha</a>
             </div>
@@ -572,7 +572,7 @@
         '</div>' +
         '<div class="actions" style="margin-top:10px;">' +
           (isWarn || isDanger || d.estado === 'sin_suscripcion'
-            ? '<a class="btn primary sm" href="/suscripciones/nueva?socio=' + d.socio_id + '" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.card + ' Cobrar / Renovar Plan</a>'
+            ? '<button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal(\'' + d.socio_id + '\', \'' + d.nombre.replace(/'/g, "\\'") + '\', \'' + (d.dni || '') + '\')" style="display:inline-flex; align-items:center; gap:6px;">' + SVG_ICONS.card + ' Cobrar / Renovar en 1 Clic</button>'
             : '') +
           '<a class="btn sm" href="/socios/' + d.socio_id + '" target="_blank">Ver Ficha</a>' +
         '</div>' +
@@ -1000,6 +1000,75 @@
       alertBox.style.display = 'block';
       alertBox.className = 'flash error';
     });
+  function abrirModalRenovarTerminal(socioId, nombre, dni) {
+    document.getElementById('renovar-socio-id').value = socioId;
+    document.getElementById('renovar-socio-nombre').textContent = nombre;
+    document.getElementById('renovar-socio-dni').textContent = 'DNI: ' + (dni || '—');
+    document.getElementById('renovar-alerta').style.display = 'none';
+
+    var planSelect = document.getElementById('renovar-plan-id');
+    if (planSelect && planSelect.options.length > 0) {
+      actualizarMontoRenovacion();
+    }
+    window.abrirModal('modal-renovar-terminal');
+  }
+
+  function actualizarMontoRenovacion() {
+    var planSelect = document.getElementById('renovar-plan-id');
+    var opt = planSelect.options[planSelect.selectedIndex];
+    var precio = opt ? opt.getAttribute('data-precio') : '0.00';
+    document.getElementById('renovar-monto-label').textContent = 'S/ ' + parseFloat(precio).toFixed(2);
+    document.getElementById('renovar-btn-text').textContent = 'Cobrar S/ ' + parseFloat(precio).toFixed(2) + ' y Dar Acceso';
+  }
+
+  function handleRenovarTerminalSubmit(e) {
+    e.preventDefault();
+    var form = document.getElementById('form-renovar-terminal');
+    var alertBox = document.getElementById('renovar-alerta');
+    var btn = form.querySelector('button[type="submit"]');
+
+    btn.disabled = true;
+    var origText = btn.textContent;
+    btn.textContent = 'Procesando...';
+
+    var payload = {
+      socio_id: document.getElementById('renovar-socio-id').value,
+      plan_id: document.getElementById('renovar-plan-id').value,
+      metodo_pago: (document.querySelector('input[name="renovar_metodo"]:checked') || {}).value || 'efectivo',
+      referencia: document.getElementById('renovar-ref').value.trim()
+    };
+
+    fetch('/asistencia/renovar-express', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      btn.disabled = false;
+      btn.textContent = origText;
+
+      if (data.ok) {
+        window.cerrarModal('modal-renovar-terminal');
+        sonarExito();
+        actualizarBannerCheckin(data);
+        agregarItemFeedAsistencia(data);
+        document.getElementById('dni-input').focus();
+      } else {
+        sonarAlerta();
+        alertBox.textContent = data.error || 'Error al procesar renovación.';
+        alertBox.style.display = 'block';
+        alertBox.className = 'flash error';
+      }
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = origText;
+      sonarAlerta();
+      alertBox.textContent = 'Error: ' + err.message;
+      alertBox.style.display = 'block';
+      alertBox.className = 'flash error';
+    });
   }
 </script>
 
@@ -1089,6 +1158,89 @@
       <div class="modal-footer">
         <button type="button" class="btn" onclick="window.cerrarModal('modal-socio-terminal');">Cancelar</button>
         <button type="submit" class="btn primary">Guardar Socio</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Flotante: Cobro y Renovación en 1-Clic desde Terminal -->
+<div id="modal-renovar-terminal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) window.cerrarModal('modal-renovar-terminal');">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <%- u.icon('card', 16) %> Cobro & Renovación Inmediata
+      </h3>
+      <button type="button" class="modal-close" onclick="window.cerrarModal('modal-renovar-terminal');" aria-label="Cerrar">
+        <%- u.icon('close', 16) %>
+      </button>
+    </div>
+    <form id="form-renovar-terminal" onsubmit="return handleRenovarTerminalSubmit(event);" class="stack" style="margin:0;">
+      <input type="hidden" id="renovar-socio-id">
+      <div class="modal-body">
+        <div id="renovar-alerta" style="display:none; margin-bottom:12px;"></div>
+
+        <!-- Ficha del Socio -->
+        <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div id="renovar-socio-nombre" style="font-size:16px; font-weight:800; color:var(--text-bright);">—</div>
+            <div id="renovar-socio-dni" class="muted" style="font-size:12.5px;">DNI: —</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px; text-transform:uppercase; color:var(--muted); font-weight:700;">Total a Cobrar</div>
+            <div id="renovar-monto-label" style="font-size:20px; font-weight:800; color:var(--primary);">S/ 0.00</div>
+          </div>
+        </div>
+
+        <!-- Plan a renovar -->
+        <div style="margin-bottom:14px;">
+          <label for="renovar-plan-id" style="font-weight:700;">Plan de Membresía *</label>
+          <select id="renovar-plan-id" onchange="actualizarMontoRenovacion();" required style="font-size:14.5px; font-weight:600;">
+            <% if (typeof planes !== 'undefined' && planes.length) { %>
+              <% planes.forEach(function(pl, i) { %>
+                <option value="<%= pl.id %>" data-precio="<%= pl.precio %>" data-dias="<%= pl.duracion_dias %>" <%= i === 0 ? 'selected' : '' %>>
+                  <%= pl.nombre %> — <%= pl.duracion_dias %> días (S/ <%= Number(pl.precio).toFixed(2) %>)
+                </option>
+              <% }); %>
+            <% } else { %>
+              <option value="">No hay planes configurados</option>
+            <% } %>
+          </select>
+        </div>
+
+        <!-- Método de Pago Rápido para Mostrador -->
+        <div style="margin-bottom:14px;">
+          <label style="font-weight:700; margin-bottom:8px; display:block;">Método de Pago en Mostrador *</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
+              <input type="radio" name="renovar_metodo" value="efectivo" checked style="width:auto;">
+              <span style="font-size:13.5px; font-weight:600;">💵 Efectivo</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
+              <input type="radio" name="renovar_metodo" value="yape" style="width:auto;">
+              <span style="font-size:13.5px; font-weight:600;">🟣 Yape / Plin</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
+              <input type="radio" name="renovar_metodo" value="tarjeta" style="width:auto;">
+              <span style="font-size:13.5px; font-weight:600;">💳 POS Tarjeta</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
+              <input type="radio" name="renovar_metodo" value="transferencia" style="width:auto;">
+              <span style="font-size:13.5px; font-weight:600;">🏦 Transferencia</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Referencia opcional -->
+        <div>
+          <label for="renovar-ref">Nro. de Operación / Voucher (Opcional)</label>
+          <input type="text" id="renovar-ref" placeholder="Ej: Op 948123 (dejar vacío si es efectivo)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="window.cerrarModal('modal-renovar-terminal');">Cancelar</button>
+        <button type="submit" class="btn primary" style="font-weight:800;" id="renovar-submit-btn">
+          <span id="renovar-btn-text">Cobrar y Dar Acceso</span>
+        </button>
       </div>
     </form>
   </div>
