@@ -117,6 +117,18 @@ app.get('/init-db', async (req, res) => {
   }
 });
 
+// Endpoint diagnostico rapido para probar conexion con Meta Cloud API
+app.get('/diag/test-meta', async (req, res) => {
+  try {
+    const tel = req.query.tel || '51902539354';
+    const msg = req.query.msg || 'Prueba desde servidor';
+    const r = await util.sendMetaWhatsApp(tel, msg);
+    res.json(r);
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // Auth (login / setup / logout)
 app.use('/', authRouter);
 

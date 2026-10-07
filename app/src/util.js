@@ -104,8 +104,8 @@ function dateToISO(d) {
 
 /** Envio directo via Meta WhatsApp Cloud API (Oficial - 0% ban) */
 async function sendMetaWhatsApp(numero, texto, options = {}) {
-  const token = process.env.META_WA_TOKEN;
-  const phoneId = process.env.META_WA_PHONE_NUMBER_ID;
+  const token = (process.env.META_WA_TOKEN || '').trim().replace(/^["']|["']$/g, '');
+  const phoneId = (process.env.META_WA_PHONE_NUMBER_ID || '').trim().replace(/^["']|["']$/g, '');
   if (!token || !phoneId) {
     return { ok: false, provider: 'meta', error: 'Falta configurar credenciales de Meta Cloud API (META_WA_TOKEN o PHONE_NUMBER_ID)' };
   }
@@ -147,7 +147,34 @@ async function sendMetaWhatsApp(numero, texto, options = {}) {
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const errMsg = data?.error?.message || `Error HTTP ${res.status} en Meta`;
+      console.error('[meta-cloud-api] Error HTTP', res.status, JSON.stringify(data, null, 2));
+      const code = data?.error?.code;
+      const details = data?.error?.error_data?.details;
+      const errMsg = details ? `${data.error.message} - ${details}` : (data?.error?.message || `Error HTTP ${res.status} en Meta`);
+
+      // Si falla por restricción de ventana o permisos de texto libre (131005 / 131047), reintentar automáticamente con plantilla oficial hello_world
+      if ((code === 131005 || code === 131047) && !options.template && options.fallbackTemplate !== false) {
+        console.log(`[meta-cloud-api] Reintentando con plantilla oficial hello_world para ${tel}...`);
+        const retryRes = await fetch(`https://graph.facebook.com/v22.0/${phoneId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: tel,
+            type: 'template',
+            template: { name: 'hello_world', language: { code: 'en_US' } }
+          }),
+          signal: AbortSignal.timeout(10000)
+        });
+        const retryData = await retryRes.json().catch(() => ({}));
+        if (retryRes.ok) {
+          return { ok: true, provider: 'meta', note: 'Enviado como plantilla de prueba oficial', status: retryRes.status, data: retryData };
+        }
+      }
+
       return { ok: false, provider: 'meta', status: res.status, error: errMsg, data };
     }
     return { ok: true, provider: 'meta', status: res.status, data };
