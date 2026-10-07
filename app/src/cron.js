@@ -64,9 +64,10 @@ async function enviarRecordatoriosVencimiento() {
   try {
     console.log('[cron:recordatorios] Buscando socios con vencimiento proximo (hoy o en 3 dias)...');
     const { rows } = await pool.query(`
-      SELECT v.socio_id, v.suscripcion_id, v.nombres, v.apellidos, v.telefono, 
+      SELECT v.socio_id, v.suscripcion_id, v.nombres, v.apellidos, v.telefono, s.dni,
              v.plan_nombre, v.fecha_fin, v.dias_restantes, p.t_3d, p.t_hoy
       FROM v_suscripciones_por_vencer v
+      JOIN socios s ON s.id = v.socio_id
       CROSS JOIN (
         SELECT max(cuerpo) FILTER (WHERE clave = 'recordatorio_3d')  AS t_3d,
                max(cuerpo) FILTER (WHERE clave = 'recordatorio_hoy') AS t_hoy
@@ -92,11 +93,15 @@ async function enviarRecordatoriosVencimiento() {
     console.log(`[cron:recordatorios] Se encontraron ${rows.length} socios para notificar.`);
     let enviados = 0;
 
+    const baseUrl = process.env.APP_URL || 'http://100.117.103.36:8084';
+
     for (const r of rows) {
       const esHoy = Number(r.dias_restantes) === 0;
       const clave = esHoy ? 'recordatorio_hoy' : 'recordatorio_3d';
       const cuerpoTpl = (esHoy ? r.t_hoy : r.t_3d) || 
         'Hola {{nombres}}, tu plan {{plan}} vence el {{fecha_fin}} (quedan {{dias_restantes}} dias). Te esperamos para renovar!';
+
+      const linkRenovacion = r.dni ? `${baseUrl}/membresias?dni=${encodeURIComponent(r.dni)}` : `${baseUrl}/membresias`;
 
       const vars = {
         nombres: (r.nombres || '').trim(),
@@ -105,6 +110,8 @@ async function enviarRecordatoriosVencimiento() {
         fecha_fin: r.fecha_fin ? fecha(r.fecha_fin) : '',
         dias_restantes: String(r.dias_restantes ?? ''),
         monto: '',
+        dni: (r.dni || '').trim(),
+        url_renovacion: linkRenovacion,
       };
 
       const texto = renderPlantilla(cuerpoTpl, vars);

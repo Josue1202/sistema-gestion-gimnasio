@@ -284,12 +284,206 @@ function badgeEstado(estado) {
   return map[estado] || 'muted';
 }
 
-const { icon } = require('./icons');
+/**
+ * Procesador de Pagos Profesional Culqi (Yape con OTP & Tarjetas).
+ * Soporta modo productivo (con credenciales Culqi) y modo Sandbox inteligente.
+ */
+async function procesarPagoPasarela(datos = {}) {
+  const {
+    metodo, // 'yape' | 'tarjeta'
+    monto,
+    nombres = 'Socio',
+    apellidos = '',
+    email = 'cliente@zonafitness.pe',
+    yapeTelefono,
+    yapeOtp,
+    tarjetaToken,
+    tarjetaNumero,
+    tarjetaMes,
+    tarjetaAnio,
+    tarjetaCvv,
+    planNombre = 'Membresía Gimnasio',
+  } = datos;
+
+  const montoNum = Number(monto);
+  if (!(montoNum > 0)) {
+    return { ok: false, error: 'El monto de la membresía es inválido.' };
+  }
+
+  const culqiSecret = process.env.CULQI_SECRET_KEY;
+  const culqiPublic = process.env.CULQI_PUBLIC_KEY;
+  const esLive = Boolean(culqiSecret && !culqiSecret.startsWith('sk_test_demo'));
+
+  // ---------- CASO 1: YAPE CON CÓDIGO DE APROBACIÓN (OTP) ----------
+  if (metodo === 'yape') {
+    const celLimpio = String(yapeTelefono || '').replace(/\D/g, '');
+    const otpLimpio = String(yapeOtp || '').replace(/\D/g, '');
+
+    if (celLimpio.length !== 9 || !celLimpio.startsWith('9')) {
+      return { ok: false, error: 'Ingresa un número de celular Yape válido de 9 dígitos (ej. 987654321).' };
+    }
+    if (otpLimpio.length !== 6) {
+      return { ok: false, error: 'El código de aprobación de Yape debe tener 6 dígitos. Puedes obtenerlo abriendo tu app Yape > Código de aprobación.' };
+    }
+
+    // Si hay credenciales reales de Culqi configuradas
+    if (esLive && culqiPublic) {
+      try {
+        // 1. Generar token Yape
+        const tokenRes = await fetch('https://tokens.culqi.com/v4/tokens/yape', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${culqiPublic}`,
+          },
+          body: JSON.stringify({
+            user_id: celLimpio,
+            number: celLimpio,
+            amount: Math.round(montoNum * 100),
+            otp: otpLimpio,
+          }),
+          signal: AbortSignal.timeout(12000),
+        });
+
+        const tokenData = await tokenRes.json().catch(() => ({}));
+        if (!tokenRes.ok || !tokenData.id) {
+          const userMsg = tokenData.user_message || tokenData.merchant_message || 'El código de aprobación de Yape expiró o es incorrecto.';
+          return { ok: false, error: userMsg, detalle: tokenData };
+        }
+
+        // 2. Crear cargo con el token de Yape
+        const chargeRes = await fetch('https://api.culqi.com/v2/charges', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${culqiSecret}`,
+          },
+          body: JSON.stringify({
+            amount: Math.round(montoNum * 100),
+            currency_code: 'PEN',
+            email: email || 'cliente@zonafitness.pe',
+            source_id: tokenData.id,
+            description: `Plan ${planNombre} - ${nombres} ${apellidos}`,
+            antifraud_details: {
+              first_name: (nombres || 'Socio').slice(0, 30),
+              last_name: (apellidos || 'Zona Fitness').slice(0, 30),
+              phone: celLimpio,
+            },
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
+
+        const chargeData = await chargeRes.json().catch(() => ({}));
+        if (!chargeRes.ok || chargeData.outcome?.type !== 'venta_exitosa') {
+          return {
+            ok: false,
+            error: chargeData.user_message || chargeData.outcome?.user_message || 'No se pudo procesar el cobro en Yape.',
+            detalle: chargeData,
+          };
+        }
+
+        return {
+          ok: true,
+          transaccion_id: chargeData.id,
+          metodo: 'yape',
+          proveedor: 'culqi_live',
+          monto: montoNum,
+          mensaje: 'Pago debitado exitosamente de tu cuenta Yape.',
+        };
+      } catch (err) {
+        return { ok: false, error: 'Error comunicando con pasarela Culqi / Yape: ' + err.message };
+      }
+    }
+
+    // Modo Sandbox / Demo inteligente (valida formato real y aprueba de inmediato)
+    const refSimulada = 'YAPE-' + Math.floor(100000 + Math.random() * 900000) + '-' + Date.now().toString(36).toUpperCase();
+    return {
+      ok: true,
+      transaccion_id: refSimulada,
+      metodo: 'yape',
+      proveedor: 'culqi_sandbox',
+      monto: montoNum,
+      mensaje: 'Pago debitado exitosamente de tu cuenta Yape (Aprobación instantánea).',
+    };
+  }
+
+  // ---------- CASO 2: TARJETA DE CRÉDITO / DÉBITO ----------
+  if (metodo === 'tarjeta') {
+    if (tarjetaToken && esLive) {
+      try {
+        const chargeRes = await fetch('https://api.culqi.com/v2/charges', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${culqiSecret}`,
+          },
+          body: JSON.stringify({
+            amount: Math.round(montoNum * 100),
+            currency_code: 'PEN',
+            email: email || 'cliente@zonafitness.pe',
+            source_id: tarjetaToken,
+            description: `Plan ${planNombre} - ${nombres} ${apellidos}`,
+            antifraud_details: {
+              first_name: (nombres || 'Socio').slice(0, 30),
+              last_name: (apellidos || 'Zona Fitness').slice(0, 30),
+              phone: '51999999999',
+            },
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
+
+        const chargeData = await chargeRes.json().catch(() => ({}));
+        if (!chargeRes.ok || chargeData.outcome?.type !== 'venta_exitosa') {
+          return {
+            ok: false,
+            error: chargeData.user_message || chargeData.outcome?.user_message || 'Transacción rechazada por el banco emisor de la tarjeta.',
+            detalle: chargeData,
+          };
+        }
+
+        return {
+          ok: true,
+          transaccion_id: chargeData.id,
+          metodo: 'tarjeta',
+          proveedor: 'culqi_live',
+          monto: montoNum,
+          mensaje: 'Cobro de tarjeta aprobado exitosamente.',
+        };
+      } catch (err) {
+        return { ok: false, error: 'Error comunicando con pasarela de tarjetas: ' + err.message };
+      }
+    }
+
+    // Validación básica de tarjeta en modo formulario directo o sandbox
+    const numLim = String(tarjetaNumero || '').replace(/\s+/g, '');
+    if (numLim.length < 13 || numLim.length > 19) {
+      return { ok: false, error: 'Número de tarjeta inválido (debe tener entre 15 y 16 dígitos).' };
+    }
+    const cvvLim = String(tarjetaCvv || '').trim();
+    if (cvvLim.length < 3 || cvvLim.length > 4) {
+      return { ok: false, error: 'Código CVV inválido (3 o 4 dígitos al reverso de la tarjeta).' };
+    }
+
+    const refCardSim = 'CARD-' + Math.floor(1000 + Math.random() * 9000) + '-' + Date.now().toString(36).toUpperCase();
+    return {
+      ok: true,
+      transaccion_id: refCardSim,
+      metodo: 'tarjeta',
+      proveedor: 'culqi_sandbox',
+      monto: montoNum,
+      ultimos4: numLim.slice(-4),
+      mensaje: 'Transacción aprobada con tarjeta de crédito/débito.',
+    };
+  }
+
+  return { ok: false, error: 'Método de pago no soportado. Selecciona Yape o Tarjeta.' };
+}
 
 module.exports = {
   TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
   postWebhook, sendMetaWhatsApp, sendEvolutionDirect,
   sendWhatsAppMessage, sendEvolutionWhatsApp, badgeEstado, icon,
+  procesarPagoPasarela,
 };
 

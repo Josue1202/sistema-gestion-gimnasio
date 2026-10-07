@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233ECF8E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 6.5h-1a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2zm11 0h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zM8.5 12h7M2 10v4M22 10v4'/%3E%3C/svg%3E">
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(22, 27, 39, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #3ECF8E;
+      --primary-hover: #34b37b;
+      --primary-glow: rgba(62, 207, 142, 0.25);
+      --yape-purple: #742284;
+      --yape-purple-hover: #61186f;
+      --yape-glow: rgba(116, 34, 132, 0.35);
+      --text: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --accent: #F59E0B;
+      --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(62, 207, 142, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(116, 34, 132, 0.15) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(17, 24, 39, 0.5) 0px, transparent 100%);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navbar */
+    .header {
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 25, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #10B981, #059669);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-secure {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(62, 207, 142, 0.1);
+      border: 1px solid rgba(62, 207, 142, 0.25);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Hero Banner */
+    .hero {
+      text-align: center;
+      padding: 40px 20px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero-pill {
+      display: inline-block;
+      padding: 4px 14px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #FBBF24;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* Container Grid */
+    .main-grid {
+      max-width: 1160px;
+      margin: 20px auto 60px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 32px;
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(62, 207, 142, 0.15);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      border: 1px solid rgba(62, 207, 142, 0.3);
+    }
+    .step-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    /* Input controls */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #D1D5DB;
+      margin-bottom: 8px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .input-control {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 14px 16px 14px 44px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      transition: all 0.2s ease;
+    }
+    .input-control.no-icon {
+      padding-left: 16px;
+    }
+    .input-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .input-row { grid-template-columns: 1fr; }
+    }
+
+    /* Member Status Box */
+    .member-status-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-top: 14px;
+      display: none;
+      font-size: 13px;
+      color: #A7F3D0;
+    }
+    .member-status-box.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Plan Cards Selection */
+    .plans-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .plan-card {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .plan-card:hover {
+      border-color: rgba(62, 207, 142, 0.4);
+      background: rgba(15, 23, 42, 0.8);
+      transform: translateY(-2px);
+    }
+    .plan-card.selected {
+      border-color: var(--primary);
+      background: rgba(62, 207, 142, 0.08);
+      box-shadow: 0 6px 20px var(--primary-glow);
+    }
+    .plan-info-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .plan-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .plan-tag {
+      background: rgba(245, 158, 11, 0.2);
+      color: #FBBF24;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .plan-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .plan-price-right {
+      text-align: right;
+    }
+    .plan-price-num {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .plan-card.selected .plan-price-num {
+      color: var(--primary);
+    }
+    .plan-duration {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Payment Tabs */
+    .payment-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .payment-tab-btn {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .payment-tab-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+      color: #fff;
+    }
+    .payment-tab-btn.active-yape {
+      background: var(--yape-purple);
+      border-color: #9333ea;
+      color: #fff;
+      box-shadow: 0 4px 18px var(--yape-glow);
+    }
+    .payment-tab-btn.active-card {
+      background: rgba(62, 207, 142, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 4px 18px var(--primary-glow);
+    }
+
+    /* Yape Walkthrough Box */
+    .yape-guide-box {
+      background: rgba(116, 34, 132, 0.12);
+      border: 1px solid rgba(116, 34, 132, 0.35);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .yape-guide-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #E9D5FF;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .yape-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12.5px;
+      color: #D8B4FE;
+      line-height: 1.4;
+    }
+    .yape-steps span strong {
+      color: #fff;
+    }
+
+    /* OTP Code Input */
+    .otp-input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .otp-input {
+      font-size: 26px !important;
+      letter-spacing: 0.3em;
+      text-align: center;
+      font-weight: 800;
+      color: #FDE047 !important;
+      background: rgba(0, 0, 0, 0.4) !important;
+      border: 1.5px solid rgba(253, 224, 71, 0.3) !important;
+    }
+    .otp-input:focus {
+      border-color: #FDE047 !important;
+      box-shadow: 0 0 0 3px rgba(253, 224, 71, 0.25) !important;
+    }
+
+    /* Order Summary Sidebar */
+    .summary-card {
+      position: sticky;
+      top: 96px;
+    }
+    .summary-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .summary-row.total-row {
+      border-bottom: none;
+      padding-top: 18px;
+      padding-bottom: 22px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .total-amount {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* Pay Button */
+    .btn-pay {
+      width: 100%;
+      padding: 18px 24px;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .btn-pay.btn-yape {
+      background: linear-gradient(135deg, #742284, #8E24AA);
+      box-shadow: 0 8px 24px var(--yape-glow);
+    }
+    .btn-pay.btn-yape:hover {
+      background: linear-gradient(135deg, #61186f, #7b1fa2);
+      transform: translateY(-2px);
+    }
+    .btn-pay.btn-card {
+      background: linear-gradient(135deg, #10B981, #059669);
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+    .btn-pay.btn-card:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-2px);
+    }
+    .btn-pay:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Benefits List */
+    .benefits-list {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #D1D5DB;
+    }
+    .benefit-check {
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Toast / Modal */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .loading-overlay.show {
+      display: flex;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(62, 207, 142, 0.15);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #FCA5A5;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-top: 14px;
+      display: none;
+    }
+    .error-msg.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="/" class="brand">
+      <div class="brand-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6.5 6.5h-1a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2zm11 0h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zM8.5 12h7M2 10v4M22 10v4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title"><%= gymName %></div>
+        <div class="brand-subtitle">Portal Oficial de Membresías</div>
+      </div>
+    </a>
+    <div class="badge-secure">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      Pago Seguro 256-bit SSL
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-pill">⚡ Aprobación Instantánea · Sin Colas</div>
+    <h1>Elige tu Membresía y Entrena Hoy</h1>
+    <p>Pago 100% digital con Yape Empresarial o Tarjeta. Tu plan se activa de inmediato y recibes tu recibo oficial por WhatsApp.</p>
+  </section>
+
+  <!-- Main Grid -->
+  <main class="main-grid">
+    <!-- Left Column: Steps -->
+    <div>
+      <!-- Step 1: Identificación -->
+      <div class="card">
+        <div class="step-header">
+          <div class="step-number">1</div>
+          <div class="step-title">Tus Datos de Acceso</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="dni">Número de DNI / Documento</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <input type="text" id="dni" class="input-control" placeholder="Ej. 72345678" maxlength="12" value="<%= dniParam || '' %>" required>
+          </div>
+          <div id="memberStatus" class="member-status-box"></div>
+        </div>
+
+        <div class="input-row">
+          <div class="form-group">
+            <label class="form-label" for="nombres">Nombres</label>
+            <div class="input-wrapper">
+              <input type="text" id="nombres" class="input-control no-icon" placeholder="Tus nombres" value="<%= socioPre ? socioPre.nombres : '' %>" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="apellidos">Apellidos</label>
+            <div class="input-wrapper">
+              <input type="text" id="apellidos" class="input-control no-icon" placeholder="Tus apellidos" value="<%= socioPre ? socioPre.apellidos : '' %>">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="form-group">
+            <label class="form-label" for="telefono">WhatsApp / Celular (Recibirás tu pase aquí)</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              <input type="tel" id="telefono" class="input-control" placeholder="Ej. 987654321" maxlength="11" value="<%= socioPre ? (socioPre.telefono || '').replace(/^51/, '') : '' %>" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Correo Electrónico (Opcional)</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <input type="email" id="email" class="input-control" placeholder="tu@correo.com" value="<%= socioPre ? socioPre.email : '' %>">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Selección de Plan -->
+      <div class="card">
+        <div class="step-header">
+          <div class="step-number">2</div>
+          <div class="step-title">Selecciona tu Plan</div>
+        </div>
+
+        <div class="plans-list" id="plansList">
+          <% planes.forEach(function(p, idx) { 
+               const isSelected = planParam ? (p.id === planParam || p.nombre.toLowerCase().includes(planParam.toLowerCase())) : (idx === 0);
+               const tag = p.duracion_dias >= 90 ? 'Mejor Valor' : (p.duracion_dias >= 30 ? 'Más Popular' : null);
+          %>
+            <div class="plan-card <%= isSelected ? 'selected' : '' %>" 
+                 data-id="<%= p.id %>" 
+                 data-nombre="<%= p.nombre %>" 
+                 data-precio="<%= Number(p.precio).toFixed(2) %>"
+                 data-dias="<%= p.duracion_dias %>">
+              <div class="plan-info-left">
+                <div class="plan-title">
+                  <%= p.nombre %>
+                  <% if (tag) { %><span class="plan-tag"><%= tag %></span><% } %>
+                </div>
+                <div class="plan-desc"><%= p.descripcion || (p.duracion_dias + ' días de acceso ilimitado a todas las instalaciones') %></div>
+              </div>
+              <div class="plan-price-right">
+                <div class="plan-price-num">S/ <%= Number(p.precio).toFixed(2) %></div>
+                <div class="plan-duration"><%= p.duracion_dias %> días</div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Step 3: Método de Pago Profesional -->
+      <div class="card">
+        <div class="step-header">
+          <div class="step-number">3</div>
+          <div class="step-title">Método de Pago Profesional</div>
+        </div>
+
+        <div class="payment-tabs">
+          <button type="button" class="payment-tab-btn active-yape" id="tabYape" onclick="selectPaymentTab('yape')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+            </svg>
+            Yape Directo (OTP)
+          </button>
+          <button type="button" class="payment-tab-btn" id="tabCard" onclick="selectPaymentTab('tarjeta')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+              <line x1="2" y1="10" x2="22" y2="10"></line>
+            </svg>
+            Tarjeta Crédito / Débito
+          </button>
+        </div>
+
+        <!-- Yape Box -->
+        <div id="yapeSection">
+          <div class="yape-guide-box">
+            <div class="yape-guide-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              ¿Cómo pagar con Código de Aprobación Yape?
+            </div>
+            <div class="yape-steps">
+              <span><strong>1.</strong> Abre la app de <strong>Yape</strong> en tu teléfono.</span>
+              <span><strong>2.</strong> Toca en el menú superior <strong>"Código de aprobación"</strong>.</span>
+              <span><strong>3.</strong> Copia el código de <strong>6 dígitos</strong> y escríbelo aquí abajo. El cargo se descuenta directamente de tu saldo Yape en 2 segundos.</span>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="form-group">
+              <label class="form-label" for="yapePhone">Celular con Yape</label>
+              <div class="input-wrapper">
+                <input type="tel" id="yapePhone" class="input-control no-icon" placeholder="987654321" maxlength="9">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="yapeOtp">Código de Aprobación (6 dígitos)</label>
+              <div class="input-wrapper">
+                <input type="text" id="yapeOtp" class="input-control otp-input" placeholder="······" maxlength="6" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Box -->
+        <div id="cardSection" style="display:none;">
+          <div class="form-group">
+            <label class="form-label" for="cardNum">Número de Tarjeta</label>
+            <div class="input-wrapper">
+              <input type="text" id="cardNum" class="input-control no-icon" placeholder="4000 1234 5678 9010" maxlength="19">
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="form-group">
+              <label class="form-label" for="cardExp">Vencimiento (MM/AA)</label>
+              <div class="input-wrapper">
+                <input type="text" id="cardExp" class="input-control no-icon" placeholder="12/28" maxlength="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cardCvv">CVV (3 dígitos)</label>
+              <div class="input-wrapper">
+                <input type="password" id="cardCvv" class="input-control no-icon" placeholder="123" maxlength="4">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="paymentError" class="error-msg"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Summary & Checkout Button -->
+    <div>
+      <div class="card summary-card">
+        <div class="summary-title">
+          <span>Resumen de Compra</span>
+          <span style="font-size:12px; color:var(--primary); font-weight:600;">Activación Hoy</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Plan seleccionado:</span>
+          <strong id="summaryPlanName" style="color:#fff;">-</strong>
+        </div>
+        <div class="summary-row">
+          <span>Duración:</span>
+          <span id="summaryPlanDays">-</span>
+        </div>
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span id="summarySubtotal">S/ 0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>IGV (18% incluido):</span>
+          <span id="summaryIgv">S/ 0.00</span>
+        </div>
+        <div class="summary-row total-row">
+          <span>Total a pagar:</span>
+          <span class="total-amount" id="summaryTotal">S/ 0.00</span>
+        </div>
+
+        <button type="button" class="btn-pay btn-yape" id="btnPay" onclick="procesarPago()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span id="btnPayText">Pagar con Yape</span>
+        </button>
+
+        <div class="benefits-list">
+          <div class="benefit-item">
+            <span class="benefit-check">✓</span>
+            Acceso libre a pesas, máquinas y área cardio
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-check">✓</span>
+            Pase digital con código QR para el torniquete
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-check">✓</span>
+            Comprobante y recibo oficial enviado a tu WhatsApp
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-check">✓</span>
+            Vestuarios, duchas y casilleros incluidos
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingModal">
+    <div class="spinner"></div>
+    <div style="font-size:18px; font-weight:700; color:#fff;" id="loadingText">Procesando pago seguro...</div>
+    <div style="font-size:13px; color:var(--text-muted);">Por favor espera unos segundos sin cerrar la ventana.</div>
+  </div>
+
+  <script>
+    let selectedPlan = null;
+    let selectedMethod = 'yape';
+
+    // Inicializar planes
+    document.querySelectorAll('.plan-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        updatePlan(card);
+      });
+      if (card.classList.contains('selected')) {
+        updatePlan(card);
+      }
+    });
+
+    function updatePlan(card) {
+      selectedPlan = {
+        id: card.dataset.id,
+        nombre: card.dataset.nombre,
+        precio: parseFloat(card.dataset.precio),
+        dias: card.dataset.dias
+      };
+      const total = selectedPlan.precio;
+      const subtotal = total / 1.18;
+      const igv = total - subtotal;
+
+      document.getElementById('summaryPlanName').textContent = selectedPlan.nombre;
+      document.getElementById('summaryPlanDays').textContent = selectedPlan.dias + ' días';
+      document.getElementById('summarySubtotal').textContent = 'S/ ' + subtotal.toFixed(2);
+      document.getElementById('summaryIgv').textContent = 'S/ ' + igv.toFixed(2);
+      document.getElementById('summaryTotal').textContent = 'S/ ' + total.toFixed(2);
+
+      updatePayButtonText();
+    }
+
+    function selectPaymentTab(method) {
+      selectedMethod = method;
+      const tabY = document.getElementById('tabYape');
+      const tabC = document.getElementById('tabCard');
+      const secY = document.getElementById('yapeSection');
+      const secC = document.getElementById('cardSection');
+      const btn = document.getElementById('btnPay');
+
+      if (method === 'yape') {
+        tabY.className = 'payment-tab-btn active-yape';
+        tabC.className = 'payment-tab-btn';
+        secY.style.display = 'block';
+        secC.style.display = 'none';
+        btn.className = 'btn-pay btn-yape';
+      } else {
+        tabY.className = 'payment-tab-btn';
+        tabC.className = 'payment-tab-btn active-card';
+        secY.style.display = 'none';
+        secC.style.display = 'block';
+        btn.className = 'btn-pay btn-card';
+      }
+      updatePayButtonText();
+    }
+
+    function updatePayButtonText() {
+      const priceText = selectedPlan ? 'S/ ' + selectedPlan.precio.toFixed(2) : '';
+      const textSpan = document.getElementById('btnPayText');
+      if (selectedMethod === 'yape') {
+        textSpan.textContent = 'Pagar ' + priceText + ' con Yape';
+      } else {
+        textSpan.textContent = 'Pagar ' + priceText + ' con Tarjeta';
+      }
+    }
+
+    // Auto-lookup DNI en tiempo real
+    const dniInput = document.getElementById('dni');
+    const telInput = document.getElementById('telefono');
+    const yapePhoneInput = document.getElementById('yapePhone');
+    const statusBox = document.getElementById('memberStatus');
+
+    telInput.addEventListener('input', () => {
+      if (!yapePhoneInput.value || yapePhoneInput.value.length < 9) {
+        yapePhoneInput.value = telInput.value;
+      }
+    });
+
+    let dniDebounce = null;
+    dniInput.addEventListener('input', (e) => {
+      clearTimeout(dniDebounce);
+      const val = e.target.value.trim();
+      if (val.length >= 8) {
+        dniDebounce = setTimeout(() => buscarSocio(val), 400);
+      } else {
+        statusBox.className = 'member-status-box';
+        statusBox.innerHTML = '';
+      }
+    });
+
+    async function buscarSocio(dni) {
+      try {
+        const res = await fetch('/api/checkout/socio/' + encodeURIComponent(dni));
+        const data = await res.json();
+        if (data.ok && data.encontrado) {
+          const s = data.socio;
+          if (s.nombres) document.getElementById('nombres').value = s.nombres;
+          if (s.apellidos) document.getElementById('apellidos').value = s.apellidos;
+          if (s.telefono) {
+            const rawTel = s.telefono.replace(/^51/, '');
+            document.getElementById('telefono').value = rawTel;
+            if (!yapePhoneInput.value) yapePhoneInput.value = rawTel;
+          }
+          if (s.email) document.getElementById('email').value = s.email;
+
+          let estadoTxt = '';
+          if (s.estado_membresia === 'activo' && s.fecha_fin) {
+            estadoTxt = `¡Hola de nuevo, ${s.nombres}! Tienes membresía activa hasta el <strong>${s.fecha_fin}</strong>. Al comprar tu nuevo plan hoy, se te <strong>suman los días</strong> automáticamente.`;
+          } else {
+            estadoTxt = `¡Bienvenido de vuelta, ${s.nombres}! Tus datos están listos para la activación.`;
+          }
+          statusBox.innerHTML = estadoTxt;
+          statusBox.className = 'member-status-box show';
+        } else {
+          statusBox.innerHTML = `Nuevo socio detectado. Tu pase digital se generará de inmediato con este registro.`;
+          statusBox.className = 'member-status-box show';
+        }
+      } catch (e) {
+        console.warn('Error buscando DNI:', e);
+      }
+    }
+
+    // Si viene pre-cargado DNI
+    if (dniInput.value && dniInput.value.length >= 8) {
+      buscarSocio(dniInput.value);
+    }
+
+    // Enviar pago
+    async function procesarPago() {
+      const errBox = document.getElementById('paymentError');
+      errBox.className = 'error-msg';
+      errBox.textContent = '';
+
+      const dni = dniInput.value.trim();
+      const nombres = document.getElementById('nombres').value.trim();
+      const apellidos = document.getElementById('apellidos').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!dni || dni.length < 6) {
+        showError('Por favor ingresa un número de DNI válido.');
+        dniInput.focus();
+        return;
+      }
+      if (!nombres) {
+        showError('Por favor ingresa tus nombres completos.');
+        document.getElementById('nombres').focus();
+        return;
+      }
+      if (!telefono || telefono.length < 9) {
+        showError('Por favor ingresa tu número de WhatsApp para enviarte el comprobante y pase digital.');
+        document.getElementById('telefono').focus();
+        return;
+      }
+      if (!selectedPlan) {
+        showError('Por favor selecciona un plan de entrenamiento.');
+        return;
+      }
+
+      const payload = {
+        dni, nombres, apellidos, telefono, email,
+        plan_id: selectedPlan.id,
+        metodo: selectedMethod
+      };
+
+      if (selectedMethod === 'yape') {
+        const yTel = yapePhoneInput.value.trim() || telefono;
+        const yOtp = document.getElementById('yapeOtp').value.trim();
+
+        if (!yTel || yTel.length !== 9) {
+          showError('Ingresa un número de celular Yape válido de 9 dígitos.');
+          yapePhoneInput.focus();
+          return;
+        }
+        if (!yOtp || yOtp.length !== 6) {
+          showError('Ingresa el Código de Aprobación de 6 dígitos de tu app Yape.');
+          document.getElementById('yapeOtp').focus();
+          return;
+        }
+
+        payload.yape_telefono = yTel;
+        payload.yape_otp = yOtp;
+      } else {
+        const cNum = document.getElementById('cardNum').value.replace(/\s+/g, '');
+        const cExp = document.getElementById('cardExp').value.trim();
+        const cCvv = document.getElementById('cardCvv').value.trim();
+
+        if (cNum.length < 13) {
+          showError('Ingresa un número de tarjeta válido.');
+          document.getElementById('cardNum').focus();
+          return;
+        }
+        if (!cExp.includes('/')) {
+          showError('Ingresa la fecha de vencimiento de la tarjeta (MM/AA).');
+          document.getElementById('cardExp').focus();
+          return;
+        }
+        if (cCvv.length < 3) {
+          showError('Ingresa el código CVV de seguridad de la tarjeta.');
+          document.getElementById('cardCvv').focus();
+          return;
+        }
+
+        const [mes, anio] = cExp.split('/');
+        payload.tarjeta_numero = cNum;
+        payload.tarjeta_mes = mes;
+        payload.tarjeta_anio = anio;
+        payload.tarjeta_cvv = cCvv;
+      }
+
+      const modal = document.getElementById('loadingModal');
+      const btn = document.getElementById('btnPay');
+      modal.className = 'loading-overlay show';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/checkout/procesar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          document.getElementById('loadingText').textContent = '¡Pago Aprobado! Redirigiendo a tu pase digital...';
+          setTimeout(() => {
+            window.location.href = data.redirect_url;
+          }, 800);
+        } else {
+          modal.className = 'loading-overlay';
+          btn.disabled = false;
+          showError(data.error || 'No se pudo procesar la transacción. Verifica tus datos.');
+        }
+      } catch (err) {
+        modal.className = 'loading-overlay';
+        btn.disabled = false;
+        showError('Error de conexión con el servidor: ' + err.message);
+      }
+    }
+
+    function showError(msg) {
+      const errBox = document.getElementById('paymentError');
+      errBox.textContent = msg;
+      errBox.className = 'error-msg show';
+      errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+</body>
+</html>

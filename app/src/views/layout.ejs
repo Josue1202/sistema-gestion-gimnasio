@@ -71,6 +71,14 @@
             active: currentP.startsWith('/planes')
           },
           {
+            url: '/membresias',
+            label: 'Portal Membresías Online',
+            desc: 'Pasarela de venta online con Yape OTP y Tarjeta',
+            icon: 'ticket',
+            target: '_blank',
+            active: currentP.startsWith('/membresias')
+          },
+          {
             url: '/reportes',
             label: 'Reportes & Métricas',
             desc: 'Ingresos mensuales, medios de pago y retención',
@@ -141,7 +149,7 @@
               </button>
               <div class="nav-dropdown-menu">
                 <% g.items.forEach(function(it){ %>
-                  <a href="<%= it.url %>" class="nav-dropdown-item <%= it.active ? 'active' : '' %>">
+                  <a href="<%= it.url %>" class="nav-dropdown-item <%= it.active ? 'active' : '' %>" <%- it.target ? ('target="' + it.target + '"') : '' %>>
                     <div class="nav-dropdown-icon">
                       <%- u.icon(it.icon, 16) %>
                     </div>

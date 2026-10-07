@@ -129,6 +129,9 @@ app.get('/diag/test-meta', async (req, res) => {
   }
 });
 
+// Portal publico de Membresias Online & Pasarela de Pagos (Yape OTP / Tarjeta)
+app.use('/', require('./routes/checkout'));
+
 // Auth (login / setup / logout)
 app.use('/', authRouter);
 
