@@ -1,54 +1,56 @@
-<div class="toolbar">
-  <div>
-    <h1 class="mb0">Historial de Cajas Anteriores</h1>
-    <p class="muted" style="margin-top:4px;">Registro de cierres de caja, ingresos, egresos y control de diferencias de efectivo.</p>
+<div class="page-container-lg">
+  <div class="toolbar">
+    <div>
+      <h1 class="mb0">Historial de Cajas Anteriores</h1>
+      <p class="muted" style="margin-top:4px;">Registro de cierres de caja, ingresos, egresos y control de diferencias de efectivo.</p>
+    </div>
+    <a class="btn" href="/caja" style="display:inline-flex; align-items:center; gap:6px;">
+      Volver a Caja
+    </a>
   </div>
-  <a class="btn" href="/caja" style="display:inline-flex; align-items:center; gap:6px;">
-    Volver a Caja
-  </a>
-</div>
 
-<div class="card card-lg">
-  <% if (!cajas.length) { %>
-    <p class="muted mb0" style="padding:20px; text-align:center;">No hay turnos de caja cerrados registrados.</p>
-  <% } else { %>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th style="width:130px;">Apertura</th>
-          <th style="width:130px;">Cierre</th>
-          <th class="num" style="width:95px;">Apertura S/</th>
-          <th class="num" style="width:95px;">Ing. Efectivo</th>
-          <th class="num" style="width:85px;">Egresos</th>
-          <th class="num" style="width:95px;">Esperado</th>
-          <th class="num" style="width:95px;">Contado</th>
-          <th class="num" style="width:100px;">Diferencia</th>
-        </tr>
-      </thead>
-      <tbody>
-      <% cajas.forEach(function(c){ var dif = Number(c.diferencia || 0); %>
-        <tr>
-          <td class="muted" style="font-size:12px;"><%= u.fechaHora(c.fecha_apertura) %></td>
-          <td class="muted" style="font-size:12px;"><%= u.fechaHora(c.fecha_cierre) %></td>
-          <td class="num"><%= u.soles(c.monto_apertura) %></td>
-          <td class="num" style="color:var(--primary); font-weight:600;"><%= u.soles(c.ingresos_efectivo) %></td>
-          <td class="num" style="color:var(--danger-ink);"><%= u.soles(c.egresos_total) %></td>
-          <td class="num"><%= u.soles(c.efectivo_esperado) %></td>
-          <td class="num" style="font-weight:700;"><%= u.soles(c.monto_cierre_real) %></td>
-          <td class="num">
-            <% if (dif === 0) { %>
-              <span class="badge ok">Exacto (0.00)</span>
-            <% } else if (dif > 0) { %>
-              <span class="badge warn">+<%= u.soles(dif) %></span>
-            <% } else { %>
-              <span class="badge danger"><%= u.soles(dif) %></span>
-            <% } %>
-          </td>
-        </tr>
-      <% }); %>
-      </tbody>
-    </table>
+  <div class="card">
+    <% if (!cajas.length) { %>
+      <p class="muted mb0" style="padding:20px; text-align:center;">No hay turnos de caja cerrados registrados.</p>
+    <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:130px;">Apertura</th>
+            <th style="width:130px;">Cierre</th>
+            <th class="num" style="width:95px;">Apertura S/</th>
+            <th class="num" style="width:95px;">Ing. Efectivo</th>
+            <th class="num" style="width:85px;">Egresos</th>
+            <th class="num" style="width:95px;">Esperado</th>
+            <th class="num" style="width:95px;">Contado</th>
+            <th class="num" style="width:100px;">Diferencia</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% cajas.forEach(function(c){ var dif = Number(c.diferencia || 0); %>
+          <tr>
+            <td class="muted" style="font-size:12px;"><%= u.fechaHora(c.fecha_apertura) %></td>
+            <td class="muted" style="font-size:12px;"><%= u.fechaHora(c.fecha_cierre) %></td>
+            <td class="num"><%= u.soles(c.monto_apertura) %></td>
+            <td class="num" style="color:var(--primary); font-weight:600;"><%= u.soles(c.ingresos_efectivo) %></td>
+            <td class="num" style="color:var(--danger-ink);"><%= u.soles(c.egresos_total) %></td>
+            <td class="num"><%= u.soles(c.efectivo_esperado) %></td>
+            <td class="num" style="font-weight:700;"><%= u.soles(c.monto_cierre_real) %></td>
+            <td class="num">
+              <% if (dif === 0) { %>
+                <span class="badge ok">Exacto (0.00)</span>
+              <% } else if (dif > 0) { %>
+                <span class="badge warn">+<%= u.soles(dif) %></span>
+              <% } else { %>
+                <span class="badge danger"><%= u.soles(dif) %></span>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
   </div>
-  <% } %>
 </div>

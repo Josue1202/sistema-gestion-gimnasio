@@ -1622,19 +1622,46 @@ input[readonly], textarea[readonly] {
 }
 
 /* ============================================================
-   CONTENCIÓN DE ANCHO Y TABLAS PROPORCIONADAS
+   CONTENCIÓN DE ANCHO Y TABLAS CENTRADAS ARMONIOSAS
    ============================================================ */
+
+.page-container-narrow,
+.container-narrow {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-container-md,
+.container-md {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-container-lg,
+.container-lg {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .card-narrow {
   max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .card-md {
   max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .card-lg {
   max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Grid de Productos & Ventas: Lado a lado en desktop, apilado en móvil */
@@ -1650,5 +1677,6 @@ input[readonly], textarea[readonly] {
     grid-template-columns: 1fr;
   }
 }
+
 
 
