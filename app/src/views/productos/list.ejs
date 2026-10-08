@@ -1,73 +1,143 @@
 <div class="toolbar">
-  <h1 class="mb0">Productos</h1>
+  <div>
+    <h1 class="mb0">Productos y Mostrador</h1>
+    <p class="muted" style="margin-top:4px;">Gestión de inventario de bebidas, suplementos y venta rápida.</p>
+  </div>
   <button class="btn primary" type="button" onclick="abrirModalProductoNuevo();" style="display:inline-flex; align-items:center; gap:6px;">
     <%- u.icon('plus', 15) %> Nuevo producto
   </button>
 </div>
 
-<div class="card">
-  <div class="table-wrap"><table>
-    <thead><tr><th>Producto</th><th class="num">Precio</th><th class="num">Stock</th><th>Vender</th><th></th></tr></thead>
-    <tbody>
-    <% productos.forEach(function(p){ %>
-      <tr<%= p.activo ? '' : ' class="muted"' %>>
-        <td><strong><%= p.nombre %></strong></td>
-        <td class="num"><%= u.soles(p.precio) %></td>
-        <td class="num"><%= p.stock %></td>
-        <td>
-          <% if (p.activo) { %>
-          <form method="post" action="/productos/<%= p.id %>/vender" class="search" style="margin:0;">
-            <input type="number" name="cantidad" value="1" min="1" style="width:64px;">
-            <select name="metodo_pago" style="width:auto;">
-              <option value="efectivo">Efectivo</option>
-              <option value="yape">Yape</option>
-              <option value="plin">Plin</option>
-              <option value="tarjeta">Tarjeta</option>
-            </select>
-            <button class="btn sm primary" type="submit">Vender</button>
-          </form>
-          <% } %>
-        </td>
-        <td class="actions">
-          <button class="btn sm" type="button"
-                  data-id="<%= p.id %>"
-                  data-nombre="<%= p.nombre %>"
-                  data-precio="<%= p.precio %>"
-                  data-costo="<%= p.costo || '' %>"
-                  data-stock="<%= p.stock %>"
-                  onclick="abrirModalProductoEditar(this);"
-                  style="display:inline-flex; align-items:center; gap:4px;">
-            <%- u.icon('edit', 13) %> Editar
-          </button>
-          <form method="post" action="/productos/<%= p.id %>/toggle" style="margin:0;">
-            <button class="btn sm" type="submit"><%= p.activo ? 'Desactivar' : 'Activar' %></button>
-          </form>
-        </td>
-      </tr>
-    <% }); %>
-    <% if (!productos.length) { %><tr><td colspan="5" class="muted">Sin productos.</td></tr><% } %>
-    </tbody>
-  </table></div>
-</div>
+<div class="prod-split-grid">
+  <!-- Columna 1: Catálogo y Venta Rápida -->
+  <div>
+    <div class="card" style="margin-bottom:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="margin:0; font-size:15px; display:flex; align-items:center; gap:6px;">
+          <%- u.icon('productos', 15) %> Catálogo de Productos
+        </h2>
+        <span class="muted" style="font-size:12px;"><%= productos.length %> registrados</span>
+      </div>
 
-<h2>Ultimas ventas</h2>
-<div class="card">
-  <% if (!ventas.length) { %><p class="muted mb0">Sin ventas.</p><% } else { %>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Fecha</th><th>Producto</th><th class="num">Cant.</th><th class="num">Subtotal</th><th>Metodo</th></tr></thead>
-    <tbody>
-    <% ventas.forEach(function(v){ %>
-      <tr>
-        <td><%= u.fechaHora(v.creado_en) %></td>
-        <td><%= v.nombre %></td>
-        <td class="num"><%= v.cantidad %></td>
-        <td class="num"><%= u.soles(v.subtotal) %></td>
-        <td><%= v.metodo_pago %></td>
-      </tr>
-    <% }); %>
-    </tbody>
-  </table></div>
-  <% } %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:130px;">Producto</th>
+              <th class="num" style="width:80px;">Precio</th>
+              <th class="num" style="width:65px;">Stock</th>
+              <th style="width:205px;">Venta Rápida</th>
+              <th style="width:125px; text-align:right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% productos.forEach(function(p){ %>
+            <tr<%= p.activo ? '' : ' class="muted"' %>>
+              <td>
+                <strong style="color:var(--text-bright);"><%= p.nombre %></strong>
+                <% if (p.costo) { %>
+                  <div class="muted" style="font-size:11px;">Costo: <%= u.soles(p.costo) %></div>
+                <% } %>
+              </td>
+              <td class="num" style="font-weight:600;"><%= u.soles(p.precio) %></td>
+              <td class="num">
+                <% if (p.stock <= 0) { %>
+                  <span class="badge danger" style="padding:1px 5px; font-size:10px;">0</span>
+                <% } else if (p.stock <= 3) { %>
+                  <span class="badge warn" style="padding:1px 5px; font-size:10px;"><%= p.stock %></span>
+                <% } else { %>
+                  <span style="font-weight:600;"><%= p.stock %></span>
+                <% } %>
+              </td>
+              <td>
+                <% if (p.activo && p.stock > 0) { %>
+                <form method="post" action="/productos/<%= p.id %>/vender" style="display:flex; align-items:center; gap:4px; margin:0;">
+                  <input type="number" name="cantidad" value="1" min="1" max="<%= p.stock %>" style="width:44px; height:28px; padding:0 3px; text-align:center; font-size:12px;" title="Cantidad a vender">
+                  <select name="metodo_pago" style="width:80px; height:28px; padding:0 4px; font-size:11.5px;">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="yape">Yape</option>
+                    <option value="plin">Plin</option>
+                    <option value="tarjeta">Tarjeta</option>
+                  </select>
+                  <button class="btn sm primary" type="submit" style="height:28px; padding:0 8px; font-size:11.5px; font-weight:600;">Vender</button>
+                </form>
+                <% } else if (p.activo && p.stock <= 0) { %>
+                  <span class="badge danger" style="font-size:11px;">Agotado</span>
+                <% } else { %>
+                  <span class="muted" style="font-size:12px;">Inactivo</span>
+                <% } %>
+              </td>
+              <td class="actions">
+                <div style="display:flex; align-items:center; justify-content:flex-end; gap:4px;">
+                  <button class="btn sm" type="button"
+                          data-id="<%= p.id %>"
+                          data-nombre="<%= p.nombre %>"
+                          data-precio="<%= p.precio %>"
+                          data-costo="<%= p.costo || '' %>"
+                          data-stock="<%= p.stock %>"
+                          onclick="abrirModalProductoEditar(this);"
+                          style="height:28px; padding:0 7px; font-size:11.5px; display:inline-flex; align-items:center; gap:3px;"
+                          title="Editar">
+                    <%- u.icon('edit', 12) %> Editar
+                  </button>
+                  <form method="post" action="/productos/<%= p.id %>/toggle" style="margin:0;">
+                    <button class="btn sm" type="submit" style="height:28px; padding:0 7px; font-size:11.5px;" title="<%= p.activo ? 'Desactivar' : 'Activar' %>">
+                      <%= p.activo ? 'Pausar' : 'Activar' %>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+          <% if (!productos.length) { %>
+            <tr><td colspan="5" class="muted" style="text-align:center; padding:24px 12px;">Sin productos registrados. Haz clic en "Nuevo producto".</td></tr>
+          <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna 2: Últimas Ventas -->
+  <div>
+    <div class="card" style="margin-bottom:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="margin:0; font-size:15px; display:flex; align-items:center; gap:6px;">
+          <%- u.icon('checkCircle', 15) %> Últimas Ventas
+        </h2>
+        <span class="muted" style="font-size:12px;"><%= ventas.length %> registradas</span>
+      </div>
+
+      <% if (!ventas.length) { %>
+        <p class="muted mb0" style="padding:16px 0; text-align:center;">No hay ventas registradas en el turno.</p>
+      <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:105px;">Fecha</th>
+              <th>Producto</th>
+              <th class="num" style="width:45px;">Cant.</th>
+              <th class="num" style="width:75px;">Subtotal</th>
+              <th style="width:75px;">Método</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% ventas.forEach(function(v){ %>
+            <tr>
+              <td class="muted" style="font-size:11.5px;"><%= u.fechaHora(v.creado_en) %></td>
+              <td><strong><%= v.nombre %></strong></td>
+              <td class="num"><%= v.cantidad %></td>
+              <td class="num" style="font-weight:600;"><%= u.soles(v.subtotal) %></td>
+              <td><span class="badge info" style="font-size:10.5px; text-transform:capitalize;"><%= v.metodo_pago %></span></td>
+            </tr>
+          <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Flotante: Crear / Editar Producto -->
@@ -81,11 +151,11 @@
         <%- u.icon('close', 16) %>
       </button>
     </div>
-    <form id="form-producto" method="post" action="/productos" class="stack" style="margin:0;">
+    <form id="form-producto" method="post" action="/productos" class="stack" style="margin:0;" autocomplete="off">
       <div class="modal-body">
         <div style="margin-bottom:12px;">
           <label for="prod-nombre">Nombre del Producto *</label>
-          <input id="prod-nombre" name="nombre" required placeholder="Ej: Agua San Luis 500ml, Batido Proteico...">
+          <input id="prod-nombre" name="nombre" required placeholder="Ej: Agua San Luis 500ml, Batido Proteico..." autocomplete="off">
         </div>
         <div class="grid3">
           <div>
