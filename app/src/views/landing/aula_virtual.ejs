@@ -500,6 +500,217 @@
       background: var(--primary-hover);
     }
 
+    /* ==========================================
+       SIDEBAR TABS DOCENTOS (PANEL LATERAL)
+       ========================================== */
+    .sidebar-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      background: #060910;
+      border-bottom: 1px solid var(--border);
+      padding: 6px 8px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .sidebar-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      padding: 8px 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .sidebar-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .sidebar-tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      border-color: rgba(62, 207, 142, 0.25);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+    }
+    .sidebar-tab-count {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+    }
+    .sidebar-tab-btn.active .sidebar-tab-count {
+      background: rgba(62, 207, 142, 0.18);
+      color: var(--primary);
+    }
+
+    /* Panes */
+    .sidebar-pane {
+      display: none;
+      height: 100%;
+      min-height: 0;
+      flex-direction: column;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .sidebar-pane.active {
+      display: flex;
+    }
+
+    /* Notes Pane */
+    .notes-container {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      padding: 16px 20px;
+      overflow: hidden;
+    }
+    .notes-header-bar {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .notes-textarea {
+      width: 100%;
+      flex-grow: 1;
+      background: #060910;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: #fff;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .notes-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.15);
+    }
+    .notes-footer-bar {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /* Mentorship (Consultas) Pane */
+    .mentorship-container {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      padding: 16px 20px;
+      overflow: hidden;
+    }
+    .mentorship-feed {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .q-card {
+      background: #060910;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .q-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+    .q-user-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .q-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid rgba(62, 207, 142, 0.3);
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .q-question-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .coach-reply-box {
+      background: rgba(62, 207, 142, 0.08);
+      border: 1px solid rgba(62, 207, 142, 0.25);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 4px;
+    }
+    .coach-reply-header {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .coach-reply-body {
+      font-size: 12.5px;
+      color: #EDEDED;
+      line-height: 1.45;
+    }
+    .mentorship-form-box {
+      background: #090D16;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .mentorship-input {
+      width: 100%;
+      background: #060910;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      color: #fff;
+      resize: none;
+      outline: none;
+      transition: border-color 0.15s ease;
+      min-height: 56px;
+      margin-bottom: 8px;
+    }
+    .mentorship-input:focus {
+      border-color: var(--primary);
+    }
+
     /* Responsive */
     @media (max-width: 992px) {
       .classroom-container {
@@ -687,64 +898,196 @@
 
     </main>
 
-    <!-- COLUMNA DERECHA: TEMARIO & LISTA DE VIDEOS SIGUIENTES (DOCENTOS) -->
+    <!-- COLUMNA DERECHA: PANEL LATERAL DOCENTOS (3 PESTAÑAS: TEMARIO, APUNTES, CONSULTAS) -->
     <aside class="playlist-column">
-      <div class="playlist-header">
-        <div class="playlist-header-top">
-          <div class="playlist-title">
-            <%- u.icon('cup', 15) %> Temario del Curso
+      <!-- Pestañas Superiores -->
+      <div class="sidebar-tabs">
+        <button type="button" class="sidebar-tab-btn active" id="tab-btn-temario" onclick="cambiarSidebarTab('temario');">
+          <%- u.icon('book', 13) %> <span>Temario</span>
+          <span class="sidebar-tab-count"><%= lecciones.length %></span>
+        </button>
+        <button type="button" class="sidebar-tab-btn" id="tab-btn-apuntes" onclick="cambiarSidebarTab('apuntes');">
+          <%- u.icon('edit', 13) %> <span>Mis Apuntes</span>
+        </button>
+        <button type="button" class="sidebar-tab-btn" id="tab-btn-consultas" onclick="cambiarSidebarTab('consultas');">
+          <%- u.icon('mensajes', 13) %> <span>Consultas</span>
+          <% if (consultasLeccion && consultasLeccion.length) { %>
+            <span class="sidebar-tab-count" id="badge-consultas-count"><%= consultasLeccion.length %></span>
+          <% } %>
+        </button>
+      </div>
+
+      <!-- PESTAÑA 1: TEMARIO & PLAYLIST -->
+      <div class="sidebar-pane active" id="pane-temario">
+        <div class="playlist-header">
+          <div class="playlist-header-top">
+            <div class="playlist-title">
+              <%- u.icon('cup', 15) %> Temario del Curso
+            </div>
+            <div class="playlist-count" id="sidebar-progress-count">
+              <%= totalCompletadas %> / <%= lecciones.length %> completadas
+            </div>
           </div>
-          <div class="playlist-count" id="sidebar-progress-count">
-            <%= totalCompletadas %> / <%= lecciones.length %> completadas
+          <div class="playlist-progress-bar">
+            <div id="sidebar-progress-fill" class="playlist-progress-fill" style="width: <%= porcentajeCurso %>%;"></div>
           </div>
         </div>
-        <div class="playlist-progress-bar">
-          <div id="sidebar-progress-fill" class="playlist-progress-fill" style="width: <%= porcentajeCurso %>%;"></div>
+
+        <div class="playlist-items-scroll">
+          <% lecciones.forEach(function(lec, idx) { %>
+            <% 
+              const esActiva = (lec.id === leccionActiva.id);
+              const estaCompletada = Boolean(progresoMap[lec.id]);
+              const bloqueada = !lec.es_preview && (!socio || socio.estado_membresia !== 'activo');
+            %>
+            <a 
+              href="/academia/curso/<%= curso.slug %>?leccion=<%= lec.id %>" 
+              class="playlist-item <%= esActiva ? 'active' : '' %> <%= bloqueada ? 'locked' : '' %>"
+              id="item-lec-<%= lec.id %>"
+            >
+              <div class="item-status-icon <%= esActiva ? 'playing' : (estaCompletada ? 'completed' : 'pending') %>">
+                <% if (esActiva) { %>
+                  <%- u.icon('play', 12) %>
+                <% } else if (estaCompletada) { %>
+                  <%- u.icon('check', 13) %>
+                <% } else if (bloqueada) { %>
+                  <%- u.icon('lock', 12) %>
+                <% } else { %>
+                  <%= idx + 1 %>
+                <% } %>
+              </div>
+
+              <div class="item-content">
+                <div class="item-title"><%= lec.titulo %></div>
+                <div class="item-meta">
+                  <span><%= lec.duracion_minutos %> min</span>
+                  <% if (esActiva) { %>
+                    <span class="item-now-playing">· Reproduciendo ahora</span>
+                  <% } else if (lec.es_preview) { %>
+                    <span style="color:#3ECF8E; font-weight:700;">· Gratis</span>
+                  <% } %>
+                </div>
+              </div>
+            </a>
+          <% }); %>
         </div>
       </div>
 
-      <!-- Lista de Lecciones / Playlist -->
-      <div class="playlist-items-scroll">
-        <% lecciones.forEach(function(lec, idx) { %>
-          <% 
-            const esActiva = (lec.id === leccionActiva.id);
-            const estaCompletada = Boolean(progresoMap[lec.id]);
-            const bloqueada = !lec.es_preview && (!socio || socio.estado_membresia !== 'activo');
-          %>
-          <a 
-            href="/academia/curso/<%= curso.slug %>?leccion=<%= lec.id %>" 
-            class="playlist-item <%= esActiva ? 'active' : '' %> <%= bloqueada ? 'locked' : '' %>"
-            id="item-lec-<%= lec.id %>"
-          >
-            <!-- Icono de estado -->
-            <div class="item-status-icon <%= esActiva ? 'playing' : (estaCompletada ? 'completed' : 'pending') %>">
-              <% if (esActiva) { %>
-                <%- u.icon('play', 12) %>
-              <% } else if (estaCompletada) { %>
-                <%- u.icon('check', 13) %>
-              <% } else if (bloqueada) { %>
-                <%- u.icon('lock', 12) %>
-              <% } else { %>
-                <%= idx + 1 %>
-              <% } %>
-            </div>
-
-            <!-- Contenido de la lección en la playlist -->
-            <div class="item-content">
-              <div class="item-title"><%= lec.titulo %></div>
-              <div class="item-meta">
-                <span><%= lec.duracion_minutos %> min</span>
-                <% if (esActiva) { %>
-                  <span class="item-now-playing">
-                    · Reproduciendo ahora
-                  </span>
-                <% } else if (lec.es_preview) { %>
-                  <span style="color:#3ECF8E; font-weight:700;">· Gratis</span>
-                <% } %>
+      <!-- PESTAÑA 2: MIS APUNTES (DOCENTOS NOTES PANEL) -->
+      <div class="sidebar-pane" id="pane-apuntes">
+        <div class="notes-container">
+          <div class="notes-header-bar">
+            <div>
+              <div style="font-size:13.5px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                <%- u.icon('edit', 14) %> Mis Notas de Clase
+              </div>
+              <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">
+                <%= leccionActiva.titulo %>
               </div>
             </div>
-          </a>
-        <% }); %>
+          </div>
+
+          <% if (socio) { %>
+            <textarea 
+              id="notes-textarea" 
+              class="notes-textarea" 
+              placeholder="Escribe tus apuntes personales para esta lección: series recomendadas, peso máximo, macros o dudas para repasar..."
+              oninput="handleNotasInput();"
+            ><%= notaActual || '' %></textarea>
+
+            <div class="notes-footer-bar">
+              <span id="notes-status-msg" style="font-size:11.5px; color:var(--muted); display:inline-flex; align-items:center; gap:4px;">
+                <%- u.icon('check', 12) %> <%= notaActual ? 'Apuntes sincronizados' : 'Listo para escribir' %>
+              </span>
+              <button type="button" class="btn-complete" onclick="guardarApuntes();" id="btn-save-notes" style="font-size:12px; padding:6px 14px;">
+                <%- u.icon('check', 13) %> Guardar
+              </button>
+            </div>
+          <% } else { %>
+            <div style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; background:#060910; border:1px solid var(--border); border-radius:12px;">
+              <div style="width:48px; height:48px; border-radius:14px; background:rgba(62,207,142,0.1); border:1px solid rgba(62,207,142,0.25); color:var(--primary); display:flex; align-items:center; justify-content:center; margin-bottom:14px;">
+                <%- u.icon('lock', 22) %>
+              </div>
+              <h4 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Sincronización de Apuntes</h4>
+              <p style="font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:18px;">
+                Inicia sesión con tu cuenta de alumno para tomar apuntes y acceder a ellos desde cualquier dispositivo.
+              </p>
+              <a href="/academia/login?next=/academia/curso/<%= curso.slug %>?leccion=<%= leccionActiva.id %>" class="btn primary sm">
+                <%- u.icon('user', 13) %> Iniciar Sesión de Alumno
+              </a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 3: CONSULTAS AL COACH (DOCENTOS MENTORSHIP PANEL) -->
+      <div class="sidebar-pane" id="pane-consultas">
+        <div class="mentorship-container">
+          <div style="margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13.5px; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                <%- u.icon('mensajes', 14) %> Consultas al Coach
+              </div>
+              <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">
+                Preguntas de socios y respuestas de entrenadores
+              </div>
+            </div>
+          </div>
+
+          <div class="mentorship-feed" id="mentorship-feed">
+            <% if (consultasLeccion && consultasLeccion.length) { %>
+              <% consultasLeccion.forEach(function(c) { %>
+                <div class="q-card">
+                  <div class="q-top">
+                    <div class="q-user-pill">
+                      <div class="q-avatar">
+                        <%= (c.nombres || 'S')[0].toUpperCase() %>
+                      </div>
+                      <span><%= c.nombres %></span>
+                    </div>
+                    <span><%= u.fecha(c.creado_en) %></span>
+                  </div>
+                  <div class="q-question-text"><%= c.pregunta %></div>
+                  <% if (c.respondida && c.respuesta) { %>
+                    <div class="coach-reply-box">
+                      <div class="coach-reply-header">
+                        <%- u.icon('checkCircle', 12) %> Entrenador Oficial <%= gymName %>
+                      </div>
+                      <div class="coach-reply-body"><%= c.respuesta %></div>
+                    </div>
+                  <% } %>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div id="mentorship-empty" style="text-align:center; padding:30px 16px; color:var(--muted); font-size:12.5px; line-height:1.5;">
+                <%- u.icon('mensajes', 24) %>
+                <div style="margin-top:10px; font-weight:700; color:#fff;">No hay consultas todavía</div>
+                <div>Sé el primero en consultar cualquier detalle o técnica de esta lección.</div>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="mentorship-form-box">
+            <% if (socio) { %>
+              <textarea 
+                id="input-pregunta-coach" 
+                class="mentorship-input" 
+                placeholder="Escribe tu consulta para el entrenador (ej. ¿cómo sustituyo este ejercicio si me duele el hombro?)..."
+              ></textarea>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="button" class="btn primary sm" onclick="enviarConsultaCoach();" id="btn-send-question">
+                  <%- u.icon('send', 13) %> Enviar Consulta
+                </button>
+              </div>
+            <% } else { %>
+              <div style="text-align:center; padding:10px; font-size:12px; color:var(--muted);">
+                <a href="/academia/login?next=/academia/curso/<%= curso.slug %>?leccion=<%= leccionActiva.id %>" style="color:var(--primary); font-weight:700; text-decoration:none;">
+                  Inicia sesión para consultar al coach
+                </a>
+              </div>
+            <% } %>
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -796,6 +1139,146 @@
       .catch(function(err) {
         btn.disabled = false;
         console.error('Error toggling progress:', err);
+      });
+    }
+
+    // ==========================================
+    // CAMBIO DE PESTAÑAS LATERALES (DOCENTOS)
+    // ==========================================
+    function cambiarSidebarTab(tabName) {
+      var tabs = ['temario', 'apuntes', 'consultas'];
+      tabs.forEach(function(t) {
+        var btn = document.getElementById('tab-btn-' + t);
+        var pane = document.getElementById('pane-' + t);
+        if (btn) btn.classList.toggle('active', t === tabName);
+        if (pane) pane.classList.toggle('active', t === tabName);
+      });
+      try {
+        localStorage.setItem('gym_sidebar_active_tab', tabName);
+      } catch (e) {}
+    }
+
+    // Restaurar última pestaña usada si existe
+    try {
+      var ultimaPestana = localStorage.getItem('gym_sidebar_active_tab');
+      if (ultimaPestana && ['temario', 'apuntes', 'consultas'].indexOf(ultimaPestana) !== -1) {
+        cambiarSidebarTab(ultimaPestana);
+      }
+    } catch (e) {}
+
+    // ==========================================
+    // MIS APUNTES CON AUTO-GUARDADO (DOCENTOS)
+    // ==========================================
+    var notasDebounceTimer = null;
+    var leccionActivaId = '<%= leccionActiva.id %>';
+
+    function handleNotasInput() {
+      var statusMsg = document.getElementById('notes-status-msg');
+      if (statusMsg) {
+        statusMsg.innerHTML = '<span style="color:#F59E0B;">● Escribiendo cambios...</span>';
+      }
+      clearTimeout(notasDebounceTimer);
+      notasDebounceTimer = setTimeout(function() {
+        guardarApuntes(true);
+      }, 1500);
+    }
+
+    function guardarApuntes(esAutoGuardado) {
+      var textarea = document.getElementById('notes-textarea');
+      var btn = document.getElementById('btn-save-notes');
+      var statusMsg = document.getElementById('notes-status-msg');
+      if (!textarea) return;
+
+      var contenido = textarea.value;
+      if (btn && !esAutoGuardado) btn.disabled = true;
+      if (statusMsg) statusMsg.innerHTML = '<span style="color:var(--muted);">Guardando apuntes...</span>';
+
+      fetch('/api/academia/leccion/' + leccionActivaId + '/notas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenido: contenido })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (btn) btn.disabled = false;
+        if (data.ok) {
+          var ahora = new Date();
+          var horaStr = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
+          if (statusMsg) {
+            statusMsg.innerHTML = '<span style="color:#3ECF8E;">✓ Sincronizado ' + horaStr + '</span>';
+          }
+        } else {
+          if (statusMsg) statusMsg.innerHTML = '<span style="color:#EF4444;">Error al guardar</span>';
+        }
+      })
+      .catch(function(err) {
+        if (btn) btn.disabled = false;
+        if (statusMsg) statusMsg.innerHTML = '<span style="color:#EF4444;">Error de conexión</span>';
+      });
+    }
+
+    // ==========================================
+    // CONSULTAS AL COACH (DOCENTOS MENTORSHIP)
+    // ==========================================
+    function enviarConsultaCoach() {
+      var input = document.getElementById('input-pregunta-coach');
+      var btn = document.getElementById('btn-send-question');
+      var feed = document.getElementById('mentorship-feed');
+      if (!input || !btn) return;
+
+      var pregunta = input.value.trim();
+      if (!pregunta) {
+        alert('Por favor escribe tu duda o consulta para el entrenador.');
+        return;
+      }
+
+      btn.disabled = true;
+      var oldHtml = btn.innerHTML;
+      btn.innerHTML = 'Enviando...';
+
+      fetch('/api/academia/leccion/' + leccionActivaId + '/consultas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pregunta: pregunta })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+
+        if (data.ok) {
+          input.value = '';
+          var emptyState = document.getElementById('mentorship-empty');
+          if (emptyState) emptyState.remove();
+
+          var card = document.createElement('div');
+          card.className = 'q-card';
+          var inicial = (data.consulta.nombres || 'S')[0].toUpperCase();
+          card.innerHTML = 
+            '<div class="q-top">' +
+              '<div class="q-user-pill">' +
+                '<div class="q-avatar">' + inicial + '</div>' +
+                '<span>' + (data.consulta.nombres || 'Tú') + '</span>' +
+              '</div>' +
+              '<span style="color:#3ECF8E;">Recién enviada</span>' +
+            '</div>' +
+            '<div class="q-question-text">' + data.consulta.pregunta + '</div>';
+
+          feed.insertBefore(card, feed.firstChild);
+
+          // Actualizar contador
+          var badge = document.getElementById('badge-consultas-count');
+          if (badge) {
+            badge.textContent = parseInt(badge.textContent || '0') + 1;
+          }
+        } else {
+          alert(data.error || 'No se pudo enviar la consulta.');
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+        alert('Error de conexión al enviar la consulta.');
       });
     }
   </script>

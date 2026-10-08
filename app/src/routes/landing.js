@@ -514,6 +514,22 @@ router.get('/academia/curso/:slug', async (req, res, next) => {
     const totalCompletadas = lecciones.filter(l => progresoMap[l.id]).length;
     const porcentajeCurso = Math.round((totalCompletadas / lecciones.length) * 100);
 
+    // 7. Apuntes del socio y consultas al entrenador de esta lección (DocentOS)
+    let notaActual = '';
+    if (socio) {
+      const n = await db.one('SELECT contenido FROM lecciones_notas WHERE socio_id = $1 AND leccion_id = $2', [socio.id, leccionActiva.id]);
+      if (n) notaActual = n.contenido;
+    }
+
+    const consultasLeccion = await db.rows(`
+      SELECT c.*, s.nombres, s.apellidos
+      FROM lecciones_consultas c
+      JOIN socios s ON s.id = c.socio_id
+      WHERE c.leccion_id = $1
+      ORDER BY c.creado_en DESC
+      LIMIT 20
+    `, [leccionActiva.id]);
+
     res.render('landing/aula_virtual', {
       layout: false,
       title: curso.titulo + ' · DocentOS Classroom',
@@ -529,6 +545,8 @@ router.get('/academia/curso/:slug', async (req, res, next) => {
       progresoMap,
       totalCompletadas,
       porcentajeCurso,
+      notaActual,
+      consultasLeccion,
       socio
     });
   } catch (err) {
@@ -594,6 +612,230 @@ router.post('/api/academia/leccion/:id/progreso', async (req, res) => {
   } catch (err) {
     console.error('[academia] Error alternando progreso de lección:', err);
     return res.status(500).json({ ok: false, error: 'Error del servidor al registrar progreso.' });
+  }
+});
+
+// ============================================================================
+// APIS DOCENTOS: AUTENTICACIÓN MODAL, APUNTES Y CONSULTAS AL COACH
+// ============================================================================
+
+/**
+ * POST /api/academia/auth/login - Login asíncrono para el AuthModal flotante
+ */
+router.post('/api/academia/auth/login', async (req, res) => {
+  try {
+    const identificador = String(req.body.identificador || '').trim();
+    const password = String(req.body.password || '').trim();
+    const nextUrl = req.body.next || '/academia';
+
+    if (!identificador || !password) {
+      return res.status(400).json({ ok: false, error: 'Ingresa tu correo o DNI y tu contraseña.' });
+    }
+
+    const socio = await db.one(`
+      SELECT s.*, e.estado_membresia, e.plan_nombre, e.dias_restantes
+      FROM socios s
+      LEFT JOIN v_socios_estado e ON e.id = s.id
+      WHERE (LOWER(TRIM(s.email)) = LOWER($1) OR TRIM(s.dni) = $1) AND s.activo = true
+      LIMIT 1
+    `, [identificador]);
+
+    if (!socio) {
+      return res.status(404).json({ ok: false, error: 'No encontramos un socio registrado con ese correo o DNI.' });
+    }
+
+    if (!socio.password_hash) {
+      if (password === socio.dni) {
+        const hash = await bcrypt.hash(password, 10);
+        await db.query('UPDATE socios SET password_hash = $1, ultimo_login = now() WHERE id = $2', [hash, socio.id]);
+      } else {
+        return res.status(400).json({
+          ok: false,
+          error: 'Tu cuenta aún no tiene contraseña. Usa tu DNI como clave provisional para activarla.',
+          requiereActivacion: true,
+          dni: socio.dni
+        });
+      }
+    } else {
+      const coincide = await bcrypt.compare(password, socio.password_hash);
+      if (!coincide) {
+        return res.status(401).json({ ok: false, error: 'Contraseña incorrecta. Si es tu primera vez, actívala con tu DNI.' });
+      }
+    }
+
+    await db.query('UPDATE socios SET ultimo_login = now() WHERE id = $1', [socio.id]);
+
+    req.session.socio = {
+      id: socio.id,
+      nombres: socio.nombres,
+      apellidos: socio.apellidos,
+      dni: socio.dni,
+      email: socio.email,
+      telefono: socio.telefono,
+      foto_url: socio.foto_url,
+      estado_membresia: socio.estado_membresia || 'sin_suscripcion',
+      plan_nombre: socio.plan_nombre || null,
+      dias_restantes: socio.dias_restantes || 0
+    };
+
+    return res.json({
+      ok: true,
+      socio: req.session.socio,
+      redirectUrl: nextUrl,
+      mensaje: `¡Bienvenido de vuelta, ${socio.nombres}!`
+    });
+  } catch (err) {
+    console.error('[academia-api] Error en login modal:', err);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al procesar inicio de sesión.' });
+  }
+});
+
+/**
+ * POST /api/academia/auth/activar - Activación asíncrona con DNI para AuthModal
+ */
+router.post('/api/academia/auth/activar', async (req, res) => {
+  try {
+    const dni = String(req.body.dni || '').trim();
+    const password = String(req.body.password || '').trim();
+    const password_confirm = String(req.body.password_confirm || '').trim();
+    const nextUrl = req.body.next || '/academia';
+
+    if (!dni || !password) {
+      return res.status(400).json({ ok: false, error: 'Ingresa tu DNI registrado y una nueva contraseña.' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ ok: false, error: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+    if (password !== password_confirm) {
+      return res.status(400).json({ ok: false, error: 'Las contraseñas no coinciden.' });
+    }
+
+    const socio = await db.one(`
+      SELECT s.*, e.estado_membresia, e.plan_nombre, e.dias_restantes
+      FROM socios s
+      LEFT JOIN v_socios_estado e ON e.id = s.id
+      WHERE TRIM(s.dni) = $1 AND s.activo = true
+      LIMIT 1
+    `, [dni]);
+
+    if (!socio) {
+      return res.status(404).json({ ok: false, error: 'El DNI ' + dni + ' no está registrado como socio.' });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    await db.query('UPDATE socios SET password_hash = $1, ultimo_login = now() WHERE id = $2', [hash, socio.id]);
+
+    req.session.socio = {
+      id: socio.id,
+      nombres: socio.nombres,
+      apellidos: socio.apellidos,
+      dni: socio.dni,
+      email: socio.email,
+      telefono: socio.telefono,
+      foto_url: socio.foto_url,
+      estado_membresia: socio.estado_membresia || 'sin_suscripcion',
+      plan_nombre: socio.plan_nombre || null,
+      dias_restantes: socio.dias_restantes || 0
+    };
+
+    return res.json({
+      ok: true,
+      socio: req.session.socio,
+      redirectUrl: nextUrl,
+      mensaje: `¡Cuenta activada con éxito! Bienvenido ${socio.nombres}.`
+    });
+  } catch (err) {
+    console.error('[academia-api] Error activando en modal:', err);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al activar cuenta.' });
+  }
+});
+
+/**
+ * GET /api/academia/leccion/:id/notas - Obtener apuntes del socio
+ */
+router.get('/api/academia/leccion/:id/notas', async (req, res) => {
+  const socio = req.session ? req.session.socio : null;
+  if (!socio) return res.status(401).json({ ok: false, error: 'No autenticado.' });
+
+  try {
+    const nota = await db.one('SELECT contenido, actualizado_en FROM lecciones_notas WHERE socio_id = $1 AND leccion_id = $2', [socio.id, req.params.id]);
+    return res.json({ ok: true, contenido: nota ? nota.contenido : '', actualizado_en: nota ? nota.actualizado_en : null });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'Error al cargar apuntes.' });
+  }
+});
+
+/**
+ * POST /api/academia/leccion/:id/notas - Guardar apuntes del socio (DocentOS NotesPanel)
+ */
+router.post('/api/academia/leccion/:id/notas', async (req, res) => {
+  const socio = req.session ? req.session.socio : null;
+  if (!socio) return res.status(401).json({ ok: false, error: 'Debes iniciar sesión para guardar tus apuntes.' });
+
+  try {
+    const contenido = String(req.body.contenido || '').trim();
+    await db.query(`
+      INSERT INTO lecciones_notas (socio_id, leccion_id, contenido, actualizado_en)
+      VALUES ($1, $2, $3, now())
+      ON CONFLICT (socio_id, leccion_id)
+      DO UPDATE SET contenido = EXCLUDED.contenido, actualizado_en = now()
+    `, [socio.id, req.params.id, contenido]);
+
+    return res.json({ ok: true, mensaje: 'Apuntes guardados con éxito.' });
+  } catch (err) {
+    console.error('[academia-api] Error guardando notas:', err);
+    return res.status(500).json({ ok: false, error: 'No se pudieron guardar los apuntes.' });
+  }
+});
+
+/**
+ * GET /api/academia/leccion/:id/consultas - Obtener preguntas de la lección
+ */
+router.get('/api/academia/leccion/:id/consultas', async (req, res) => {
+  try {
+    const consultas = await db.rows(`
+      SELECT c.*, s.nombres, s.apellidos
+      FROM lecciones_consultas c
+      JOIN socios s ON s.id = c.socio_id
+      WHERE c.leccion_id = $1
+      ORDER BY c.creado_en DESC
+      LIMIT 20
+    `, [req.params.id]);
+    return res.json({ ok: true, consultas });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'Error cargando consultas.' });
+  }
+});
+
+/**
+ * POST /api/academia/leccion/:id/consultas - Dejar una pregunta al coach (DocentOS MentorshipPanel)
+ */
+router.post('/api/academia/leccion/:id/consultas', async (req, res) => {
+  const socio = req.session ? req.session.socio : null;
+  if (!socio) return res.status(401).json({ ok: false, error: 'Debes iniciar sesión para consultar al coach.' });
+
+  try {
+    const pregunta = String(req.body.pregunta || '').trim();
+    if (!pregunta) return res.status(400).json({ ok: false, error: 'Por favor escribe tu duda o pregunta.' });
+
+    const nueva = await db.one(`
+      INSERT INTO lecciones_consultas (socio_id, leccion_id, pregunta)
+      VALUES ($1, $2, $3)
+      RETURNING *
+    `, [socio.id, req.params.id, pregunta]);
+
+    return res.json({
+      ok: true,
+      consulta: {
+        ...nueva,
+        nombres: socio.nombres,
+        apellidos: socio.apellidos
+      },
+      mensaje: '¡Tu consulta ha sido enviada al equipo de entrenadores!'
+    });
+  } catch (err) {
+    console.error('[academia-api] Error creando consulta:', err);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al registrar consulta.' });
   }
 });
 

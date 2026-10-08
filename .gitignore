@@ -27,6 +27,7 @@ app/.turbo/
 Thumbs.db
 
 cookies.txt
+scratch/
 
 # Uploads de fotos de socios
 app/public/uploads/*

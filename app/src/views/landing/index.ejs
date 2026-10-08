@@ -848,14 +848,92 @@
       padding-top: 24px;
     }
 
-    /* Responsive */
-    @media (max-width: 860px) {
-      .nav-links { display: none; }
-      .bento-grid { grid-template-columns: 1fr; }
-      .calc-grid { grid-template-columns: 1fr; }
-      .stats-bar { grid-template-columns: 1fr 1fr; }
-      .docentos-body { grid-template-columns: 1fr; }
-      .docentos-curriculum-pane { max-height: 250px; }
+    /* DocentOS AuthModal Styles */
+    .auth-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .auth-modal-card {
+      width: 100%;
+      max-width: 440px;
+      background: #0D1322;
+      border: 1px solid rgba(62, 207, 142, 0.35);
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+    .auth-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .auth-close-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text-bright);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 30px;
+    }
+    .user-avatar-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid rgba(62, 207, 142, 0.4);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   </style>
 </head>
@@ -887,11 +965,17 @@
 
       <div class="nav-actions">
         <% if (socio) { %>
+          <div class="user-pill">
+            <div class="user-avatar-badge">
+              <%= (socio.nombres || 'S')[0].toUpperCase() %>
+            </div>
+            <span style="font-size:13px; font-weight:700; color:#fff;"><%= socio.nombres %></span>
+            <span style="font-size:11px; font-weight:700; color:var(--primary); background:rgba(62,207,142,0.15); padding:1px 6px; border-radius:4px;">
+              <%= socio.estado_membresia === 'activo' ? 'Socio Activo' : socio.estado_membresia %>
+            </span>
+          </div>
           <a href="/academia" class="btn primary sm" title="Ingresar a mi aula de cursos">
             <%- u.icon('cup', 14) %> Mi Aula Virtual
-          </a>
-          <a href="/academia" class="btn outline sm">
-            <%- u.icon('user', 13) %> <%= socio.nombres %>
           </a>
           <a href="/academia/logout" class="btn ghost sm" title="Cerrar sesión">
             <%- u.icon('logout', 14) %>
@@ -901,9 +985,9 @@
             <%- u.icon('dashboard', 14) %> Ir al Dashboard
           </a>
         <% } else { %>
-          <a href="/academia/login" class="btn outline sm" title="Acceso a cursos de nutrición y fitness para socios">
+          <button type="button" class="btn outline sm" onclick="abrirAuthModal('login');" title="Acceso a cursos de nutrición y fitness para socios">
             <%- u.icon('user', 14) %> Acceso Alumnos
-          </a>
+          </button>
           <a href="/login" class="btn staff" title="Acceso exclusivo para recepcionistas y entrenadores">
             <%- u.icon('lock', 13) %> Staff
           </a>
@@ -1176,12 +1260,12 @@
           </div>
 
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <a href="/academia/login" class="btn primary sm">
+            <button type="button" class="btn primary sm" onclick="abrirAuthModal('login');">
               <%- u.icon('user', 14) %> Iniciar Sesión Alumno
-            </a>
-            <a href="/academia/login?tab=activar" class="btn outline sm">
+            </button>
+            <button type="button" class="btn outline sm" onclick="abrirAuthModal('activar');">
               <%- u.icon('lock', 13) %> Primer Acceso con DNI
-            </a>
+            </button>
           </div>
         </div>
       <% } %>
@@ -1304,6 +1388,104 @@
             <!-- Se inyectan dinámicamente -->
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL DE AUTENTICACIÓN DOCENTOS (AUTH MODAL)
+       ========================================== -->
+  <div id="modal-auth-docentos" class="auth-modal-backdrop" onclick="if(event.target===this) cerrarAuthModal();">
+    <div class="auth-modal-card" onclick="event.stopPropagation();">
+      <button type="button" class="auth-close-btn" onclick="cerrarAuthModal();" aria-label="Cerrar modal">
+        <%- u.icon('close', 16) %>
+      </button>
+
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="width:46px; height:46px; border-radius:14px; background:rgba(62,207,142,0.12); border:1px solid rgba(62,207,142,0.35); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; box-shadow:0 4px 16px rgba(62,207,142,0.2);">
+          <%- u.icon('cup', 22) %>
+        </div>
+        <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:4px; letter-spacing:-0.02em;">Portal Alumnos & Socios</h3>
+        <p style="font-size:12.5px; color:var(--muted);"><%= gymName %> · Academia de Nutrición & Fitness</p>
+      </div>
+
+      <!-- Tabs Nav -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:20px;">
+        <button type="button" class="tab-btn active" id="auth-tab-btn-login" onclick="cambiarAuthTab('login');">
+          <%- u.icon('user', 13) %> Iniciar Sesión
+        </button>
+        <button type="button" class="tab-btn" id="auth-tab-btn-activar" onclick="cambiarAuthTab('activar');">
+          <%- u.icon('lock', 13) %> Primer Acceso
+        </button>
+      </div>
+
+      <!-- Feedback Alert Box -->
+      <div id="auth-feedback" style="display:none; padding:11px 14px; border-radius:10px; font-size:12.5px; margin-bottom:16px; line-height:1.4;"></div>
+
+      <!-- Panel 1: Login -->
+      <div id="auth-panel-login">
+        <form onsubmit="enviarAuthLogin(event);">
+          <div style="margin-bottom:14px;">
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px;">Correo o DNI</label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:12px; color:var(--muted); pointer-events:none;"><%- u.icon('user', 15) %></span>
+              <input type="text" id="auth-input-identificador" class="form-input" placeholder="tu@correo.com o tu DNI" required style="padding-left:38px;">
+            </div>
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px;">Contraseña</label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:12px; color:var(--muted); pointer-events:none;"><%- u.icon('lock', 15) %></span>
+              <input type="password" id="auth-input-password" class="form-input" placeholder="••••••••" required style="padding-left:38px;">
+            </div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:5px;">
+              Si es tu primera vez, ingresa tu <strong>DNI</strong> o ve a <strong>Primer Acceso</strong>.
+            </div>
+          </div>
+
+          <button type="submit" id="auth-btn-login-submit" class="btn primary lg" style="width:100%; border-radius:10px; font-size:14px; justify-content:center;">
+            <%- u.icon('play', 14) %> <span>Ingresar a Mi Aula Virtual</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Panel 2: Activar Cuenta con DNI -->
+      <div id="auth-panel-activar" style="display:none;">
+        <form onsubmit="enviarAuthActivar(event);">
+          <div style="margin-bottom:14px;">
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px;">DNI Registrado</label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:12px; color:var(--muted); pointer-events:none;"><%- u.icon('user', 15) %></span>
+              <input type="text" id="auth-input-dni" class="form-input" placeholder="8 dígitos de tu DNI" maxlength="12" required style="padding-left:38px;">
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">El DNI con el que te inscribiste en recepción o web.</div>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px;">Crea tu Contraseña</label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:12px; color:var(--muted); pointer-events:none;"><%- u.icon('lock', 15) %></span>
+              <input type="password" id="auth-input-new-pass" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required style="padding-left:38px;">
+            </div>
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px;">Confirmar Contraseña</label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:12px; color:var(--muted); pointer-events:none;"><%- u.icon('check', 15) %></span>
+              <input type="password" id="auth-input-new-pass2" class="form-input" placeholder="Repite tu contraseña" minlength="6" required style="padding-left:38px;">
+            </div>
+          </div>
+
+          <button type="submit" id="auth-btn-activar-submit" class="btn primary lg" style="width:100%; border-radius:10px; font-size:14px; justify-content:center;">
+            <%- u.icon('checkCircle', 15) %> <span>Activar Cuenta y Acceder</span>
+          </button>
+        </form>
+      </div>
+
+      <div style="margin-top:20px; padding-top:14px; border-top:1px solid var(--border); text-align:center; font-size:12px; color:var(--muted);">
+        ¿Aún no eres socio? <a href="#planes" onclick="cerrarAuthModal();" style="color:var(--primary); font-weight:700; text-decoration:none;">Ver Planes y Membresías</a>
       </div>
     </div>
   </div>
@@ -1555,6 +1737,174 @@
       document.getElementById('modal-docentos').style.display = 'none';
       document.getElementById('modal-video-iframe').src = '';
       document.body.style.overflow = '';
+    }
+
+    // ==========================================
+    // DOCENTOS AUTH MODAL HANDLERS
+    // ==========================================
+    function abrirAuthModal(tab) {
+      tab = tab || 'login';
+      cambiarAuthTab(tab);
+      var modal = document.getElementById('modal-auth-docentos');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        var fb = document.getElementById('auth-feedback');
+        if (fb) fb.style.display = 'none';
+        
+        setTimeout(function() {
+          if (tab === 'login') {
+            var el = document.getElementById('auth-input-identificador');
+            if (el) el.focus();
+          } else {
+            var elDni = document.getElementById('auth-input-dni');
+            if (elDni) elDni.focus();
+          }
+        }, 100);
+      }
+    }
+
+    function cerrarAuthModal() {
+      var modal = document.getElementById('modal-auth-docentos');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+
+    function cambiarAuthTab(tab) {
+      var btnLogin = document.getElementById('auth-tab-btn-login');
+      var btnActivar = document.getElementById('auth-tab-btn-activar');
+      var panelLogin = document.getElementById('auth-panel-login');
+      var panelActivar = document.getElementById('auth-panel-activar');
+      var fb = document.getElementById('auth-feedback');
+      if (fb) fb.style.display = 'none';
+
+      if (tab === 'activar') {
+        if (btnLogin) btnLogin.classList.remove('active');
+        if (btnActivar) btnActivar.classList.add('active');
+        if (panelLogin) panelLogin.style.display = 'none';
+        if (panelActivar) panelActivar.style.display = 'block';
+      } else {
+        if (btnLogin) btnLogin.classList.add('active');
+        if (btnActivar) btnActivar.classList.remove('active');
+        if (panelLogin) panelLogin.style.display = 'block';
+        if (panelActivar) panelActivar.style.display = 'none';
+      }
+    }
+
+    function mostrarAuthFeedback(exito, msg) {
+      var fb = document.getElementById('auth-feedback');
+      if (!fb) return;
+      fb.textContent = msg;
+      fb.style.display = 'block';
+      if (exito) {
+        fb.style.background = 'rgba(62, 207, 142, 0.15)';
+        fb.style.border = '1px solid rgba(62, 207, 142, 0.4)';
+        fb.style.color = '#3ECF8E';
+      } else {
+        fb.style.background = 'rgba(239, 68, 68, 0.15)';
+        fb.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+        fb.style.color = '#F87171';
+      }
+    }
+
+    function enviarAuthLogin(e) {
+      e.preventDefault();
+      var idVal = document.getElementById('auth-input-identificador').value.trim();
+      var passVal = document.getElementById('auth-input-password').value;
+      var btn = document.getElementById('auth-btn-login-submit');
+
+      if (!idVal || !passVal) {
+        mostrarAuthFeedback(false, 'Ingresa tu correo/DNI y contraseña.');
+        return;
+      }
+
+      btn.disabled = true;
+      var span = btn.querySelector('span');
+      var oldText = span ? span.textContent : '';
+      if (span) span.textContent = 'Verificando credenciales...';
+
+      fetch('/api/academia/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identificador: idVal, password: passVal })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        btn.disabled = false;
+        if (span) span.textContent = oldText;
+
+        if (res.ok) {
+          mostrarAuthFeedback(true, res.mensaje || '¡Bienvenido! Ingresando...');
+          setTimeout(function() {
+            window.location.href = res.redirectUrl || '/academia';
+          }, 450);
+        } else {
+          if (res.requiereActivacion) {
+            mostrarAuthFeedback(false, res.error);
+            setTimeout(function() {
+              cambiarAuthTab('activar');
+              var dniInput = document.getElementById('auth-input-dni');
+              if (dniInput && res.dni) dniInput.value = res.dni;
+            }, 1200);
+          } else {
+            mostrarAuthFeedback(false, res.error || 'Credenciales incorrectas.');
+          }
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        if (span) span.textContent = oldText;
+        mostrarAuthFeedback(false, 'Error de conexión con el servidor.');
+      });
+    }
+
+    function enviarAuthActivar(e) {
+      e.preventDefault();
+      var dniVal = document.getElementById('auth-input-dni').value.trim();
+      var passVal = document.getElementById('auth-input-new-pass').value;
+      var pass2Val = document.getElementById('auth-input-new-pass2').value;
+      var btn = document.getElementById('auth-btn-activar-submit');
+
+      if (passVal.length < 6) {
+        mostrarAuthFeedback(false, 'La contraseña debe tener al menos 6 caracteres.');
+        return;
+      }
+      if (passVal !== pass2Val) {
+        mostrarAuthFeedback(false, 'Las contraseñas no coinciden.');
+        return;
+      }
+
+      btn.disabled = true;
+      var span = btn.querySelector('span');
+      var oldText = span ? span.textContent : '';
+      if (span) span.textContent = 'Activando cuenta de socio...';
+
+      fetch('/api/academia/auth/activar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dni: dniVal, password: passVal, password_confirm: pass2Val })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        btn.disabled = false;
+        if (span) span.textContent = oldText;
+
+        if (res.ok) {
+          mostrarAuthFeedback(true, res.mensaje || '¡Cuenta activada con éxito! Redirigiendo...');
+          setTimeout(function() {
+            window.location.href = res.redirectUrl || '/academia';
+          }, 500);
+        } else {
+          mostrarAuthFeedback(false, res.error || 'No se pudo activar la cuenta.');
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        if (span) span.textContent = oldText;
+        mostrarAuthFeedback(false, 'Error de conexión con el servidor.');
+      });
     }
 
     // Inicializar calculadora

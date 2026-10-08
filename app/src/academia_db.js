@@ -56,6 +56,25 @@ async function initAcademiaDb() {
         completada_en TIMESTAMPTZ DEFAULT now(),
         UNIQUE(socio_id, leccion_id)
       );
+
+      CREATE TABLE IF NOT EXISTS lecciones_notas (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        socio_id UUID NOT NULL REFERENCES socios(id) ON DELETE CASCADE,
+        leccion_id UUID NOT NULL REFERENCES lecciones(id) ON DELETE CASCADE,
+        contenido TEXT NOT NULL,
+        actualizado_en TIMESTAMPTZ DEFAULT now(),
+        UNIQUE(socio_id, leccion_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS lecciones_consultas (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        socio_id UUID NOT NULL REFERENCES socios(id) ON DELETE CASCADE,
+        leccion_id UUID NOT NULL REFERENCES lecciones(id) ON DELETE CASCADE,
+        pregunta TEXT NOT NULL,
+        respuesta TEXT,
+        respondida BOOLEAN DEFAULT false,
+        creado_en TIMESTAMPTZ DEFAULT now()
+      );
     `);
 
     // 4. Sembrado de cursos si la tabla está vacía
