@@ -15,6 +15,17 @@ function soles(n) {
 /** Date | string ISO -> "dd/mm/yyyy" */
 function fecha(d) {
   if (!d) return '';
+  if (typeof d === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d.trim())) {
+      const [y, m, day] = d.trim().split('-');
+      return `${day}/${m}/${y}`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}T/.test(d.trim())) {
+      const isoDate = d.trim().slice(0, 10);
+      const [y, m, day] = isoDate.split('-');
+      return `${day}/${m}/${y}`;
+    }
+  }
   const date = (d instanceof Date) ? d : new Date(d);
   if (isNaN(date)) return String(d);
   return date.toLocaleDateString('es-PE', { timeZone: TZ, day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -44,6 +55,39 @@ function addDias(iso, dias) {
   const dt = new Date(Date.UTC(y, m - 1, d));
   dt.setUTCDate(dt.getUTCDate() + Number(dias));
   return dt.toISOString().slice(0, 10);
+}
+
+/** Convierte Date o string a "yyyy-mm-dd" local sin desfase */
+function dateToISO(d) {
+  if (!d) return '';
+  if (typeof d === 'string') {
+    const s = d.trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  }
+  if (d instanceof Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  const date = new Date(d);
+  if (isNaN(date)) return '';
+  return date.toLocaleDateString('en-CA', { timeZone: TZ });
+}
+
+/**
+ * Calcula la diferencia exacta en dias calendario entre dos fechas (sin desfase horario).
+ * Retorna >0 si fin es posterior, 0 si es el mismo dia, <0 si ya paso.
+ */
+function diasEntreFechas(fechaFin, fechaInicio) {
+  const f1 = dateToISO(fechaInicio || hoyISO());
+  const f2 = dateToISO(fechaFin);
+  if (!f1 || !f2) return 0;
+  const [y1, m1, d1] = f1.split('-').map(Number);
+  const [y2, m2, d2] = f2.split('-').map(Number);
+  const utc1 = Date.UTC(y1, m1 - 1, d1);
+  const utc2 = Date.UTC(y2, m2 - 1, d2);
+  return Math.round((utc2 - utc1) / (1000 * 60 * 60 * 24));
 }
 
 /**
@@ -545,7 +589,7 @@ const { icon } = require('./icons');
 
 module.exports = {
   TZ, soles, fecha, fechaHora, hoyISO, addDias, dateToISO,
-  calcularFechaFin, calcularInicioRenovacion, guardarFotoSocioBase64,
+  calcularFechaFin, calcularInicioRenovacion, diasEntreFechas, guardarFotoSocioBase64,
   normalizarTelefono, renderPlantilla, waLink, escapeHtml,
   postWebhook, sendMetaWhatsApp, sendEvolutionDirect,
   sendWhatsAppMessage, sendEvolutionWhatsApp, badgeEstado, icon,

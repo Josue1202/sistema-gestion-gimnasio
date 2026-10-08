@@ -50,7 +50,7 @@ router.get('/', async (req, res, next) => {
        ORDER BY apellidos, nombres
        LIMIT $${params.length - 1} OFFSET $${params.length}`, params);
     const total = await db.one(`SELECT count(*)::int AS n FROM v_socios_estado ${whereSql}`, params.slice(0, params.length - 2));
-    res.render('socios/list', { title: 'Socios', socios, q, estado, page, hayMas: socios.length === limit, total: total.n });
+    res.render('socios/list', { title: 'Socios', socios, q, estado, page, hayMas: socios.length === limit, total: total ? total.n : 0 });
   } catch (e) { next(e); }
 });
 

@@ -46,7 +46,8 @@ SELECT
     WHEN v.suscripcion_estado = 'congelada' THEN 'congelado'
     WHEN v.fecha_fin >= CURRENT_DATE        THEN 'activo'
     ELSE 'vencido'
-  END AS estado_membresia
+  END AS estado_membresia,
+  s.foto_url
 FROM socios s
 LEFT JOIN v_socio_suscripcion_vigente v ON v.socio_id = s.id
 WHERE s.activo = true;

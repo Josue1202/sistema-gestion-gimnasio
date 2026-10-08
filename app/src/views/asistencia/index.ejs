@@ -606,9 +606,9 @@
             : '') +
           '<div class="actions" style="margin-top:10px;">' +
             (!isPermitido || isWarn
-              ? '<button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal(\'' + d.socio_id + '\', \'' + d.nombre.replace(/'/g, "\\'") + '\', \'' + (d.dni || '') + '\')" style="display:inline-flex; align-items:center; gap:6px; font-weight:700;">' + SVG_ICONS.card + ' Cobrar / Renovar en 1 Clic</button>'
+              ? '<button type="button" class="btn primary sm" onclick="abrirModalRenovarTerminal(\'' + d.socio_id + '\', \'' + (d.nombre || '').replace(/'/g, "\\'") + '\', \'' + (d.dni || '') + '\')" style="display:inline-flex; align-items:center; gap:6px; font-weight:700;">' + SVG_ICONS.card + ' Cobrar / Renovar en 1 Clic</button>'
               : '') +
-            '<button type="button" class="btn sm" onclick="abrirModalFotoTerminal(\'' + d.socio_id + '\', \'' + d.nombre.replace(/'/g, "\\'") + '\')" style="display:inline-flex; align-items:center; gap:4px;">' +
+            '<button type="button" class="btn sm" onclick="abrirModalFotoTerminal(\'' + d.socio_id + '\', \'' + (d.nombre || '').replace(/'/g, "\\'") + '\')" style="display:inline-flex; align-items:center; gap:4px;">' +
               SVG_ICONS.camera + ' ' + (d.foto_url ? 'Cambiar Foto' : 'Tomar Foto') +
             '</button>' +
             '<a class="btn sm" href="/socios/' + d.socio_id + '" target="_blank">Ver Ficha</a>' +
@@ -672,6 +672,7 @@
 
     var div = document.createElement('div');
     div.className = 'feed-item';
+    var nombreAttr = (d.nombre || '').replace(/"/g, '&quot;');
     div.innerHTML =
       '<div>' +
         '<a href="/socios/' + d.socio_id + '" target="_blank" style="font-weight:700; font-size:13px; color:var(--text);">' + d.nombre + '</a>' +
@@ -680,7 +681,7 @@
       '<div style="display:flex; align-items:center; gap:6px;">' +
         '<button type="button" class="btn sm" style="font-size:11px; padding:3px 8px; display:inline-flex; align-items:center; gap:4px;" ' +
           'data-id="' + d.socio_id + '" ' +
-          'data-nombre="' + d.nombre + '" ' +
+          'data-nombre="' + nombreAttr + '" ' +
           'data-dni="' + (d.dni || '') + '" ' +
           'data-plan="' + (d.plan || '') + '" ' +
           'data-estado="' + (d.estado || 'activo') + '" ' +
@@ -1057,8 +1058,15 @@
     var planSelect = document.getElementById('renovar-plan-id');
     var opt = planSelect.options[planSelect.selectedIndex];
     var precio = opt ? opt.getAttribute('data-precio') : '0.00';
-    document.getElementById('renovar-monto-label').textContent = 'S/ ' + parseFloat(precio).toFixed(2);
-    document.getElementById('renovar-btn-text').textContent = 'Cobrar S/ ' + parseFloat(precio).toFixed(2) + ' y Dar Acceso';
+    var montoLabel = document.getElementById('renovar-monto-label');
+    if (montoLabel) montoLabel.textContent = 'S/ ' + parseFloat(precio).toFixed(2);
+    var btnText = document.getElementById('renovar-btn-text');
+    if (btnText) {
+      btnText.textContent = 'Cobrar S/ ' + parseFloat(precio).toFixed(2) + ' y Dar Acceso';
+    } else {
+      var btnEl = document.getElementById('renovar-submit-btn');
+      if (btnEl) btnEl.textContent = 'Cobrar S/ ' + parseFloat(precio).toFixed(2) + ' y Dar Acceso';
+    }
   }
 
   function handleRenovarTerminalSubmit(e) {
@@ -1066,10 +1074,12 @@
     var form = document.getElementById('form-renovar-terminal');
     var alertBox = document.getElementById('renovar-alerta');
     var btn = form.querySelector('button[type="submit"]');
+    var btnTextEl = document.getElementById('renovar-btn-text');
 
     btn.disabled = true;
-    var origText = btn.textContent;
-    btn.textContent = 'Procesando...';
+    var origText = btnTextEl ? btnTextEl.textContent : btn.textContent;
+    if (btnTextEl) btnTextEl.textContent = 'Procesando...';
+    else btn.textContent = 'Procesando...';
 
     var payload = {
       socio_id: document.getElementById('renovar-socio-id').value,
@@ -1086,7 +1096,8 @@
     .then(function(res) { return res.json(); })
     .then(function(data) {
       btn.disabled = false;
-      btn.textContent = origText;
+      if (btnTextEl) btnTextEl.textContent = origText;
+      else btn.textContent = origText;
 
       if (data.ok) {
         window.cerrarModal('modal-renovar-terminal');
@@ -1103,7 +1114,8 @@
     })
     .catch(function(err) {
       btn.disabled = false;
-      btn.textContent = origText;
+      if (btnTextEl) btnTextEl.textContent = origText;
+      else btn.textContent = origText;
       sonarAlerta();
       alertBox.textContent = 'Error: ' + err.message;
       alertBox.style.display = 'block';

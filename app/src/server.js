@@ -34,6 +34,7 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json({ limit: '10mb' }));
 app.use('/public', express.static(path.join(__dirname, '..', 'public'), { maxAge: '1h' }));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads'), { maxAge: '1h' }));
 
 // Sesion
 app.use(session({

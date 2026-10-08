@@ -62,7 +62,7 @@ router.post('/cerrar', async (req, res, next) => {
       `UPDATE cajas SET estado='cerrada', fecha_cierre=now(), monto_cierre_real=$1, cerrada_por=$2, notas=$3 WHERE id=$4`,
       [real, req.session.user.nombre, req.body.notas || null, caja.id]);
     const r = await db.one('SELECT diferencia FROM v_resumen_caja WHERE caja_id = $1', [caja.id]);
-    const dif = Number(r.diferencia || 0);
+    const dif = Number(r?.diferencia || 0);
     req.flash(dif === 0 ? 'ok' : 'info',
       dif === 0 ? 'Caja cerrada, cuadrada.' : `Caja cerrada. Diferencia: ${soles(dif)} (${dif > 0 ? 'sobrante' : 'faltante'}).`);
     res.redirect('/caja/historial');

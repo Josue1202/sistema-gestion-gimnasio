@@ -118,10 +118,11 @@ router.get('/:id/ticket', async (req, res, next) => {
     const pago = await db.one('SELECT * FROM pagos WHERE suscripcion_id = $1 ORDER BY creado_en DESC LIMIT 1', [sub.id]);
 
     const gymNombre = res.locals.gymName || 'Gimnasio';
+    const metodoNombre = (pago && pago.metodo_pago ? String(pago.metodo_pago).toUpperCase() : 'EFECTIVO');
     const textoWhatsApp = `¡Hola ${sub.nombres}! 🏋️\nComprobante de pago en *${gymNombre}*:\n` +
       `• Plan: *${sub.plan_nombre}*\n` +
       `• Válido: ${fecha(sub.fecha_inicio)} al ${fecha(sub.fecha_fin)}\n` +
-      `• Monto pagado: *${soles(sub.precio_pagado)}* (${pago ? pago.metodo_pago.toUpperCase() : 'EFECTIVO'})\n` +
+      `• Monto pagado: *${soles(sub.precio_pagado)}* (${metodoNombre})\n` +
       `• Fecha de pago: ${fechaHora(pago ? pago.creado_en : sub.creado_en)}\n\n` +
       `¡Gracias por entrenar con nosotros! 💪`;
 
@@ -155,10 +156,11 @@ router.post('/:id/enviar-ticket', async (req, res, next) => {
 
     const pago = await db.one('SELECT * FROM pagos WHERE suscripcion_id = $1 ORDER BY creado_en DESC LIMIT 1', [sub.id]);
     const gymNombre = res.locals.gymName || 'Gimnasio';
+    const metodoNombre = (pago && pago.metodo_pago ? String(pago.metodo_pago).toUpperCase() : 'EFECTIVO');
     const texto = `¡Hola ${sub.nombres}! 🏋️\nComprobante de pago en *${gymNombre}*:\n` +
       `• Plan: *${sub.plan_nombre}*\n` +
       `• Vigencia: ${fecha(sub.fecha_inicio)} al ${fecha(sub.fecha_fin)}\n` +
-      `• Monto: *${soles(sub.precio_pagado)}* (${pago ? pago.metodo_pago.toUpperCase() : 'EFECTIVO'})\n` +
+      `• Monto: *${soles(sub.precio_pagado)}* (${metodoNombre})\n` +
       `• Registrado: ${fechaHora(pago ? pago.creado_en : sub.creado_en)}\n\n` +
       `¡A entrenar con todo! 💪`;
 

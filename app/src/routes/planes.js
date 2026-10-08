@@ -39,6 +39,10 @@ router.post('/', async (req, res, next) => {
 router.post('/:id', async (req, res, next) => {
   try {
     const { nombre, descripcion, precio, duracion_dias } = req.body;
+    if (!nombre || !nombre.trim() || !(Number(precio) >= 0) || !(parseInt(duracion_dias, 10) > 0)) {
+      req.flash('error', 'Revisa nombre, precio y duración.');
+      return res.redirect('/planes/' + req.params.id + '/editar');
+    }
     await db.query('UPDATE planes SET nombre=$1, descripcion=$2, precio=$3, duracion_dias=$4 WHERE id=$5',
       [nombre.trim(), descripcion || null, Number(precio), parseInt(duracion_dias, 10), req.params.id]);
     req.flash('ok', 'Plan actualizado.');

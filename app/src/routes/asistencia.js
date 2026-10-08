@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const db = require('../db');
-const { fecha, hoyISO, addDias, dateToISO, soles, calcularFechaFin, calcularInicioRenovacion } = require('../util');
+const { fecha, hoyISO, addDias, dateToISO, soles, calcularFechaFin, calcularInicioRenovacion, diasEntreFechas } = require('../util');
 const { notificarPagoConfirmado } = require('../cron');
 
 const router = express.Router();
@@ -133,9 +133,7 @@ router.post('/marcar', async (req, res, next) => {
     if (sub) {
       // ✅ ACCESO PERMITIDO: Membresía vigente
       accesoPermitido = true;
-      const hoy = new Date();
-      const fin = new Date(sub.fecha_fin);
-      diasRestantes = Math.ceil((fin - hoy) / (1000 * 60 * 60 * 24));
+      diasRestantes = diasEntreFechas(sub.fecha_fin, hoyISO());
       fechaFinTxt = fecha(sub.fecha_fin);
       planNombre = sub.plan_nombre;
 
