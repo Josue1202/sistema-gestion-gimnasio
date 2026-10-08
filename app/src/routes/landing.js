@@ -74,7 +74,10 @@ router.post('/api/academia/validar-acceso', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Por favor ingresa un número de DNI válido.' });
     }
 
-    const socio = await db.one('SELECT * FROM v_socios_estado WHERE dni = $1', [dni]);
+    const socio = await db.one(
+      'SELECT id, nombres, apellidos, dni, telefono, email FROM socios WHERE dni = $1 AND activo = true',
+      [dni]
+    );
 
     if (!socio) {
       return res.json({
@@ -84,17 +87,20 @@ router.post('/api/academia/validar-acceso', async (req, res) => {
       });
     }
 
-    if (socio.estado_membresia !== 'activo') {
+    const estado = await db.one('SELECT * FROM v_socios_estado WHERE id = $1', [socio.id]);
+    const estadoMembresia = estado ? estado.estado_membresia : 'sin_suscripcion';
+
+    if (estadoMembresia !== 'activo') {
       return res.json({
         ok: false,
         vencido: true,
         socio: {
           nombres: socio.nombres,
           apellidos: socio.apellidos,
-          estado_membresia: socio.estado_membresia,
-          plan_nombre: socio.plan_nombre
+          estado_membresia: estadoMembresia,
+          plan_nombre: estado ? estado.plan_nombre : null
         },
-        mensaje: `Hola ${socio.nombres}, tu membresía se encuentra ${socio.estado_membresia}. Renuévala para continuar accediendo a la Academia.`
+        mensaje: `Hola ${socio.nombres}, tu membresía se encuentra ${estadoMembresia}. Renuévala para continuar accediendo a la Academia.`
       });
     }
 
@@ -106,9 +112,9 @@ router.post('/api/academia/validar-acceso', async (req, res) => {
         nombres: socio.nombres,
         apellidos: socio.apellidos,
         dni: socio.dni,
-        estado_membresia: socio.estado_membresia,
-        plan_nombre: socio.plan_nombre,
-        dias_restantes: socio.dias_restantes
+        estado_membresia: estadoMembresia,
+        plan_nombre: estado ? estado.plan_nombre : 'Plan Activo',
+        dias_restantes: estado ? estado.dias_restantes : 30
       },
       mensaje: `¡Bienvenido ${socio.nombres}! Acceso VIP concedido a todos los cursos y contenidos.`
     });
@@ -145,8 +151,10 @@ router.get('/api/academia/leccion/:id', async (req, res) => {
       });
     }
 
-    const socio = await db.one('SELECT * FROM v_socios_estado WHERE dni = $1', [dni]);
-    if (!socio || socio.estado_membresia !== 'activo') {
+    const socio = await db.one('SELECT id FROM socios WHERE dni = $1 AND activo = true', [dni]);
+    const estado = socio ? await db.one('SELECT * FROM v_socios_estado WHERE id = $1', [socio.id]) : null;
+
+    if (!estado || estado.estado_membresia !== 'activo') {
       return res.status(403).json({
         ok: false,
         bloqueado: true,
