@@ -1199,7 +1199,7 @@
             if (iniBanner) iniBanner.style.display = 'none';
             var okEl = document.getElementById('term-foto-ok');
             if (okEl) {
-              okEl.textContent = '🎉 ¡Foto recibida y actualizada desde tu celular con éxito!';
+              okEl.textContent = 'Foto recibida y actualizada desde tu celular con éxito.';
               okEl.style.display = 'block';
             }
             setTimeout(function() {
@@ -1484,19 +1484,19 @@
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
             <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
               <input type="radio" name="renovar_metodo" value="efectivo" checked style="width:auto;">
-              <span style="font-size:13.5px; font-weight:600;">💵 Efectivo</span>
+              <span style="font-size:13.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('cash', 15) %> Efectivo</span>
             </label>
             <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
               <input type="radio" name="renovar_metodo" value="yape" style="width:auto;">
-              <span style="font-size:13.5px; font-weight:600;">🟣 Yape / Plin</span>
+              <span style="font-size:13.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('mobile', 15) %> Yape / Plin</span>
             </label>
             <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
               <input type="radio" name="renovar_metodo" value="tarjeta" style="width:auto;">
-              <span style="font-size:13.5px; font-weight:600;">💳 POS Tarjeta</span>
+              <span style="font-size:13.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('creditCard', 15) %> POS Tarjeta</span>
             </label>
             <label style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
               <input type="radio" name="renovar_metodo" value="transferencia" style="width:auto;">
-              <span style="font-size:13.5px; font-weight:600;">🏦 Transferencia</span>
+              <span style="font-size:13.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><%- u.icon('building', 15) %> Transferencia</span>
             </label>
           </div>
         </div>
@@ -1539,7 +1539,7 @@
           <%- u.icon('camera', 14) %> Cámara Laptop
         </button>
         <button type="button" class="btn sm" onclick="mostrarQRCelularTerminal();" style="display:inline-flex; align-items:center; gap:6px; background:rgba(37,211,102,0.15); color:#25D366; border-color:rgba(37,211,102,0.3);">
-          📱 Tomar con Celular (QR)
+          <%- u.icon('mobile', 14) %> Tomar con Celular (QR)
         </button>
         <input type="file" id="term-foto-file-input" accept="image/*" style="display:none;" onchange="handleFotoTerminalFile(event);">
         <button type="button" class="btn sm" onclick="document.getElementById('term-foto-file-input').click();" style="display:inline-flex; align-items:center; gap:6px;">
@@ -1550,7 +1550,7 @@
       <!-- PANEL QR: Tomar foto con celular en tiempo real -->
       <div id="term-qr-celular-box" style="display:none; text-align:center; background:#121214; border:1px solid #2e2e34; border-radius:12px; padding:16px;">
         <div style="display:flex; align-items:center; justify-content:center; gap:6px; color:#25D366; font-size:14px; font-weight:700; margin-bottom:8px;">
-          📱 Escanea con la cámara de tu celular
+          <%- u.icon('mobile', 16) %> Escanea con la cámara de tu celular
         </div>
         <p class="muted" style="font-size:12px; margin-bottom:12px;">
           Apunta con la cámara de tu teléfono a este código. Se abrirá la cámara de tu celular y la foto aparecerá en la pantalla al instante.
@@ -1570,7 +1570,7 @@
       <!-- GUÍA INTERACTIVA: Cuando el navegador bloquea la cámara por ser HTTP -->
       <div id="term-webcam-http-guide" style="display:none; background:#18181b; border:1px solid #f59e0b; border-radius:12px; padding:14px; margin-top:8px;">
         <div style="display:flex; align-items:center; gap:8px; color:#fbbf24; font-weight:700; font-size:13.5px; margin-bottom:8px;">
-          ⚠️ Chrome bloqueó la cámara web por ser una dirección IP
+          <%- u.icon('alert', 16) %> Chrome bloqueó la cámara web por ser una dirección IP
         </div>
         <p style="font-size:12px; color:#e4e4e7; line-height:1.45; margin-bottom:10px;">
           Chrome/Edge bloquea la cámara por seguridad al no tener HTTPS. Tienes <strong>2 soluciones inmediatas</strong>:
@@ -1583,7 +1583,7 @@
             Toma la foto desde tu celular en 5 segundos. Escaneas el QR, tomas la foto y se guarda sola en esta laptop.
           </p>
           <button type="button" class="btn sm wa" onclick="mostrarQRCelularTerminal();" style="width:100%;">
-            📱 Abrir Código QR para Celular
+            <%- u.icon('mobile', 14) %> Abrir Código QR para Celular
           </button>
         </div>
 
@@ -1614,7 +1614,7 @@
         <canvas id="webcam-term-canvas" style="display:none;"></canvas>
         <div style="display:flex; justify-content:space-between; gap:8px; margin-top:8px;">
           <button type="button" class="btn primary sm" onclick="capturarFotoTerminal();" style="flex:1;">
-            📸 Capturar y Guardar
+            <%- u.icon('camera', 14) %> Capturar y Guardar
           </button>
           <button type="button" class="btn sm" onclick="detenerCamaraTerminal();">Cancelar</button>
         </div>

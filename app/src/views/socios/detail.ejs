@@ -366,7 +366,7 @@
             <%- u.icon('camera', 14) %> Cámara Laptop
           </button>
           <button type="button" class="btn sm" onclick="mostrarQRCelular();" style="display:inline-flex; align-items:center; gap:6px; background:rgba(37,211,102,0.15); color:#25D366; border-color:rgba(37,211,102,0.3);">
-            📱 Tomar con Celular (QR)
+            <%- u.icon('mobile', 14) %> Tomar con Celular (QR)
           </button>
           <input type="file" id="foto-rapida-file" accept="image/*" style="display:none;" onchange="handleFotoRapidaFile(event);">
           <button type="button" class="btn sm" onclick="document.getElementById('foto-rapida-file').click();" style="display:inline-flex; align-items:center; gap:6px;">
@@ -383,7 +383,7 @@
       <!-- PANEL QR: Tomar foto con celular en tiempo real -->
       <div id="qr-celular-box" style="display:none; text-align:center; background:#121214; border:1px solid #2e2e34; border-radius:12px; padding:16px;">
         <div style="display:flex; align-items:center; justify-content:center; gap:6px; color:#25D366; font-size:14px; font-weight:700; margin-bottom:8px;">
-          📱 Escanea con la cámara de tu celular
+          <%- u.icon('mobile', 16) %> Escanea con la cámara de tu celular
         </div>
         <p class="muted" style="font-size:12.5px; margin-bottom:12px;">
           Apunta con la cámara de tu teléfono a este código. Se abrirá la cámara de tu celular y la foto aparecerá en esta laptop al instante.
@@ -403,7 +403,7 @@
       <!-- GUÍA INTERACTIVA: Cuando el navegador bloquea la cámara por ser HTTP -->
       <div id="webcam-http-guide" style="display:none; background:#18181b; border:1px solid #f59e0b; border-radius:12px; padding:16px; margin-top:8px;">
         <div style="display:flex; align-items:center; gap:8px; color:#fbbf24; font-weight:700; font-size:14px; margin-bottom:8px;">
-          ⚠️ Chrome bloqueó la cámara web por ser una dirección IP
+          <%- u.icon('alert', 16) %> Chrome bloqueó la cámara web por ser una dirección IP
         </div>
         <p style="font-size:12.5px; color:#e4e4e7; line-height:1.45; margin-bottom:12px;">
           Por seguridad, los navegadores (Chrome/Edge) sólo activan la cámara en <code>https://</code> o permitiendo la IP en su configuración. Tienes <strong>2 soluciones inmediatas</strong>:
@@ -416,7 +416,7 @@
             Toma la foto desde tu celular en 5 segundos. Escaneas el QR, tomas la foto y se guarda sola en esta laptop.
           </p>
           <button type="button" class="btn sm wa" onclick="mostrarQRCelular();" style="width:100%;">
-            📱 Abrir Código QR para Celular
+            <%- u.icon('mobile', 14) %> Abrir Código QR para Celular
           </button>
         </div>
 
@@ -447,7 +447,7 @@
         <canvas id="webcam-rapida-canvas" style="display:none;"></canvas>
         <div style="display:flex; justify-content:space-between; gap:8px; margin-top:8px;">
           <button type="button" class="btn primary sm" onclick="capturarFotoRapida();" style="flex:1;">
-            📸 Capturar y Guardar
+            <%- u.icon('camera', 14) %> Capturar y Guardar
           </button>
           <button type="button" class="btn sm" onclick="detenerCamaraRapida();">Cancelar</button>
         </div>
@@ -527,7 +527,7 @@
             document.getElementById('foto-rapida-empty').style.display = 'none';
 
             var okMsg = document.getElementById('foto-rapida-ok');
-            okMsg.textContent = '🎉 ¡Foto recibida y actualizada desde tu celular con éxito!';
+            okMsg.textContent = 'Foto recibida y actualizada desde tu celular con éxito.';
             okMsg.style.display = 'block';
 
             // Actualizar avatar en el encabezado de la ficha
