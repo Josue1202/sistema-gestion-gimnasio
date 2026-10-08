@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('../db');
 const { plantillasMap, varsDe } = require('../mensajeria');
 const { renderPlantilla, waLink, hoyISO, normalizarTelefono, sendEvolutionWhatsApp, guardarFotoSocioBase64 } = require('../util');
+const { generarQRParaSocio } = require('./captura_foto');
 
 const router = express.Router();
 
@@ -215,6 +216,38 @@ router.post('/:id/foto', async (req, res, next) => {
   } catch (e) {
     console.error('[socios:foto] error:', e);
     res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// ---------- Generar QR para captura desde celular ----------
+router.get('/:id/qr-foto', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const socio = await db.one('SELECT id, nombres, apellidos, foto_url FROM socios WHERE id = $1', [id]);
+    if (!socio) return res.status(404).json({ ok: false, error: 'Socio no encontrado.' });
+
+    const qrInfo = await generarQRParaSocio(req, id);
+    res.json({
+      ok: true,
+      qr_data_url: qrInfo.qrDataUrl,
+      movil_url: qrInfo.movilUrl,
+      token: qrInfo.token,
+      socio: { id: socio.id, nombres: socio.nombres, apellidos: socio.apellidos, foto_url: socio.foto_url }
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// ---------- Consultar estado de la foto en tiempo real (Polling desde la Laptop) ----------
+router.get('/:id/estado-foto', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const socio = await db.one('SELECT id, foto_url, actualizado_en FROM socios WHERE id = $1', [id]);
+    if (!socio) return res.status(404).json({ ok: false, error: 'Socio no encontrado.' });
+    res.json({ ok: true, foto_url: socio.foto_url, actualizado_en: socio.actualizado_en });
+  } catch (e) {
+    next(e);
   }
 });
 

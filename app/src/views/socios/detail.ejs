@@ -338,7 +338,7 @@
      MODAL RÁPIDO: TOMAR / SUBIR FOTO DEL SOCIO
      ======================================================== -->
 <div id="modal-foto-rapida" class="modal-backdrop" style="display:none;" onclick="if(event.target===this) cerrarModalFoto();">
-  <div class="modal-card" style="max-width:440px;" onclick="event.stopPropagation();">
+  <div class="modal-card" style="max-width:480px;" onclick="event.stopPropagation();">
     <div class="modal-header">
       <h3 style="display:flex; align-items:center; gap:8px; margin:0;">
         <%- u.icon('camera', 18) %> Foto de <%= socio.nombres %>
@@ -349,9 +349,10 @@
     </div>
     <div class="modal-body stack" style="margin:0;">
       <div id="foto-rapida-alerta" style="display:none;" class="flash error"></div>
+      <div id="foto-rapida-ok" style="display:none;" class="flash ok"></div>
 
-      <!-- Preview y opciones -->
-      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <!-- Preview y opciones principales -->
+      <div id="foto-panel-main" style="display:flex; flex-direction:column; align-items:center; gap:12px;">
         <div style="width:160px; height:160px; border-radius:16px; background:#18181b; border:2px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center;">
           <img id="foto-rapida-img" src="<%= socio.foto_url || '' %>" style="width:100%; height:100%; object-fit:cover; <%= socio.foto_url ? '' : 'display:none;' %>">
           <div id="foto-rapida-empty" style="color:var(--muted); font-size:12px; display:<%= socio.foto_url ? 'none' : 'flex' %>; flex-direction:column; align-items:center; gap:6px;">
@@ -361,12 +362,15 @@
         </div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="btn sm primary" onclick="iniciarCamaraRapida();" style="display:inline-flex; align-items:center; gap:6px;">
+            <%- u.icon('camera', 14) %> Cámara Laptop
+          </button>
+          <button type="button" class="btn sm" onclick="mostrarQRCelular();" style="display:inline-flex; align-items:center; gap:6px; background:rgba(37,211,102,0.15); color:#25D366; border-color:rgba(37,211,102,0.3);">
+            📱 Tomar con Celular (QR)
+          </button>
           <input type="file" id="foto-rapida-file" accept="image/*" style="display:none;" onchange="handleFotoRapidaFile(event);">
           <button type="button" class="btn sm" onclick="document.getElementById('foto-rapida-file').click();" style="display:inline-flex; align-items:center; gap:6px;">
             <%- u.icon('file', 14) %> Subir Archivo
-          </button>
-          <button type="button" class="btn sm primary" onclick="iniciarCamaraRapida();" style="display:inline-flex; align-items:center; gap:6px;">
-            <%- u.icon('camera', 14) %> Tomar con Cámara Web
           </button>
           <% if (socio.foto_url) { %>
             <button type="button" class="btn sm" onclick="eliminarFotoDirecto();" style="display:inline-flex; align-items:center; gap:4px; color:var(--danger);">
@@ -376,7 +380,68 @@
         </div>
       </div>
 
-      <!-- Visor de la cámara en vivo -->
+      <!-- PANEL QR: Tomar foto con celular en tiempo real -->
+      <div id="qr-celular-box" style="display:none; text-align:center; background:#121214; border:1px solid #2e2e34; border-radius:12px; padding:16px;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:6px; color:#25D366; font-size:14px; font-weight:700; margin-bottom:8px;">
+          📱 Escanea con la cámara de tu celular
+        </div>
+        <p class="muted" style="font-size:12.5px; margin-bottom:12px;">
+          Apunta con la cámara de tu teléfono a este código. Se abrirá la cámara de tu celular y la foto aparecerá en esta laptop al instante.
+        </p>
+        <div style="display:inline-block; padding:8px; background:#18181b; border:1px solid #3f3f46; border-radius:12px; margin-bottom:12px;">
+          <img id="qr-celular-img" src="" alt="Código QR" style="width:200px; height:200px; display:block; border-radius:8px;">
+        </div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <span class="muted" style="font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#25D366; animation:pulse 1.5s infinite;"></span>
+            Esperando foto desde tu celular...
+          </span>
+          <button type="button" class="btn sm" onclick="ocultarQRCelular();" style="padding:2px 8px; font-size:11px;">Ocultar QR</button>
+        </div>
+      </div>
+
+      <!-- GUÍA INTERACTIVA: Cuando el navegador bloquea la cámara por ser HTTP -->
+      <div id="webcam-http-guide" style="display:none; background:#18181b; border:1px solid #f59e0b; border-radius:12px; padding:16px; margin-top:8px;">
+        <div style="display:flex; align-items:center; gap:8px; color:#fbbf24; font-weight:700; font-size:14px; margin-bottom:8px;">
+          ⚠️ Chrome bloqueó la cámara web por ser una dirección IP
+        </div>
+        <p style="font-size:12.5px; color:#e4e4e7; line-height:1.45; margin-bottom:12px;">
+          Por seguridad, los navegadores (Chrome/Edge) sólo activan la cámara en <code>https://</code> o permitiendo la IP en su configuración. Tienes <strong>2 soluciones inmediatas</strong>:
+        </p>
+        <div style="background:#121214; border:1px solid #27272a; border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+          <div style="font-weight:700; color:#25D366; font-size:13px; margin-bottom:4px;">
+            Opción 1 (Recomendada y sin configurar nada):
+          </div>
+          <p style="font-size:12px; color:#a1a1aa; margin-bottom:8px;">
+            Toma la foto desde tu celular en 5 segundos. Escaneas el QR, tomas la foto y se guarda sola en esta laptop.
+          </p>
+          <button type="button" class="btn sm wa" onclick="mostrarQRCelular();" style="width:100%;">
+            📱 Abrir Código QR para Celular
+          </button>
+        </div>
+
+        <div style="background:#121214; border:1px solid #27272a; border-radius:8px; padding:10px 12px;">
+          <div style="font-weight:700; color:#EDEDED; font-size:13px; margin-bottom:4px;">
+            Opción 2: Habilitar cámara en esta laptop (15 segundos, una sola vez):
+          </div>
+          <ol style="font-size:11.5px; color:#a1a1aa; padding-left:18px; line-height:1.45; margin-bottom:8px;">
+            <li>Abre en una nueva pestaña de Chrome: <br><code style="color:#3ECF8E; word-break:break-all;">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></li>
+            <li>En esa opción, selecciona <strong>Enabled</strong>.</li>
+            <li>En la caja de texto que aparece, pega esta URL:</li>
+          </ol>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="copy-origin-input" readonly value="" style="height:30px; font-size:12px; background:#09090b; border:1px solid #3f3f46; color:#fff; padding:0 8px;">
+            <button type="button" class="btn sm primary" onclick="copiarUrlOrigen();" style="height:30px; padding:0 10px; font-size:11.5px;">
+              Copiar
+            </button>
+          </div>
+          <p style="font-size:11px; color:#71717a; margin-top:6px; margin-bottom:0;">
+            Luego haz clic en el botón azul <strong>Relaunch</strong> (Reiniciar Chrome) y la webcam de tu laptop funcionará para siempre.
+          </p>
+        </div>
+      </div>
+
+      <!-- Visor de la cámara en vivo de la laptop -->
       <div id="webcam-rapida-box" style="display:none; background:#09090b; padding:10px; border-radius:8px; border:1px solid #3f3f46; margin-top:8px;">
         <video id="webcam-rapida-video" autoplay playsinline style="width:100%; height:220px; object-fit:cover; border-radius:6px; background:#000;"></video>
         <canvas id="webcam-rapida-canvas" style="display:none;"></canvas>
@@ -401,23 +466,104 @@
 
   var webcamRapidaStream = null;
   var currentSocioId = '<%= socio.id %>';
+  var qrPollingInterval = null;
+  var fotoInicialUrl = '<%= socio.foto_url || "" %>';
 
   function abrirModalFotoRapida(socioId, nombre) {
     document.getElementById('foto-rapida-alerta').style.display = 'none';
+    document.getElementById('foto-rapida-ok').style.display = 'none';
+    document.getElementById('webcam-http-guide').style.display = 'none';
+    document.getElementById('qr-celular-box').style.display = 'none';
+    detenerCamaraRapida();
+    detenerPollingQR();
     window.abrirModal('modal-foto-rapida');
   }
 
   function cerrarModalFoto() {
     detenerCamaraRapida();
+    detenerPollingQR();
     window.cerrarModal('modal-foto-rapida');
+  }
+
+  function mostrarQRCelular() {
+    detenerCamaraRapida();
+    document.getElementById('webcam-http-guide').style.display = 'none';
+    var qrBox = document.getElementById('qr-celular-box');
+    var qrImg = document.getElementById('qr-celular-img');
+    qrBox.style.display = 'block';
+
+    fetch('/socios/' + currentSocioId + '/qr-foto')
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.ok && res.qr_data_url) {
+          qrImg.src = res.qr_data_url;
+          iniciarPollingQR();
+        }
+      })
+      .catch(function(err) {
+        console.error('Error cargando QR:', err);
+      });
+  }
+
+  function ocultarQRCelular() {
+    document.getElementById('qr-celular-box').style.display = 'none';
+    detenerPollingQR();
+  }
+
+  function iniciarPollingQR() {
+    detenerPollingQR();
+    qrPollingInterval = setInterval(function() {
+      fetch('/socios/' + currentSocioId + '/estado-foto')
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res.ok && res.foto_url && res.foto_url !== fotoInicialUrl) {
+            // ¡La foto llegó desde el celular!
+            fotoInicialUrl = res.foto_url;
+            detenerPollingQR();
+            ocultarQRCelular();
+
+            document.getElementById('foto-rapida-img').src = res.foto_url;
+            document.getElementById('foto-rapida-img').style.display = 'block';
+            document.getElementById('foto-rapida-empty').style.display = 'none';
+
+            var okMsg = document.getElementById('foto-rapida-ok');
+            okMsg.textContent = '🎉 ¡Foto recibida y actualizada desde tu celular con éxito!';
+            okMsg.style.display = 'block';
+
+            // Actualizar avatar en el encabezado de la ficha
+            var headerFoto = document.getElementById('detail-socio-foto');
+            var headerPlaceholder = document.getElementById('detail-socio-placeholder');
+            if (headerFoto) {
+              headerFoto.src = res.foto_url;
+              headerFoto.style.display = 'block';
+            } else if (headerPlaceholder) {
+              headerPlaceholder.outerHTML = '<img id="detail-socio-foto" src="' + res.foto_url + '" style="width:100%; height:100%; object-fit:cover;">';
+            }
+          }
+        })
+        .catch(function(e) { /* ignorar fallos temporales de red */ });
+    }, 1200);
+  }
+
+  function detenerPollingQR() {
+    if (qrPollingInterval) {
+      clearInterval(qrPollingInterval);
+      qrPollingInterval = null;
+    }
   }
 
   function iniciarCamaraRapida() {
     var box = document.getElementById('webcam-rapida-box');
     var video = document.getElementById('webcam-rapida-video');
+    document.getElementById('webcam-http-guide').style.display = 'none';
+    document.getElementById('qr-celular-box').style.display = 'none';
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Tu navegador no admite cámara web o requiere HTTPS.');
+      // Mostrar asistente interactivo en vez de alert
+      var guide = document.getElementById('webcam-http-guide');
+      var originInput = document.getElementById('copy-origin-input');
+      originInput.value = window.location.origin;
+      guide.style.display = 'block';
       return;
     }
 
@@ -430,7 +576,8 @@
       video.srcObject = stream;
     })
     .catch(function(err) {
-      alert('Error accediendo a cámara: ' + err.message);
+      document.getElementById('foto-rapida-alerta').textContent = 'Error accediendo a cámara: ' + err.message;
+      document.getElementById('foto-rapida-alerta').style.display = 'block';
       box.style.display = 'none';
     });
   }
@@ -488,6 +635,7 @@
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.ok && res.foto_url) {
+        fotoInicialUrl = res.foto_url;
         document.getElementById('foto-rapida-img').src = res.foto_url;
         document.getElementById('foto-rapida-img').style.display = 'block';
         document.getElementById('foto-rapida-empty').style.display = 'none';
@@ -512,6 +660,14 @@
     });
   }
 
+  function copiarUrlOrigen() {
+    var input = document.getElementById('copy-origin-input');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(function() {
+      alert('¡Dirección copiada! Pégala en chrome://flags/#unsafely-treat-insecure-origin-as-secure');
+    });
+  }
+
   function eliminarFotoDirecto() {
     if (!confirm('¿Deseas eliminar la foto de este socio?')) return;
     fetch('/socios/' + currentSocioId + '/foto', {
@@ -527,3 +683,4 @@
     });
   }
 </script>
+

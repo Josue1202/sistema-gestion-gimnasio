@@ -174,6 +174,9 @@ app.get('/diag/test-meta', async (req, res) => {
 // Portal publico de Membresias Online & Pasarela de Pagos (Yape OTP / Tarjeta)
 app.use('/', require('./routes/checkout'));
 
+// Captura directa de fotos desde celular via QR (publico con token)
+app.use('/', require('./routes/captura_foto').router);
+
 // Auth (login / setup / logout)
 app.use('/', authRouter);
 
