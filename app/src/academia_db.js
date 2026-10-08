@@ -43,7 +43,22 @@ async function initAcademiaDb() {
       );
     `);
 
-    // 3. Sembrado de cursos si la tabla está vacía
+    // 3. Autenticación de socios (Portal Alumno) y Progreso
+    await db.query(`
+      ALTER TABLE socios ADD COLUMN IF NOT EXISTS password_hash TEXT;
+      ALTER TABLE socios ADD COLUMN IF NOT EXISTS ultimo_login TIMESTAMPTZ;
+
+      CREATE TABLE IF NOT EXISTS lecciones_progreso (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        socio_id UUID NOT NULL REFERENCES socios(id) ON DELETE CASCADE,
+        leccion_id UUID NOT NULL REFERENCES lecciones(id) ON DELETE CASCADE,
+        completada BOOLEAN DEFAULT true,
+        completada_en TIMESTAMPTZ DEFAULT now(),
+        UNIQUE(socio_id, leccion_id)
+      );
+    `);
+
+    // 4. Sembrado de cursos si la tabla está vacía
     const cuenta = await db.one('SELECT count(*)::int AS total FROM cursos');
     if (cuenta && cuenta.total === 0) {
       console.log('[academia] Sembrando cursos y lecciones de Nutrición y Gym (DocentOS)...');

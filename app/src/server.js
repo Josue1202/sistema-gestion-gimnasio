@@ -60,6 +60,7 @@ app.use((req, res, next) => {
   req.session.flash = [];
   req.flash = (type, msg) => { (req.session.flash ||= []).push({ type, msg }); };
   res.locals.user = req.session.user || null;
+  res.locals.socio = req.session.socio || null;
   res.locals.currentPath = req.path;
   res.locals.u = util; // helpers en las vistas: u.soles(), u.fecha(), ...
   res.locals.gymName = process.env.GYM_NAME || 'Zona Fitness';

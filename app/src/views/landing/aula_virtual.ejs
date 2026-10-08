@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= leccionActiva.titulo %> · <%= curso.titulo %> · <%= gymName %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090D16;
+      --bg-alt: #0D1322;
+      --surface: #121829;
+      --surface-2: #182238;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(62, 207, 142, 0.35);
+      --primary: #3ECF8E;
+      --primary-hover: #32b57a;
+      --primary-glow: rgba(62, 207, 142, 0.25);
+      --text: #EDEDED;
+      --text-bright: #FFFFFF;
+      --muted: #9CA3AF;
+      --muted-dark: #6B7280;
+      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    .classroom-header {
+      background: rgba(9, 13, 22, 0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .btn-back:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .course-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .course-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      background: rgba(62, 207, 142, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(62, 207, 142, 0.25);
+      flex-shrink: 0;
+    }
+    .course-title-header {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-bright);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .course-progress-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+    }
+    .pill-progress-track {
+      width: 70px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .pill-progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    /* Classroom Layout: 2 Columns */
+    .classroom-container {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      flex-grow: 1;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+
+    /* Columna Izquierda: Video Player & Detalles */
+    .player-column {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: #060910;
+    }
+    .video-viewport {
+      width: 100%;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      max-height: 70vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-viewport iframe, .video-viewport video {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Bloqueo / Paywall Overlay */
+    .locked-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.94);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      z-index: 10;
+    }
+    .locked-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #F59E0B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .locked-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .locked-desc {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    /* Player Controls Bar */
+    .player-controls-bar {
+      background: #0D1322;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.18s ease;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .btn-control:hover:not(:disabled) {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      background: var(--surface-2);
+    }
+    .btn-control:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-complete {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      border: 1px solid rgba(62, 207, 142, 0.35);
+      background: rgba(62, 207, 142, 0.1);
+      color: var(--primary);
+    }
+    .btn-complete:hover {
+      background: rgba(62, 207, 142, 0.2);
+    }
+    .btn-complete.completed {
+      background: var(--primary);
+      color: #05160E;
+      box-shadow: 0 2px 10px var(--primary-glow);
+    }
+
+    /* Lesson Content Body */
+    .lesson-content {
+      padding: 28px 32px 48px;
+      flex-grow: 1;
+    }
+    .lesson-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .lesson-badge-preview {
+      background: rgba(62, 207, 142, 0.15);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(62, 207, 142, 0.3);
+    }
+    .lesson-h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 14px;
+      line-height: 1.3;
+    }
+    .lesson-desc {
+      font-size: 14.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 26px;
+      max-width: 800px;
+    }
+
+    /* Recursos Descargables */
+    .resource-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      max-width: 640px;
+    }
+    .resource-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .resource-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(62, 207, 142, 0.1);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .resource-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .resource-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* Columna Derecha: Temario & Playlist DocentOS */
+    .playlist-column {
+      background: var(--bg-alt);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .playlist-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #090D16;
+    }
+    .playlist-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .playlist-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .playlist-count {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .playlist-progress-bar {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .playlist-progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .playlist-items-scroll {
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    /* Lesson List Item */
+    .playlist-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .playlist-item:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .playlist-item.active {
+      background: rgba(62, 207, 142, 0.08);
+      border-left: 3px solid var(--primary);
+    }
+    .playlist-item.locked {
+      opacity: 0.65;
+    }
+
+    .item-status-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+    .item-status-icon.pending {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+    }
+    .item-status-icon.completed {
+      background: rgba(62, 207, 142, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(62, 207, 142, 0.35);
+    }
+    .item-status-icon.playing {
+      background: var(--primary);
+      color: #05160E;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .item-content {
+      flex-grow: 1;
+      min-width: 0;
+    }
+    .item-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+    .playlist-item.active .item-title {
+      color: #fff;
+    }
+    .item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .item-now-playing {
+      color: var(--primary);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Buttons */
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .btn-action.primary {
+      background: var(--primary);
+      color: #05160E;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+    .btn-action.primary:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .classroom-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .player-column {
+        height: auto;
+        overflow: visible;
+      }
+      .playlist-column {
+        height: 500px;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Superior DocentOS -->
+  <header class="classroom-header">
+    <div class="header-left">
+      <a href="<%= socio ? '/academia' : '/' %>" class="btn-back">
+        <%- u.icon('arrowLeft', 14) %> <%= socio ? 'Volver al Portal' : 'Volver al Gimnasio' %>
+      </a>
+
+      <div class="course-breadcrumb">
+        <span class="course-badge"><%= curso.categoria %></span>
+        <span class="course-title-header"><%= curso.titulo %></span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="course-progress-pill">
+        <div class="pill-progress-track">
+          <div id="header-progress-fill" class="pill-progress-fill" style="width: <%= porcentajeCurso %>%;"></div>
+        </div>
+        <span id="header-progress-text" style="font-weight:700; color:#fff;"><%= totalCompletadas %>/<%= lecciones.length %></span>
+      </div>
+
+      <% if (socio) { %>
+        <span style="font-size:12.5px; color:var(--muted); font-weight:600;">
+          <%= socio.nombres %>
+        </span>
+      <% } else { %>
+        <a href="/academia/login?next=/academia/curso/<%= curso.slug %>" class="btn-control" style="font-size:12px; padding:5px 12px;">
+          <%- u.icon('user', 13) %> Acceso Alumnos
+        </a>
+      <% } %>
+    </div>
+  </header>
+
+  <!-- Contenedor Aula Virtual: 2 Columnas -->
+  <div class="classroom-container">
+
+    <!-- COLUMNA IZQUIERDA: REPRODUCTOR DE VIDEO Y DETALLES -->
+    <main class="player-column">
+
+      <!-- Viewport de Video -->
+      <div class="video-viewport">
+        <% if (!accesoConcedido) { %>
+          <!-- Overlay de Bloqueo / Membresía -->
+          <div class="locked-overlay">
+            <div class="locked-icon">
+              <%- u.icon('lock', 28) %>
+            </div>
+            <% if (motivoBloqueo === 'requiere_login') { %>
+              <h2 class="locked-title">Contenido Exclusivo para Socios</h2>
+              <p class="locked-desc">
+                Esta lección forma parte del temario avanzado de <%= gymName %>. Inicia sesión con tu correo o DNI para continuar tu formación.
+              </p>
+              <a href="/academia/login?next=/academia/curso/<%= curso.slug %>?leccion=<%= leccionActiva.id %>" class="btn-action primary">
+                <%- u.icon('user', 16) %> Iniciar Sesión de Alumno
+              </a>
+            <% } else { %>
+              <h2 class="locked-title">Membresía No Activa</h2>
+              <p class="locked-desc">
+                Hola <%= socio ? socio.nombres : 'Socio' %>, tu membresía se encuentra en estado <strong><%= socio ? socio.estado_membresia : 'vencido' %></strong>. Renuévala para continuar disfrutando de todas las clases y descargas.
+              </p>
+              <a href="/#planes" class="btn-action primary">
+                <%- u.icon('zap', 16) %> Renovar Membresía
+              </a>
+            <% } %>
+          </div>
+        <% } else { %>
+          <!-- Video Player Iframe / HTML5 -->
+          <iframe 
+            id="main-video-player"
+            src="<%= leccionActiva.video_url %>?rel=0&modestbranding=1" 
+            title="<%= leccionActiva.titulo %>"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen
+          ></iframe>
+        <% } %>
+      </div>
+
+      <!-- Barra de Controles: Anterior, Completada, Siguiente -->
+      <div class="player-controls-bar">
+        <div>
+          <% if (leccionAnterior) { %>
+            <a href="/academia/curso/<%= curso.slug %>?leccion=<%= leccionAnterior.id %>" class="btn-control">
+              <%- u.icon('arrowLeft', 14) %> Lección Anterior
+            </a>
+          <% } else { %>
+            <button type="button" class="btn-control" disabled>
+              <%- u.icon('arrowLeft', 14) %> Lección Anterior
+            </button>
+          <% } %>
+        </div>
+
+        <div>
+          <% if (socio) { %>
+            <button 
+              type="button" 
+              id="btn-toggle-completada" 
+              class="btn-complete <%= progresoMap[leccionActiva.id] ? 'completed' : '' %>"
+              onclick="toggleProgresoLeccion('<%= leccionActiva.id %>');"
+            >
+              <%- u.icon('check', 16) %> 
+              <span id="btn-completada-texto">
+                <%= progresoMap[leccionActiva.id] ? 'Lección Completada' : 'Marcar como Completada' %>
+              </span>
+            </button>
+          <% } else { %>
+            <a href="/academia/login?next=/academia/curso/<%= curso.slug %>" class="btn-control" style="font-size:12px;">
+              <%- u.icon('user', 14) %> Inicia sesión para guardar tu avance
+            </a>
+          <% } %>
+        </div>
+
+        <div>
+          <% if (leccionSiguiente) { %>
+            <a href="/academia/curso/<%= curso.slug %>?leccion=<%= leccionSiguiente.id %>" class="btn-control" style="border-color: rgba(62, 207, 142, 0.4);">
+              Siguiente Lección <%- u.icon('arrowRight', 14) %>
+            </a>
+          <% } else { %>
+            <button type="button" class="btn-control" disabled>
+              Fin del Curso <%- u.icon('checkCircle', 14) %>
+            </button>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Detalle de la Lección Actual -->
+      <div class="lesson-content">
+        <div class="lesson-meta-row">
+          <span>Clase <%= indiceActivo + 1 %> de <%= lecciones.length %></span>
+          <span>·</span>
+          <span><%- u.icon('clock', 13) %> <%= leccionActiva.duracion_minutos %> minutos</span>
+          <% if (leccionActiva.es_preview) { %>
+            <span>·</span>
+            <span class="lesson-badge-preview">Clase Abierta / Preview</span>
+          <% } %>
+        </div>
+
+        <h1 class="lesson-h1"><%= leccionActiva.titulo %></h1>
+        <p class="lesson-desc"><%= leccionActiva.descripcion %></p>
+
+        <!-- Recurso Descargable si existe -->
+        <% if (leccionActiva.recurso_nombre) { %>
+          <div class="resource-box">
+            <div class="resource-info">
+              <div class="resource-icon">
+                <%- u.icon('download', 18) %>
+              </div>
+              <div>
+                <div class="resource-title"><%= leccionActiva.recurso_nombre %></div>
+                <div class="resource-sub">Material de apoyo en PDF / Plantilla oficial</div>
+              </div>
+            </div>
+            <% if (accesoConcedido) { %>
+              <a href="<%= leccionActiva.recurso_descarga || '#' %>" target="_blank" class="btn-control" style="font-size:12px; padding:6px 14px;">
+                <%- u.icon('download', 14) %> Descargar
+              </a>
+            <% } else { %>
+              <span style="font-size:11px; color:#F59E0B; font-weight:700;">
+                <%- u.icon('lock', 12) %> Exclusivo
+              </span>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+
+    </main>
+
+    <!-- COLUMNA DERECHA: TEMARIO & LISTA DE VIDEOS SIGUIENTES (DOCENTOS) -->
+    <aside class="playlist-column">
+      <div class="playlist-header">
+        <div class="playlist-header-top">
+          <div class="playlist-title">
+            <%- u.icon('cup', 15) %> Temario del Curso
+          </div>
+          <div class="playlist-count" id="sidebar-progress-count">
+            <%= totalCompletadas %> / <%= lecciones.length %> completadas
+          </div>
+        </div>
+        <div class="playlist-progress-bar">
+          <div id="sidebar-progress-fill" class="playlist-progress-fill" style="width: <%= porcentajeCurso %>%;"></div>
+        </div>
+      </div>
+
+      <!-- Lista de Lecciones / Playlist -->
+      <div class="playlist-items-scroll">
+        <% lecciones.forEach(function(lec, idx) { %>
+          <% 
+            const esActiva = (lec.id === leccionActiva.id);
+            const estaCompletada = Boolean(progresoMap[lec.id]);
+            const bloqueada = !lec.es_preview && (!socio || socio.estado_membresia !== 'activo');
+          %>
+          <a 
+            href="/academia/curso/<%= curso.slug %>?leccion=<%= lec.id %>" 
+            class="playlist-item <%= esActiva ? 'active' : '' %> <%= bloqueada ? 'locked' : '' %>"
+            id="item-lec-<%= lec.id %>"
+          >
+            <!-- Icono de estado -->
+            <div class="item-status-icon <%= esActiva ? 'playing' : (estaCompletada ? 'completed' : 'pending') %>">
+              <% if (esActiva) { %>
+                <%- u.icon('play', 12) %>
+              <% } else if (estaCompletada) { %>
+                <%- u.icon('check', 13) %>
+              <% } else if (bloqueada) { %>
+                <%- u.icon('lock', 12) %>
+              <% } else { %>
+                <%= idx + 1 %>
+              <% } %>
+            </div>
+
+            <!-- Contenido de la lección en la playlist -->
+            <div class="item-content">
+              <div class="item-title"><%= lec.titulo %></div>
+              <div class="item-meta">
+                <span><%= lec.duracion_minutos %> min</span>
+                <% if (esActiva) { %>
+                  <span class="item-now-playing">
+                    · Reproduciendo ahora
+                  </span>
+                <% } else if (lec.es_preview) { %>
+                  <span style="color:#3ECF8E; font-weight:700;">· Gratis</span>
+                <% } %>
+              </div>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    // Manejo de progreso interactivo AJAX (DocentOS)
+    function toggleProgresoLeccion(leccionId) {
+      var btn = document.getElementById('btn-toggle-completada');
+      var texto = document.getElementById('btn-completada-texto');
+      btn.disabled = true;
+
+      fetch('/api/academia/leccion/' + leccionId + '/progreso', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        if (data.ok) {
+          if (data.completada) {
+            btn.classList.add('completed');
+            texto.textContent = 'Lección Completada';
+          } else {
+            btn.classList.remove('completed');
+            texto.textContent = 'Marcar como Completada';
+          }
+
+          // Actualizar barras de progreso en vivo
+          document.getElementById('header-progress-fill').style.width = data.porcentaje + '%';
+          document.getElementById('sidebar-progress-fill').style.width = data.porcentaje + '%';
+          document.getElementById('header-progress-text').textContent = data.totalCompletadas + '/' + data.totalLecciones;
+          document.getElementById('sidebar-progress-count').textContent = data.totalCompletadas + ' / ' + data.totalLecciones + ' completadas';
+
+          // Actualizar icono en el ítem de la playlist
+          var itemEl = document.getElementById('item-lec-' + leccionId);
+          if (itemEl && !itemEl.classList.contains('active')) {
+            var iconBox = itemEl.querySelector('.item-status-icon');
+            if (data.completada) {
+              iconBox.className = 'item-status-icon completed';
+              iconBox.innerHTML = '<svg class="coolicon" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            } else {
+              iconBox.className = 'item-status-icon pending';
+              iconBox.textContent = '<%= indiceActivo + 1 %>';
+            }
+          }
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        console.error('Error toggling progress:', err);
+      });
+    }
+  </script>
+</body>
+</html>

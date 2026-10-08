@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090D16;
+      --bg-alt: #0D1322;
+      --surface: #121829;
+      --surface-2: #182238;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(62, 207, 142, 0.35);
+      --primary: #3ECF8E;
+      --primary-hover: #32b57a;
+      --primary-glow: rgba(62, 207, 142, 0.25);
+      --text: #EDEDED;
+      --text-bright: #FFFFFF;
+      --muted: #9CA3AF;
+      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(62, 207, 142, 0.12) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 40%);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .back-nav {
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+    .back-nav:hover {
+      color: var(--text-bright);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(62, 207, 142, 0.12);
+      border: 1px solid rgba(62, 207, 142, 0.35);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+    .card-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-bright);
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+    .card-subtitle {
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    /* Tabs */
+    .tabs-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      padding: 9px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text-bright);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Forms */
+    .form-panel {
+      display: none;
+    }
+    .form-panel.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .form-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px 12px 42px;
+      font-size: 14px;
+      color: #fff;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.18s ease;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      background: rgba(62, 207, 142, 0.03);
+      box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.15);
+    }
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #05160E;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 14.5px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      margin-top: 22px;
+    }
+    .btn-submit:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(62, 207, 142, 0.4);
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #FCA5A5;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .card-footer {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .card-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .card-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="/" class="back-nav">
+    <%- u.icon('arrowLeft', 16) %> Volver a la Web Principal
+  </a>
+
+  <div class="login-card">
+    <div class="card-header">
+      <div class="brand-icon">
+        <%- u.icon('cup', 26) %>
+      </div>
+      <h1 class="card-title">Portal Alumno & Aula Virtual</h1>
+      <p class="card-subtitle"><%= gymName %> · Cursos de Nutrición y Gym</p>
+    </div>
+
+    <!-- Pestañas de Login / Primer Acceso -->
+    <div class="tabs-nav">
+      <button type="button" class="tab-btn <%= tab !== 'activar' ? 'active' : '' %>" id="tab-login-btn" onclick="cambiarTab('login')">
+        <%- u.icon('user', 14) %> Iniciar Sesión
+      </button>
+      <button type="button" class="tab-btn <%= tab === 'activar' ? 'active' : '' %>" id="tab-activar-btn" onclick="cambiarTab('activar')">
+        <%- u.icon('lock', 14) %> Primer Acceso
+      </button>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert-error">
+        <div style="flex-shrink:0; margin-top:2px;">
+          <%- u.icon('alertCircle', 16) %>
+        </div>
+        <div><%= error %></div>
+      </div>
+    <% } %>
+
+    <!-- FORMULARIO 1: INICIAR SESIÓN -->
+    <div class="form-panel <%= tab !== 'activar' ? 'active' : '' %>" id="panel-login">
+      <form action="/academia/login" method="POST">
+        <input type="hidden" name="next" value="<%= next %>">
+
+        <div class="form-group">
+          <label class="form-label" for="login-identificador">Correo Electrónico o DNI</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><%- u.icon('user', 16) %></span>
+            <input 
+              type="text" 
+              id="login-identificador" 
+              name="identificador" 
+              class="form-input" 
+              placeholder="tu@correo.com o tu DNI" 
+              value="<%= identificador %>" 
+              required 
+              autofocus
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Contraseña</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><%- u.icon('lock', 16) %></span>
+            <input 
+              type="password" 
+              id="login-password" 
+              name="password" 
+              class="form-input" 
+              placeholder="••••••••" 
+              required
+            >
+          </div>
+          <div class="form-hint">
+            Si es tu primera vez, puedes ingresar tu <strong>DNI</strong> como contraseña o ir a la pestaña <strong>Primer Acceso</strong>.
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <%- u.icon('play', 15) %> Ingresar a Mi Aula Virtual
+        </button>
+      </form>
+    </div>
+
+    <!-- FORMULARIO 2: PRIMER ACCESO / ACTIVAR CONTRASEÑA -->
+    <div class="form-panel <%= tab === 'activar' ? 'active' : '' %>" id="panel-activar">
+      <form action="/academia/activar" method="POST">
+        <input type="hidden" name="next" value="<%= next %>">
+
+        <div class="form-group">
+          <label class="form-label" for="act-dni">Número de DNI Registrado</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><%- u.icon('user', 16) %></span>
+            <input 
+              type="text" 
+              id="act-dni" 
+              name="dni" 
+              class="form-input" 
+              placeholder="Ej. 72345678" 
+              value="<%= dni %>" 
+              maxlength="12" 
+              required
+            >
+          </div>
+          <div class="form-hint">El mismo DNI con el que te inscribiste en recepción o en la web.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="act-pass">Crea tu Contraseña</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><%- u.icon('lock', 16) %></span>
+            <input 
+              type="password" 
+              id="act-pass" 
+              name="password" 
+              class="form-input" 
+              placeholder="Mínimo 6 caracteres" 
+              minlength="6" 
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="act-pass2">Confirmar Contraseña</label>
+          <div class="input-wrapper">
+            <span class="input-icon"><%- u.icon('check', 16) %></span>
+            <input 
+              type="password" 
+              id="act-pass2" 
+              name="password_confirm" 
+              class="form-input" 
+              placeholder="Repite tu contraseña" 
+              minlength="6" 
+              required
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <%- u.icon('checkCircle', 16) %> Activar Cuenta e Ingresar
+        </button>
+      </form>
+    </div>
+
+    <div class="card-footer">
+      ¿Aún no eres socio? <a href="/#planes">Ver Planes y Membresías</a>
+    </div>
+  </div>
+
+  <script>
+    function cambiarTab(tab) {
+      var btnLogin = document.getElementById('tab-login-btn');
+      var btnActivar = document.getElementById('tab-activar-btn');
+      var panelLogin = document.getElementById('panel-login');
+      var panelActivar = document.getElementById('panel-activar');
+
+      if (tab === 'activar') {
+        btnLogin.classList.remove('active');
+        btnActivar.classList.add('active');
+        panelLogin.classList.remove('active');
+        panelActivar.classList.add('active');
+      } else {
+        btnLogin.classList.add('active');
+        btnActivar.classList.remove('active');
+        panelLogin.classList.add('active');
+        panelActivar.classList.remove('active');
+      }
+    }
+
+    // Activar tab desde hash #activar
+    if (window.location.hash === '#activar') {
+      cambiarTab('activar');
+    }
+  </script>
+</body>
+</html>
