@@ -136,6 +136,13 @@ async function initDatabase() {
        SET estado = 'vencida', actualizado_en = now()
        WHERE estado = 'activa' AND fecha_fin < CURRENT_DATE`
     );
+    // 4. Asegurar tablas y contenidos de la Academia Fitness & Nutrición (DocentOS)
+    try {
+      const { initAcademiaDb } = require('./academia_db');
+      await initAcademiaDb();
+    } catch (err) {
+      console.warn('[db] Advertencia inicializando academia_db:', err.message);
+    }
   } catch (err) {
     console.warn('[db] Advertencia en migración v_socios_estado / marcar vencidas:', err.message);
   }
@@ -177,13 +184,15 @@ app.use('/', require('./routes/checkout'));
 // Captura directa de fotos desde celular via QR (publico con token)
 app.use('/', require('./routes/captura_foto').router);
 
+// Landing Page Oficial del Gimnasio & Academia Fitness (DocentOS)
+app.use('/', require('./routes/landing'));
+
 // Auth (login / setup / logout)
 app.use('/', authRouter);
 
 // A partir de aca todo requiere sesion
 app.use(requireAuth);
 
-app.get('/', (req, res) => res.redirect('/dashboard'));
 app.use('/dashboard', require('./routes/dashboard'));
 app.use('/socios', require('./routes/socios'));
 app.use('/suscripciones', require('./routes/suscripciones'));
